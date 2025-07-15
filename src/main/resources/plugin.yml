@@ -1,0 +1,128 @@
+name: Multi-Plugin
+version: '1.21.4'
+main: de.niclasl.multiPlugin.MultiPlugin
+api-version: '1.21'
+authors: [ Niclas ]
+commands:
+  manage:
+    description: Manage players.
+    usage: /manage <player>
+    permission: manage.player
+    permission-message: You don't have permission to use this command!
+    aliases:
+      - m
+  vanish:
+    description: With this Permission can you in or out of Invisibility.
+    usage: /vanish
+    permission: admin.vanish
+    permission-message: You don't have permission to use this command!
+    aliases:
+      - v
+  ban:
+    description: Ban Players.
+    usage: /ban <player> <duration> <reason>
+    permission: admin.ban.player
+    permission-message: You don't have permission to use this command!
+  unban:
+    description: Entbannt einen Spieler.
+    usage: /unban <player>
+    permission: admin.unban.player
+    permission-message: You don't have permission to use this command!
+  ban-history:
+    description: Zeigt die Ban-Historie eines Spielers.
+    usage: /ban-history <player>
+    permission: admin.banhistory
+    permission-message: You don't have permission to use this command!
+    aliases:
+      - b-h
+
+  teleport-dimension:
+    description: Set Location to Teleport in a Dimension or Teleport to a Dimension.
+    usage: /teleport-dimension <set|dimension> <dimension|>
+    permission: teleport.player
+    aliases:
+      - tp-d
+
+  gamemode-gui:
+    description: Set Gamemode.
+    usage: /gamemode-gui <player>
+    permission: admin.gamemode.gui
+    permission-message: You don't have permission to use this command!
+    aliases:
+      - gm-g
+
+  mute:
+    description: Mute Players.
+    usage: /mute <player> <duration> <reason>
+    permission-message: You don't have permission to use this command!
+    permission: admin.mute
+  unmute:
+    description: Unmute Players.
+    usage: /unmute <player>
+    permission-message: You don't have permission to use this command!
+    permission: admin.unmute
+
+  warn:
+    description: Warn a player.
+    usage: /warn <player> <reason>
+    permission: admin.warn
+    permission-message: You don't have permission to use this command!
+  warn-history:
+    description: See the Warn History from a Player.
+    usage: /warn-history <player>
+    permission-message: You don't have permission to use this command!
+    permission: admin.warn.history
+  unwarn:
+    description: Unwarn a player.
+    usage: /unwarn <player> <Warn-ID>
+    permission: admin.unwarn
+    permission-message: You don't have permission to use this command!
+
+  report:
+    description: Report a player
+    usage: /report <player> <reason>
+    permission: report.player
+  report-gui:
+    usage: /report-gui <player> [page]
+    description: Opens the report GUI for a player.
+    permission: admin.report.gui
+    permission-message: You don't have permission to use this command!
+
+permissions:
+  manage.player:
+    default: op
+  admin.vanish:
+    default: op
+  admin.ban.player:
+    default: op
+  admin.unban.player:
+    default: op
+  admin.banhistory:
+    default: op
+
+  teleport.player:
+    children:
+      - admin.set.dimension.coords
+    default: true
+  admin.set.dimension.coords:
+    default: op
+
+  admin.gamemode.gui:
+    default: op
+
+  admin.mute:
+    default: op
+  admin.unmute:
+    default: op
+
+  admin.warn:
+    default: op
+  admin.warn.history:
+    default: op
+  admin.unwarn:
+    default: op
+
+  report.player:
+    default: true
+  admin.report.gui:
+    default: op
