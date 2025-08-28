@@ -1,92 +1,234 @@
 package de.niclasl.multiPlugin.teleport.commands;
 
+import de.niclasl.multiPlugin.teleport.gui.DimensionGui;
 import de.niclasl.multiPlugin.teleport.manager.TeleportManager;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import org.bukkit.Location;
-import org.bukkit.ChatColor;
 
-public class TeleportCommand implements CommandExecutor {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
-    private final TeleportManager teleportManager;
+public class TeleportCommand implements CommandExecutor, TabCompleter {
+
+    private static TeleportManager teleportManager;
 
     public TeleportCommand(TeleportManager teleportManager) {
-        this.teleportManager = teleportManager;
+        TeleportCommand.teleportManager = teleportManager;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(ChatColor.RED + "This command can only be executed by one player.");
+            sender.sendMessage(ChatColor.RED + "Only players can execute this command.");
             return true;
         }
 
         if (args.length == 0) {
-            player.sendMessage(ChatColor.RED + "Please specify a dimension: overworld, nether, end");
-            return false;
+            DimensionGui.open(player, player, 1);
+            return true;
         }
 
+        // SET
+        if (args[0].equalsIgnoreCase("set")) {
+            if (!player.hasPermission("multiplugin.teleport.dimension.setcoords")) {
+                player.sendMessage(ChatColor.RED + "You don't have permission to set teleport locations.");
+                return true;
+            }
+
+            if (args.length < 2) {
+                player.sendMessage(ChatColor.RED + "Usage: /teleport-dimension set <dimension_name>");
+                return true;
+            }
+
+            String dimension = args[1].toLowerCase();
+
+            if (!TeleportManager.dimensionExists(dimension)) {
+                player.sendMessage(ChatColor.RED + "Dimension does not exist. Use /teleport-dimension create to create it first.");
+                return true;
+            }
+
+            String dimensionType = teleportManager.getDimensionType(dimension);
+            if (dimensionType == null) dimensionType = "overworld";
+
+            Location loc = player.getLocation();
+            TeleportManager.setLocation(dimension, loc, dimensionType);
+            player.sendMessage(ChatColor.GREEN + "Location for §6'" + dimension + "'§a set to §cX=§6" +
+                    loc.getBlockX() + "§c Y=§6" + loc.getBlockY() + "§c Z=§6" + loc.getBlockZ());
+            return true;
+        }
+
+        // CREATE
+        if (args[0].equalsIgnoreCase("create")) {
+            if (!player.hasPermission("multiplugin.teleport.dimension.create")) {
+                player.sendMessage(ChatColor.RED + "You don't have permission to create a dimension.");
+                return true;
+            }
+
+            if (args.length < 3) {
+                player.sendMessage(ChatColor.RED + "Usage: /teleport-dimension create <dimension_name> <dimension_type>");
+                return true;
+            }
+
+            String dimension = args[1].toLowerCase();
+            String dimensionType = args[2].toLowerCase();
+
+            if (TeleportManager.dimensionExists(dimension)) {
+                player.sendMessage(ChatColor.RED + "This dimension already exists.");
+                return true;
+            }
+
+            TeleportManager.createDimension(dimension, dimensionType, player);
+            teleportManager.setOwner(dimension, player.getUniqueId());
+            return true;
+        }
+
+        // DELETE
+        if (args[0].equalsIgnoreCase("delete")) {
+            if (!player.hasPermission("multiplugin.teleport.dimension.delete")) {
+                player.sendMessage(ChatColor.RED + "You don't have permission to delete dimensions.");
+                return true;
+            }
+
+            if (args.length < 2) {
+                player.sendMessage(ChatColor.RED + "Usage: /teleport-dimension delete <world_name>");
+                return true;
+            }
+
+            String dimensionToDelete = args[1].toLowerCase();
+            if (TeleportManager.deleteDimension(dimensionToDelete)) {
+                player.sendMessage(ChatColor.GREEN + "Dimension §6'" + dimensionToDelete + "'§a deleted.");
+            } else {
+                player.sendMessage(ChatColor.RED + "Failed to delete dimension §6'" + dimensionToDelete + "'§c or it doesn't exist.");
+            }
+            return true;
+        }
+
+        // INVITE
+        if (args[0].equalsIgnoreCase("invite")) {
+            if (args.length < 3) {
+                player.sendMessage(ChatColor.RED + "Usage: /teleport-dimension invite <player> <world>");
+                return true;
+            }
+
+            String targetName = args[1];
+            String dimension = args[2];
+
+            Player target = Bukkit.getPlayer(targetName);
+            if (target == null) {
+                player.sendMessage(ChatColor.RED + "Player '" + targetName + "' not found.");
+                return true;
+            }
+
+            if (!TeleportManager.dimensionExists(dimension)) {
+                player.sendMessage(ChatColor.RED + "World '" + dimension + "' does not exist.");
+                return true;
+            }
+
+            // Owner-Check
+            if (!TeleportManager.isOwner(player, dimension)) {
+                player.sendMessage(ChatColor.RED + "You are not the owner of world '" + dimension + "'.");
+                return true;
+            }
+
+            TeleportManager.invite(player, dimension, target);
+            return true;
+        }
+
+        // SET DELAY
+        if (args[0].equalsIgnoreCase("setdelay")) {
+            if (args.length < 3) {
+                player.sendMessage(ChatColor.RED + "Usage: /teleport-dimension setdelay <world> <seconds>");
+                return true;
+            }
+
+            String dimension = args[1];
+            String delayArg = args[2];
+
+            if (!TeleportManager.dimensionExists(dimension)) {
+                player.sendMessage(ChatColor.RED + "World '" + dimension + "' does not exist.");
+                return true;
+            }
+
+            // Owner-Check
+            if (!TeleportManager.isOwner(player, dimension)) {
+                player.sendMessage(ChatColor.RED + "You are not the owner of world '" + dimension + "'.");
+                return true;
+            }
+
+            int delay;
+            try {
+                delay = Integer.parseInt(delayArg);
+                if (delay < 0) throw new NumberFormatException();
+            } catch (NumberFormatException e) {
+                player.sendMessage(ChatColor.RED + "Delay must be a non-negative number.");
+                return true;
+            }
+
+            TeleportManager.setTeleportDelay(player, dimension, delay);
+            return true;
+        }
+
+        // TELEPORT
         String dimension = args[0].toLowerCase();
 
-        if(sender.hasPermission("admin.set.dimension.coords") == sender.hasPermission("teleport.player")){
-            if (args.length == 2 && args[0].equalsIgnoreCase("set")) {
-                // Format: /teleport-dimension set <dimension>
-                dimension = args[1].toLowerCase();
-
-                if (isValidDimension(dimension)) {
-                    player.sendMessage(ChatColor.RED + "Invalid dimension. Use: overworld, nether, end");
-                    return true;
-                }
-
-                Location loc = player.getLocation();
-                teleportManager.setLocation(dimension, loc);
-                player.sendMessage(ChatColor.GREEN + "Position for dimension " + dimension + " set:" +
-                        "§c X=§6" + loc.getBlockX() + "§c Y=§" + loc.getBlockY() + "§c Z=§6" + loc.getBlockZ());
-                return true;
-            }
-        }else {
-            sender.sendMessage(ChatColor.RED + "You can't use this!");
-        }
-
-        if(!sender.hasPermission("admin.set.dimension.coords") == sender.hasPermission("teleport.player")){
-            // Teleport-Befehl: /teleport-dimension <dimension>
-            if (isValidDimension(dimension)) {
-                player.sendMessage(ChatColor.RED + "Invalid dimension. Use: overworld, nether, end");
-                return true;
-            }
-
-            Location targetLoc = teleportManager.getLocation(dimension);
-            if (targetLoc == null) {
-                player.sendMessage(ChatColor.RED + "No position has been set for this dimension yet.");
-                return true;
-            }
-
-            player.teleport(targetLoc);
-            player.sendMessage(ChatColor.GREEN + "You have been teleported to dimension §6" + dimension + ".");
-            return true;
-        }else if(sender.hasPermission("admin.set.dimension.coords") == sender.hasPermission("teleport.player")){
-            // Teleport-Befehl: /teleport-dimension <dimension>
-            if (isValidDimension(dimension)) {
-                player.sendMessage(ChatColor.RED + "Invalid dimension. Use: overworld, nether, end");
-                return true;
-            }
-
-            Location targetLoc = teleportManager.getLocation(dimension);
-            if (targetLoc == null) {
-                player.sendMessage(ChatColor.RED + "No position has been set for this dimension yet.");
-                return true;
-            }
-
-            player.teleport(targetLoc);
-            player.sendMessage(ChatColor.GREEN + "You have been teleported to dimension §6" + dimension + ".");
+        if (!TeleportManager.dimensionExists(dimension)) {
+            player.sendMessage(ChatColor.RED + "Unknown dimension. Use /teleport-dimension to see all.");
             return true;
         }
-        return false;
+
+        Location targetLoc = TeleportManager.getLocation(dimension);
+        if (targetLoc == null) {
+            player.sendMessage(ChatColor.RED + "No location set for dimension §6'" + dimension + "'§c.");
+            return true;
+        }
+
+        UUID owner = TeleportManager.getOwner(dimension);
+
+        if (owner != null && !owner.equals(player.toString())) {
+            // Prüfe auf Einladung oder explizite Permission
+            if (!TeleportManager.hasAccess(player, dimension) &&
+                    !player.hasPermission("multiplugin.teleport.dimension.private." + dimension)) {
+
+                player.sendMessage(ChatColor.RED + "You don't have permission to teleport to this private dimension.");
+                return true;
+            }
+        } else {
+            if (!player.hasPermission("multiplugin.teleport.dimension")) {
+                player.sendMessage(ChatColor.RED + "You don't have permission to teleport.");
+                return true;
+            }
+        }
+
+        // Verzögertes Teleportieren mit Effekten
+        teleportManager.teleportWithDelay(player, targetLoc, TeleportManager.getTeleportDelay(dimension), dimension);
+        return true;
     }
 
-    private boolean isValidDimension(String dimension) {
-        return !dimension.equals("overworld") && !dimension.equals("nether") && !dimension.equals("end");
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        List<String> completions = new ArrayList<>();
+        if (args.length == 1) {
+            completions.addAll(Arrays.asList("set", "create", "delete", "invite", "setdelay"));
+            completions.addAll(TeleportManager.getAllDimensions()); // Direkter Teleport
+        } else if (args.length == 2) {
+            if (args[0].equalsIgnoreCase("invite") || args[0].equalsIgnoreCase("delete") || args[0].equalsIgnoreCase("setdelay")) {
+                completions.addAll(TeleportManager.getAllDimensions());
+            }
+        } else if (args.length == 3) {
+            if (args[0].equalsIgnoreCase("invite")) {
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    completions.add(p.getName());
+                }
+            }
+        }
+        return completions;
     }
 }

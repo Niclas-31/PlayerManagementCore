@@ -3,26 +3,33 @@ package de.niclasl.multiPlugin.report_system.commands;
 import de.niclasl.multiPlugin.report_system.manager.ReportManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
-public class ReportCommand implements CommandExecutor {
+public class ReportCommand implements CommandExecutor, TabCompleter {
 
-    private final ReportManager reportManager;
+    private static ReportManager reportManager;
 
     public ReportCommand(ReportManager reportManager) {
-        this.reportManager = reportManager;
+        ReportCommand.reportManager = reportManager;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("Only players can create reports.");
+            return true;
+        }
+
+        if (!sender.hasPermission("multiplugin.report")) {
+            sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }
 
@@ -44,7 +51,6 @@ public class ReportCommand implements CommandExecutor {
 
         String reason = String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length));
         String time = new java.text.SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(new Date());
-        Location location = player.getLocation();
 
         // Report speichern
         reportManager.addReport(target.getUniqueId(), reason, sender.getName(), time, "OPEN", false);
@@ -61,5 +67,18 @@ public class ReportCommand implements CommandExecutor {
                         + " reported: " + ChatColor.GRAY + reason));
 
         return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        List<String> completions = new ArrayList<>();
+        if (args.length == 1) {
+            Bukkit.getOnlinePlayers().forEach(p -> {
+                if (p.getName().toLowerCase().startsWith(args[0].toLowerCase())) {
+                    completions.add(p.getName());
+                }
+            });
+        }
+        return completions;
     }
 }

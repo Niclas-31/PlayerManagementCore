@@ -18,35 +18,31 @@ public class GamemodeGui {
         GamemodeGui.plugin = plugin;
     }
 
-    public static void open(Player klicker, Player target) {
-        if (plugin == null) {
-            klicker.sendMessage("§cGamemodeGui was not initialized.");
-            return;
+    public static void open(Player player, Player target) {
+        Inventory inv = Bukkit.createInventory(null, 27, ChatColor.GOLD + "Gamemode for " + target.getName());
+
+        // Rand
+        ItemStack glass = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
+        for (int i : new int[]{0,1,2,3,4,5,6,7,8,9,17,19,20,21,23,24,25,26}) {
+            inv.setItem(i, glass);
         }
 
-        if (target == null) {
-            klicker.sendMessage("§cTarget player not found.");
-            return;
-        }
-
-        Inventory inv = Bukkit.createInventory(null, 18, ChatColor.GOLD + "Gamemode for " + target.getName());
-
-        inv.setItem(1, createItem(Material.IRON_SWORD, "§aSurvival"));
-        inv.setItem(3, createItem(Material.GRASS_BLOCK, "§bCreative"));
-        inv.setItem(5, createItem(Material.MAP, "§eAdventure"));
-        inv.setItem(7, createItem(Material.ENDER_EYE, "§7Spectator"));
+        inv.setItem(10, createItem(Material.IRON_SWORD, "§aSurvival"));
+        inv.setItem(12, createItem(Material.GRASS_BLOCK, "§bCreative"));
+        inv.setItem(14, createItem(Material.MAP, "§eAdventure"));
+        inv.setItem(16, createItem(Material.ENDER_EYE, "§7Spectator"));
 
         ItemStack back = new ItemStack(Material.BARRIER);
         ItemMeta meta = back.getItemMeta();
         assert meta != null;
         meta.setDisplayName("§cBack");
         back.setItemMeta(meta);
-        inv.setItem(9, back);
+        inv.setItem(18, back);
 
-        inv.setItem(13, createSkull(target.getName()));
+        inv.setItem(22, createSkull(target.getName()));
 
-        klicker.openInventory(inv);
-        klicker.setMetadata("gm_target", new org.bukkit.metadata.FixedMetadataValue(plugin, target.getName()));
+        player.openInventory(inv);
+        player.setMetadata("gm_target", new org.bukkit.metadata.FixedMetadataValue(plugin, target.getName()));
     }
 
     private static ItemStack createItem(Material material, String name) {

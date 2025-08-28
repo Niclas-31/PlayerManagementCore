@@ -6,19 +6,29 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 
-public class UnmuteCommand implements CommandExecutor {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
-    private final MuteManager muteManager;
+public class UnmuteCommand implements CommandExecutor, TabCompleter {
+
+    private static MuteManager muteManager;
 
     public UnmuteCommand(MuteManager muteManager) {
-        this.muteManager = muteManager;
+        UnmuteCommand.muteManager = muteManager;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
-        if (args.length != 1) {
+        if (!sender.hasPermission("multiplugin.unmute")) {
+            sender.sendMessage("§cYou don't have permission to use this command!");
+            return true;
+        }
+
+        if (args.length < 1) {
             sender.sendMessage("§cUsage: /unmute <player>");
             return true;
         }
@@ -38,5 +48,25 @@ public class UnmuteCommand implements CommandExecutor {
         muteManager.unmutePlayer(target.getUniqueId());
         sender.sendMessage("§a" + target.getName() + " was discouraged.");
         return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        List<String> completions = new ArrayList<>();
+
+        if (!sender.hasPermission("multiplugin.unmute")) return completions;
+
+        if (args.length == 1) {
+            // Alle aktuell gemuteten Spieler
+            for (UUID mutedUUID : muteManager.getMutedPlayers()) {
+                OfflinePlayer mutedPlayer = Bukkit.getOfflinePlayer(mutedUUID);
+                String name = mutedPlayer.getName();
+                if (name != null && name.toLowerCase().startsWith(args[0].toLowerCase())) {
+                    completions.add(name);
+                }
+            }
+        }
+
+        return completions;
     }
 }

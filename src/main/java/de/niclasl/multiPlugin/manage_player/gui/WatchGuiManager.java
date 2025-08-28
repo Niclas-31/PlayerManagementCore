@@ -10,18 +10,17 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static de.niclasl.multiPlugin.gamemode_manage.gui.GamemodeGui.plugin;
 
 public class WatchGuiManager {
 
     public static void openPage1(Player viewer, Player target) {
-        Inventory managePlayerPage1 = Bukkit.createInventory(null, 36, "§8Manage: " + target.getName() + " (1/2)");
+        Inventory managePlayerPage1 = Bukkit.createInventory(null, 36, "§8Manage: " + target.getName() + " §7(1/2)");
 
         // Rand
-        ItemStack glass = createItem(Material.LIGHT_GRAY_STAINED_GLASS_PANE, " ");
+        ItemStack glass = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
         for (int i : new int[]{1,2,3,4,5,6,7,9,17,18,  26,27,28,29,30,32,33,34}) {
             managePlayerPage1.setItem(i, glass);
         }
@@ -35,42 +34,32 @@ public class WatchGuiManager {
 
         managePlayerPage1.setItem(10, kick);
 
-        ItemStack invsee = new ItemStack(Material.ENDER_EYE);
-        ItemMeta invseeMeta = invsee.getItemMeta();
-        assert invseeMeta != null;
-        invseeMeta.setDisplayName(ChatColor.WHITE + "Invsee");
-        invseeMeta.setLore(List.of(ChatColor.WHITE + "See the inventory from " + target.getName()));
-        invsee.setItemMeta(invseeMeta);
+        ItemStack banHistory = new ItemStack(Material.BOOK);
+        ItemMeta banHistoryMeta = banHistory.getItemMeta();
+        assert banHistoryMeta != null;
+        banHistoryMeta.setDisplayName(ChatColor.GOLD + "Ban History");
+        banHistoryMeta.setLore(List.of(ChatColor.GOLD + "See the Ban History from " + target.getName() + "."));
+        banHistory.setItemMeta(banHistoryMeta);
 
-        managePlayerPage1.setItem(12, invsee);
+        managePlayerPage1.setItem(12, banHistory);
 
-        ItemStack ecSee = new ItemStack(Material.ENDER_CHEST);
-        ItemMeta ecSeeMeta = ecSee.getItemMeta();
-        assert ecSeeMeta != null;
-        ecSeeMeta.setDisplayName(ChatColor.WHITE + "EC-See");
-        ecSeeMeta.setLore(List.of(ChatColor.WHITE + "See the Ender Chest from " + target.getName()));
-        ecSee.setItemMeta(ecSeeMeta);
+        ItemStack warnGui = new ItemStack(Material.ENCHANTED_BOOK);
+        ItemMeta warnGuiMeta = warnGui.getItemMeta();
+        assert warnGuiMeta != null;
+        warnGuiMeta.setDisplayName(ChatColor.GOLD + "Warn History");
+        warnGuiMeta.setLore(List.of(ChatColor.GOLD + "See the Warn History from " + target.getName() + "."));
+        warnGui.setItemMeta(warnGuiMeta);
 
-        managePlayerPage1.setItem(14, ecSee);
+        managePlayerPage1.setItem(14, warnGui);
 
-        ItemStack kill = new ItemStack(Material.IRON_SWORD);
-        ItemMeta killMeta = kill.getItemMeta();
-        assert killMeta != null;
-        killMeta.setDisplayName(ChatColor.RED + "Kill");
-        killMeta.setLore(List.of(ChatColor.RED + "Kill " + target.getName(),
-                                 ChatColor.RED + "Warning: You can also killed in Creative mode or in Spectator mode!"));
-        kill.setItemMeta(killMeta);
+        ItemStack reportItem = new ItemStack(Material.KNOWLEDGE_BOOK);
+        ItemMeta reportMeta = reportItem.getItemMeta();
+        assert reportMeta != null;
+        reportMeta.setDisplayName(ChatColor.GOLD + "Report History");
+        reportMeta.setLore(List.of(ChatColor.GOLD + "See the Report History from " + target.getName() + "."));
+        reportItem.setItemMeta(reportMeta);
 
-        managePlayerPage1.setItem(16, kill);
-
-        ItemStack heal = new ItemStack(Material.RED_DYE);
-        ItemMeta healMeta = heal.getItemMeta();
-        assert healMeta != null;
-        healMeta.setDisplayName(ChatColor.WHITE + "Heal");
-        healMeta.setLore(List.of(ChatColor.WHITE + "Heal " + target.getName()));
-        heal.setItemMeta(healMeta);
-
-        managePlayerPage1.setItem(19, heal);
+        managePlayerPage1.setItem(16, reportItem);
 
         ItemStack unban = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
         ItemMeta unbanMeta = unban.getItemMeta();
@@ -79,25 +68,34 @@ public class WatchGuiManager {
         unbanMeta.setLore(List.of(ChatColor.GREEN + "Unban " + target.getName()));
         unban.setItemMeta(unbanMeta);
 
-        managePlayerPage1.setItem(21, unban);
+        managePlayerPage1.setItem(19, unban);
 
-        ItemStack banHistory = new ItemStack(Material.BOOK);
-        ItemMeta banHistoryMeta = banHistory.getItemMeta();
-        assert banHistoryMeta != null;
-        banHistoryMeta.setDisplayName(ChatColor.GOLD + "Ban History");
-        banHistoryMeta.setLore(List.of(ChatColor.GOLD + "See the Ban History from " + target.getName()));
-        banHistory.setItemMeta(banHistoryMeta);
+        ItemStack invsee = new ItemStack(Material.ENDER_EYE);
+        ItemMeta invseeMeta = invsee.getItemMeta();
+        assert invseeMeta != null;
+        invseeMeta.setDisplayName(ChatColor.WHITE + "Invsee");
+        invseeMeta.setLore(List.of(ChatColor.WHITE + "See the inventory from " + target.getName() + "."));
+        invsee.setItemMeta(invseeMeta);
 
-        managePlayerPage1.setItem(23, banHistory);
+        managePlayerPage1.setItem(21, invsee);
 
-        ItemStack gamemode = new ItemStack(Material.COMMAND_BLOCK);
-        ItemMeta gamemodeMeta = gamemode.getItemMeta();
-        assert gamemodeMeta != null;
-        gamemodeMeta.setDisplayName(ChatColor.WHITE + "Gamemode Switcher");
-        gamemodeMeta.setLore(List.of(ChatColor.WHITE + "Change Gamemode from " + target.getName()));
-        gamemode.setItemMeta(gamemodeMeta);
+        ItemStack ecSee = new ItemStack(Material.ENDER_CHEST);
+        ItemMeta ecSeeMeta = ecSee.getItemMeta();
+        assert ecSeeMeta != null;
+        ecSeeMeta.setDisplayName(ChatColor.WHITE + "EC-See");
+        ecSeeMeta.setLore(List.of(ChatColor.WHITE + "See the Ender Chest from " + target.getName() + "."));
+        ecSee.setItemMeta(ecSeeMeta);
 
-        managePlayerPage1.setItem(25, gamemode);
+        managePlayerPage1.setItem(23, ecSee);
+
+        ItemStack teleportGui = new ItemStack(Material.ENDER_PEARL);
+        ItemMeta teleportGuiMeta = teleportGui.getItemMeta();
+        assert teleportGuiMeta != null;
+        teleportGuiMeta.setDisplayName(ChatColor.WHITE + "Teleport");
+        teleportGuiMeta.setLore(List.of(ChatColor.WHITE + "Teleport " + target.getName() + " to a dimension."));
+        teleportGui.setItemMeta(teleportGuiMeta);
+
+        managePlayerPage1.setItem(25, teleportGui);
 
         managePlayerPage1.setItem(31, createPlayerHead(target));
 
@@ -114,7 +112,7 @@ public class WatchGuiManager {
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (!viewer.getOpenInventory().getTitle().contains("Manage: " + target.getName() + " (1/2)")) {
+                if (!viewer.getOpenInventory().getTitle().contains("§8Manage: " + target.getName() + " §7(1/2)")) {
                     cancel(); // GUI ist zu
                     return;
                 }
@@ -150,47 +148,60 @@ public class WatchGuiManager {
     }
 
     public static void openPage2(Player viewer, Player target) {
-        Inventory managePlayerPage2 = Bukkit.createInventory(null, 36, "§8Manage: " + target.getName() + " (2/2)");
+        Inventory managePlayerPage2 = Bukkit.createInventory(null, 36, "§8Manage: " + target.getName() + " §7(2/2)");
 
-        ItemStack glass = createItem(Material.LIGHT_GRAY_STAINED_GLASS_PANE, " ");
+        UUID targetId = target.getUniqueId();
+
+        ItemStack glass = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
         for (int i : new int[]{1,2,3,4,5,6,7,9,17,18,  26,28,29,30,32,33,34,35}) {
             managePlayerPage2.setItem(i, glass);
         }
 
-        ItemStack warnGui = new ItemStack(Material.ENCHANTED_BOOK);
-        ItemMeta warnGuiMeta = warnGui.getItemMeta();
-        assert warnGuiMeta != null;
-        warnGuiMeta.setDisplayName(ChatColor.RED + "Warns");
-        warnGuiMeta.setLore(List.of(ChatColor.RED + "Shows all warnings."));
-        warnGui.setItemMeta(warnGuiMeta);
+        ItemStack mobSpawn = new ItemStack(Material.SPAWNER);
+        ItemMeta mobSpawnMeta = mobSpawn.getItemMeta();
+        assert mobSpawnMeta != null;
+        mobSpawnMeta.setDisplayName(ChatColor.RED + "Mob Spawner");
+        mobSpawnMeta.setLore(List.of(ChatColor.RED + "Spawn mobs by " + target.getName() + "."));
+        mobSpawn.setItemMeta(mobSpawnMeta);
 
-        managePlayerPage2.setItem(10, warnGui);
-
-        ItemStack teleportGui = new ItemStack(Material.ENDER_PEARL);
-        ItemMeta teleportGuiMeta = teleportGui.getItemMeta();
-        assert teleportGuiMeta != null;
-        teleportGuiMeta.setDisplayName(ChatColor.WHITE + "Teleport");
-        teleportGuiMeta.setLore(List.of(ChatColor.WHITE + "Teleport " + target.getName() + " to a dimension."));
-        teleportGui.setItemMeta(teleportGuiMeta);
-
-        managePlayerPage2.setItem(12, teleportGui);
+        managePlayerPage2.setItem(10, mobSpawn);
 
         ItemStack stats = new ItemStack(Material.COMPASS);
         ItemMeta statsMeta = stats.getItemMeta();
         assert statsMeta != null;
-        statsMeta.setDisplayName("§bPlayer Stats");
+        statsMeta.setDisplayName(ChatColor.GOLD + "Player Stats");
+        statsMeta.setLore(List.of(ChatColor.GOLD + "See the Ender Chest from " + target.getName() + "."));
         stats.setItemMeta(statsMeta);
 
-        managePlayerPage2.setItem(14, stats);
+        managePlayerPage2.setItem(12, stats);
 
-        ItemStack reportItem = new ItemStack(Material.KNOWLEDGE_BOOK);
-        ItemMeta reportMeta = reportItem.getItemMeta();
-        assert reportMeta != null;
-        reportMeta.setDisplayName("§6View reports");
-        reportMeta.setLore(List.of("§7Show all reports for " + target.getName()));
-        reportItem.setItemMeta(reportMeta);
+        ItemStack kill = new ItemStack(Material.IRON_SWORD);
+        ItemMeta killMeta = kill.getItemMeta();
+        assert killMeta != null;
+        killMeta.setDisplayName(ChatColor.RED + "Kill");
+        killMeta.setLore(List.of(ChatColor.RED + "Kill " + target.getName(),
+                ChatColor.RED + "Warning: You can also killed in Creative mode or in Spectator mode!"));
+        kill.setItemMeta(killMeta);
 
-        managePlayerPage2.setItem(19, reportItem); // z. B. Slot 24
+        managePlayerPage2.setItem(14, kill);
+
+        ItemStack heal = new ItemStack(Material.RED_DYE);
+        ItemMeta healMeta = heal.getItemMeta();
+        assert healMeta != null;
+        healMeta.setDisplayName(ChatColor.WHITE + "Heal");
+        healMeta.setLore(List.of(ChatColor.WHITE + "Heal " + target.getName()));
+        heal.setItemMeta(healMeta);
+
+        managePlayerPage2.setItem(16, heal);
+
+        ItemStack gamemode = new ItemStack(Material.COMMAND_BLOCK);
+        ItemMeta gamemodeMeta = gamemode.getItemMeta();
+        assert gamemodeMeta != null;
+        gamemodeMeta.setDisplayName(ChatColor.WHITE + "Gamemode Switcher");
+        gamemodeMeta.setLore(List.of(ChatColor.WHITE + "Change Gamemode from " + target.getName() + "."));
+        gamemode.setItemMeta(gamemodeMeta);
+
+        managePlayerPage2.setItem(21, gamemode);
 
         managePlayerPage2.setItem(31, createPlayerHead(target));
 
@@ -209,7 +220,7 @@ public class WatchGuiManager {
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (!viewer.getOpenInventory().getTitle().contains("Manage: " + target.getName() + " (2/2)")) {
+                if (!viewer.getOpenInventory().getTitle().contains("Manage: " + target.getName() + " §7(2/2)")) {
                     cancel(); // GUI ist zu
                     return;
                 }
@@ -250,9 +261,9 @@ public class WatchGuiManager {
                 ItemMeta vanishMeta = vanishItem.getItemMeta();
                 assert vanishMeta != null;
                 vanishMeta.setDisplayName(vanishName);
-                vanishMeta.setLore(List.of("§7Click to toggle Vanish mode."));
+                vanishMeta.setLore(List.of("§7Click to toggle the Vanish mode from " + target.getName() + "."));
                 vanishItem.setItemMeta(vanishMeta);
-                viewer.getOpenInventory().getTopInventory().setItem(16, vanishItem);
+                viewer.getOpenInventory().getTopInventory().setItem(19, vanishItem);
             }
         }.runTaskTimer(plugin, 0, 10); // Alle 0,5 Sekunden
     }

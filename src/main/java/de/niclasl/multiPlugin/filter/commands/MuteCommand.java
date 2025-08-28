@@ -7,28 +7,32 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MuteCommand implements CommandExecutor {
+public class MuteCommand implements CommandExecutor, TabCompleter {
 
-    private final MuteManager muteManager;
+    private static MuteManager muteManager;
 
     public MuteCommand(MuteManager muteManager) {
-        this.muteManager = muteManager;
+        MuteCommand.muteManager = muteManager;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
-        if(!sender.hasPermission("admin.mute")){
+        if(!sender.hasPermission("multiplugin.mute")){
             sender.sendMessage(ChatColor.RED + "You don't have permission to use this command!");
+            return true;
         }
 
         if (args.length < 3) {
-            sender.sendMessage("§cUsage: /mute <player> <duration> <reason>");
+            sender.sendMessage("§cUsage: /mute <player> <duration|perm> <reason>");
             return true;
         }
 
@@ -88,5 +92,30 @@ public class MuteCommand implements CommandExecutor {
         }
         if (totalMillis == 0) throw new IllegalArgumentException("No valid time detected");
         return totalMillis;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        List<String> completions = new ArrayList<>();
+
+        if (!sender.hasPermission("multiplugin.mute")) return completions;
+
+        if (args.length == 1) {
+            // Spieler-Vorschläge für den ersten Parameter
+            completions.addAll(Bukkit.getOnlinePlayers().stream()
+                    .map(Player::getName)
+                    .filter(name -> name.toLowerCase().startsWith(args[0].toLowerCase()))
+                    .toList());
+        } else if (args.length == 2) {
+            // Dauer-Vorschläge für den zweiten Parameter
+            completions.add("perm");
+            completions.add("10s");
+            completions.add("10m");
+            completions.add("1h");
+            completions.add("1d");
+        }
+        // args.length >= 3 => Grund/Reason, hier meist freie Eingabe, kein Completion nötig
+
+        return completions;
     }
 }

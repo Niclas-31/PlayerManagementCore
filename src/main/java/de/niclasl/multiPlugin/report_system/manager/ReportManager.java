@@ -11,10 +11,10 @@ import static java.util.UUID.*;
 
 public class ReportManager {
 
-    private final File reportFolder;
+    private static File reportFolder;
 
     public ReportManager(File pluginDataFolder) {
-        this.reportFolder = new File(pluginDataFolder, "reports");
+        reportFolder = new File(pluginDataFolder, "reports");
         if (!reportFolder.exists()) {
             reportFolder.mkdirs();
         }

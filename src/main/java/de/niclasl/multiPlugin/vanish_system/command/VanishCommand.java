@@ -9,10 +9,12 @@ import org.bukkit.entity.Player;
 
 public class VanishCommand implements CommandExecutor {
 
-    private final MultiPlugin plugin;
+    private static MultiPlugin plugin;
+    private static VanishManager vanishManager;
 
-    public VanishCommand(MultiPlugin plugin) {
-        this.plugin = plugin;
+    public VanishCommand(MultiPlugin plugin, VanishManager vanishManager) {
+        VanishCommand.plugin = plugin;
+        VanishCommand.vanishManager = vanishManager;
     }
 
     @Override
@@ -22,10 +24,14 @@ public class VanishCommand implements CommandExecutor {
             return true;
         }
 
+        if (!sender.hasPermission("multiplugin.vanish")) {
+            sender.sendMessage("§cYou don't have permission to use this command!");
+        }
+
         boolean isVanished = plugin.getVanishConfig().getBoolean(player.getUniqueId().toString(), false);
         boolean newVanishState = !isVanished;
 
-        VanishManager.setVanish(player.getUniqueId(), newVanishState);
+        vanishManager.setVanish(player.getUniqueId(), newVanishState);
 
         player.sendMessage(newVanishState
                 ? "§aYou are now vanished."

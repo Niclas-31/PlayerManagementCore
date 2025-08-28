@@ -1,94 +1,144 @@
 package de.niclasl.multiPlugin.warn_system.commands;
 
+import de.niclasl.multiPlugin.MultiPlugin;
+import de.niclasl.multiPlugin.warn_system.manage.WarnActionConfigManager;
 import de.niclasl.multiPlugin.warn_system.manage.WarnManager;
 import de.niclasl.multiPlugin.ban_system.manager.BanHistoryManager;
 import de.niclasl.multiPlugin.warn_system.model.Warning;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
-public class WarnCommand implements CommandExecutor {
+public class WarnCommand implements CommandExecutor, TabCompleter {
 
-    private final WarnManager warnManager;
-    private final BanHistoryManager banManager;
+    private static WarnManager warnManager;
+    private static BanHistoryManager banManager;
+    private static MultiPlugin plugin;
 
-    public WarnCommand(WarnManager warnManager, BanHistoryManager banManager) {
-        this.warnManager = warnManager;
-        this.banManager = banManager;
+    public WarnCommand(WarnManager warnManager, BanHistoryManager banManager, MultiPlugin plugin) {
+        WarnCommand.warnManager = warnManager;
+        WarnCommand.banManager = banManager;
+        WarnCommand.plugin = plugin;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
+        if (!sender.hasPermission("multiplugin.warn")) {
+            sender.sendMessage("§cYou don't have permission to use this command!");
+            return true;
+        }
 
         if (args.length < 2) {
             sender.sendMessage("§cUsage: /warn <player> <reason>");
             return true;
         }
 
-        if (target.isOp()) {
-            sender.sendMessage(ChatColor.RED + "You cannot warn an admin!");
-            return true;
-        }
+        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
 
-        if (target.getName() == null) {
+        if (!target.hasPlayedBefore() && !target.isOnline()) {
             sender.sendMessage("§cPlayer not found.");
             return true;
         }
 
+        if (target.isOp()) {
+            sender.sendMessage("§cYou cannot warn an admin!");
+            return true;
+        }
+
         UUID uuid = target.getUniqueId();
-        String reason = String.join(" ", args).substring(args[0].length()).trim();
+        String reason = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
         String by = sender.getName();
         String date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"));
 
-        // Verwarnung hinzufügen (automatisch 3 Punkte)
+        // Warnung hinzufügen (automatisch 3 Punkte)
         warnManager.addWarning(uuid, reason, by, date);
         sender.sendMessage("§a" + target.getName() + " was warned (§7Reason: §e" + reason + "§a).");
 
         // Punkte prüfen
+        WarnActionConfigManager warnConfig = new WarnActionConfigManager(plugin);
         int totalPoints = warnManager.getTotalPoints(uuid);
-        if (totalPoints >= 10) {
-            // Bann auslösen (für 1 Tag)
-            String banReason = "Too many warnings";
-            String durationArg = "1d";
-            LocalDateTime unbanTime = LocalDateTime.now().plusDays(1);
-            Date banUntil = Date.from(unbanTime.atZone(ZoneId.systemDefault()).toInstant());
 
-            // In Minecraft Banliste eintragen
-            Bukkit.getBanList(BanList.Type.NAME).addBan(target.getName(), banReason, banUntil, "System");
+        // Schwellen sortieren (absteigend)
+        List<String> thresholds = new ArrayList<>(warnConfig.getThresholds());
+        thresholds.sort((a, b) -> Integer.compare(Integer.parseInt(b), Integer.parseInt(a)));
 
-            // Kick ausführen
-            if (target.isOnline() && target instanceof Player onlinePlayer) {
-                String kickMessage = "§cYou have been banned!\n"
-                        + "§7Reason: §e" + banReason + "\n"
-                        + "§7Duration: §c" + durationArg;
-                onlinePlayer.kickPlayer(kickMessage);
+        for (String thresholdStr : thresholds) {
+            int threshold = Integer.parseInt(thresholdStr);
+            if (totalPoints >= threshold) {
+                ConfigurationSection section = warnConfig.getThresholdSection(thresholdStr);
+                String action = section.getString("action");
+                String durationArg = section.getString("duration", null);
+                boolean resetPoints = section.getBoolean("resetPoints", false);
+
+                switch (action.toLowerCase()) {
+                    case "kick" -> {
+                        if (target.isOnline() && target instanceof Player onlinePlayer) {
+                            onlinePlayer.kickPlayer("§cYou have been kicked!\n§7Reason: §e" + reason);
+                        }
+                    }
+                    case "ban" -> {
+                        LocalDateTime unbanTime = parseDuration(durationArg);
+                        Date banUntil = Date.from(unbanTime.atZone(ZoneId.systemDefault()).toInstant());
+
+                        Bukkit.getBanList(BanList.Type.NAME).addBan(Objects.requireNonNull(target.getName()), reason, banUntil, "System");
+
+                        if (target.isOnline() && target instanceof Player onlinePlayer) {
+                            onlinePlayer.kickPlayer("§cYou have been banned!\n§7Reason: §e" + reason + "\n§7Duration: §c" + durationArg);
+                        }
+
+                        banManager.addBan(uuid, reason, "System", durationArg, null, null);
+                    }
+                }
+
+                if (resetPoints) {
+                    List<Warning> updated = warnManager.getWarnings(uuid);
+                    for (Warning w : updated) {
+                        w.setPoints(0);
+                    }
+                    warnManager.saveWarnings(uuid, updated);
+                }
+
+                break; // Nur erste passende Aktion ausführen
             }
-
-            // Eigenes Ban-System aktualisieren
-            banManager.addBan(uuid, banReason, "System", durationArg, null, null);
-
-            // Punkte auf 0 setzen nach dem Bann
-            List<de.niclasl.multiPlugin.warn_system.model.Warning> updated = warnManager.getWarnings(uuid);
-            for (Warning w : updated) {
-                w.setPoints(0);
-            }
-            warnManager.saveWarnings(uuid, updated);
         }
 
         return true;
+    }
+
+    public LocalDateTime parseDuration(String durationArg) {
+        if (durationArg == null) return LocalDateTime.now().plusYears(100); // praktisch permanent
+        int amount = Integer.parseInt(durationArg.substring(0, durationArg.length() - 1));
+        char unit = durationArg.charAt(durationArg.length() - 1);
+        return switch (unit) {
+            case 'd' -> LocalDateTime.now().plusDays(amount);
+            case 'h' -> LocalDateTime.now().plusHours(amount);
+            case 'm' -> LocalDateTime.now().plusMinutes(amount);
+            default -> LocalDateTime.now();
+        };
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        List<String> completions = new ArrayList<>();
+        if (args.length == 1) {
+            for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
+                if (p.getName() != null && p.getName().toLowerCase().startsWith(args[0].toLowerCase())) {
+                    completions.add(p.getName());
+                }
+            }
+        }
+        return completions;
     }
 }

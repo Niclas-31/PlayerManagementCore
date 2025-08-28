@@ -1,5 +1,6 @@
 package de.niclasl.multiPlugin.warn_system.listener;
 
+import de.niclasl.multiPlugin.GuiConstants;
 import de.niclasl.multiPlugin.manage_player.gui.WatchGuiManager;
 import de.niclasl.multiPlugin.warn_system.gui.WarnGui;
 import de.niclasl.multiPlugin.warn_system.manage.WarnManager;
@@ -20,22 +21,12 @@ import java.util.UUID;
 
 public class WarnGuiListener implements Listener {
 
-    private final WarnManager warnManager;
-    private final WarnGui warnGui;
-
-    // Slots, die Warnungen anzeigen (müssen mit WarnGui übereinstimmen)
-    private final int[] allowedSlots = {
-            0,1,2,3,4,5,6,7,
-            9,10,11,12,13,14,15,16,
-            18,19,20,21,22,23,24,25,
-            27,28,29,30,31,32,33,34,
-            36,37,38,39,40,41,42,43,
-            45,46,47,48,49,50,51,52
-    };
+    private static WarnManager warnManager;
+    private static WarnGui warnGui;
 
     public WarnGuiListener(WarnManager warnManager, WarnGui warnGui) {
-        this.warnManager = warnManager;
-        this.warnGui = warnGui;
+        WarnGuiListener.warnManager = warnManager;
+        WarnGuiListener.warnGui = warnGui;
     }
 
     @EventHandler
@@ -59,7 +50,7 @@ public class WarnGuiListener implements Listener {
             // Hole den Zielspieler (du brauchst eine Zuordnung: Wer betrachtet wen)
             OfflinePlayer target = getTarget(player); // <- das musst du ggf. anpassen
             if (target != null) {
-                WatchGuiManager.openPage2(player, (Player) target);
+                WatchGuiManager.openPage1(player, (Player) target);
             } else {
                 player.sendMessage("§cError: Target player not found.");
                 player.closeInventory();
@@ -78,7 +69,7 @@ public class WarnGuiListener implements Listener {
         // Klick auf Nächste Seite Button (Slot 44)
         if (slot == 44) {
             List<Warning> warnings = warnManager.getWarnings(targetUUID);
-            int warningsPerPage = allowedSlots.length;
+            int warningsPerPage = GuiConstants.ALLOWED_SLOTS.length;
             int totalPages = (int) Math.ceil(warnings.size() / (double) warningsPerPage);
             if (page < totalPages) {
                 OfflinePlayer target = Bukkit.getOfflinePlayer(targetUUID);
@@ -90,8 +81,8 @@ public class WarnGuiListener implements Listener {
         // Klick auf Warnungen
         // Prüfen, ob Slot in allowedSlots ist
         int indexInPage = -1;
-        for (int i = 0; i < allowedSlots.length; i++) {
-            if (allowedSlots[i] == slot) {
+        for (int i = 0; i < GuiConstants.ALLOWED_SLOTS.length; i++) {
+            if (GuiConstants.ALLOWED_SLOTS[i] == slot) {
                 indexInPage = i;
                 break;
             }
@@ -100,7 +91,7 @@ public class WarnGuiListener implements Listener {
 
         List<Warning> warnings = warnManager.getWarnings(targetUUID);
 
-        int warningIndex = (page - 1) * allowedSlots.length + indexInPage;
+        int warningIndex = (page - 1) * GuiConstants.ALLOWED_SLOTS.length + indexInPage;
         if (warningIndex < 0 || warningIndex >= warnings.size()) {
             player.sendMessage("§cInvalid warning slot.");
             return;

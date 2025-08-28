@@ -1,5 +1,6 @@
 package de.niclasl.multiPlugin.ban_system.gui;
 
+import de.niclasl.multiPlugin.GuiConstants;
 import de.niclasl.multiPlugin.MultiPlugin;
 import de.niclasl.multiPlugin.ban_system.model.BanRecord;
 import de.niclasl.multiPlugin.ban_system.manager.BanHistoryManager;
@@ -14,6 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class BanHistoryGui {
@@ -27,22 +29,33 @@ public class BanHistoryGui {
     public static void open(Player viewer, OfflinePlayer target, int page) {
         List<BanRecord> bans = BanHistoryManager.getBanHistory(target.getUniqueId());
 
-        int[] allowedSlots = {
-                0,1,2,3,4,5,6,7,
-                9,10,11,12,13,14,15,16,
-                18,19,20,21,22,23,24,25,
-                27,28,29,30,31,32,33,34,
-                36,37,38,39,40,41,42,43,
-                45,46,47,48,49,50,51,52
-        };
-
-        int bansPerPage = allowedSlots.length;
+        int bansPerPage = GuiConstants.ALLOWED_SLOTS.length;
         int totalPages = (int) Math.ceil(bans.size() / (double) bansPerPage);
         if (totalPages == 0) totalPages = 1;
 
         page = Math.max(1, Math.min(page, totalPages));
 
         Inventory inv = Bukkit.createInventory(null, 54, "§8Bans from " + target.getName() + " §7(" + page + "/" + totalPages + ")");
+
+        // Rand
+        ItemStack glass = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
+        for (int i : new int[]{8,17}) {
+            inv.setItem(i, glass);
+        }
+
+        if (totalPages == 1 || page == 1) {
+            ItemStack glass1 = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
+            for (int i : new int[]{35}) {
+                inv.setItem(i, glass1);
+            }
+        }
+
+        if (totalPages == 1 || totalPages == page) {
+            ItemStack glass2 = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
+            for (int i : new int[]{44}) {
+                inv.setItem(i, glass2);
+            }
+        }
 
         int startIndex = (page - 1) * bansPerPage;
         int endIndex = Math.min(startIndex + bansPerPage, bans.size());
@@ -91,7 +104,7 @@ public class BanHistoryGui {
             }
 
             paper.setItemMeta(meta);
-            int slot = allowedSlots[i - startIndex];
+            int slot = GuiConstants.ALLOWED_SLOTS[i - startIndex];
             inv.setItem(slot, paper);
         }
 
@@ -101,6 +114,7 @@ public class BanHistoryGui {
         assert skullMeta != null;
         skullMeta.setOwningPlayer(target);
         skullMeta.setDisplayName("§e" + target.getName());
+        skullMeta.setLore(List.of(ChatColor.AQUA + "Total Bans: " + bans.size()));
         skull.setItemMeta(skullMeta);
         inv.setItem(53, skull);
 
@@ -133,5 +147,24 @@ public class BanHistoryGui {
         viewer.openInventory(inv);
         viewer.setMetadata("ban_target", new FixedMetadataValue(plugin, target.getUniqueId().toString()));
         viewer.setMetadata("ban_page", new FixedMetadataValue(plugin, page));
+    }
+
+    public int getTotalPages(OfflinePlayer target) {
+        List<BanRecord> bans = BanHistoryManager.getBanHistory(target.getUniqueId());
+
+        int bansPerPage = GuiConstants.ALLOWED_SLOTS.length;
+        int totalPages = (int) Math.ceil(bans.size() / (double) bansPerPage);
+        if (totalPages == 0) totalPages = 1;
+        return totalPages;
+    }
+
+    private static ItemStack createItem(Material material, String name, String... lore) {
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+        assert meta != null;
+        meta.setDisplayName(name);
+        meta.setLore(Arrays.asList(lore));
+        item.setItemMeta(meta);
+        return item;
     }
 }

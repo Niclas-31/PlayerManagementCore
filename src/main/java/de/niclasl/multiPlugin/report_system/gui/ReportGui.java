@@ -1,6 +1,9 @@
 package de.niclasl.multiPlugin.report_system.gui;
 
+import de.niclasl.multiPlugin.GuiConstants;
 import de.niclasl.multiPlugin.MultiPlugin;
+import de.niclasl.multiPlugin.ban_system.manager.BanHistoryManager;
+import de.niclasl.multiPlugin.ban_system.model.BanRecord;
 import de.niclasl.multiPlugin.report_system.manager.ReportManager;
 import de.niclasl.multiPlugin.report_system.model.Report;
 import org.bukkit.Bukkit;
@@ -14,6 +17,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class ReportGui {
@@ -39,16 +43,36 @@ public class ReportGui {
                 45,46,47,48,49,50,51,52
         };
 
-        int warningsPerPage = allowedSlots.length; // 48
-        int totalPages = (int) Math.ceil(reports.size() / (double) warningsPerPage);
+        int reportsPerPage = allowedSlots.length; // 48
+        int totalPages = (int) Math.ceil(reports.size() / (double) reportsPerPage);
         if(totalPages == 0) totalPages = 1;
 
         page = Math.min(Math.max(page, 1), totalPages);
 
         Inventory inv = Bukkit.createInventory(null, 54, "§8Reports from " + target.getName() + " §7(" + page + "/" + totalPages + ")");
 
-        int startIndex = (page - 1) * warningsPerPage;
-        int endIndex = Math.min(startIndex + warningsPerPage, reports.size());
+        // Rand
+        ItemStack glass = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
+        for (int i : new int[]{8,17}) {
+            inv.setItem(i, glass);
+        }
+
+        if (totalPages == 1 || page == 1) {
+            ItemStack glass1 = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
+            for (int i : new int[]{35}) {
+                inv.setItem(i, glass1);
+            }
+        }
+
+        if (totalPages == 1 || totalPages == page) {
+            ItemStack glass2 = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
+            for (int i : new int[]{44}) {
+                inv.setItem(i, glass2);
+            }
+        }
+
+        int startIndex = (page - 1) * reportsPerPage;
+        int endIndex = Math.min(startIndex + reportsPerPage, reports.size());
 
         for (int i = startIndex; i < endIndex; i++) {
             Report report = reports.get(i);
@@ -123,5 +147,24 @@ public class ReportGui {
         viewer.openInventory(inv);
         viewer.setMetadata("report_target", new FixedMetadataValue(plugin, target.getUniqueId().toString()));
         viewer.setMetadata("report_page", new FixedMetadataValue(plugin, page));
+    }
+
+    public int getTotalPages(OfflinePlayer target) {
+        List<BanRecord> bans = BanHistoryManager.getBanHistory(target.getUniqueId());
+
+        int bansPerPage = GuiConstants.ALLOWED_SLOTS.length;
+        int totalPages = (int) Math.ceil(bans.size() / (double) bansPerPage);
+        if (totalPages == 0) totalPages = 1;
+        return totalPages;
+    }
+
+    private static ItemStack createItem(Material material, String name, String... lore) {
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+        assert meta != null;
+        meta.setDisplayName(name);
+        meta.setLore(Arrays.asList(lore));
+        item.setItemMeta(meta);
+        return item;
     }
 }

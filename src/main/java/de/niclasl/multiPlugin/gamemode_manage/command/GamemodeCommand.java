@@ -5,9 +5,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
-public class GamemodeCommand implements CommandExecutor {
+import java.util.ArrayList;
+import java.util.List;
+
+public class GamemodeCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -19,7 +23,7 @@ public class GamemodeCommand implements CommandExecutor {
         }
 
         // Nur Admins
-        if (!player.hasPermission("admin.gamemode.gui")) {
+        if (!player.hasPermission("multiplugin.gamemode.gui")) {
             player.sendMessage("§cYou do not have permission to access this GUI.");
             return true;
         }
@@ -39,5 +43,19 @@ public class GamemodeCommand implements CommandExecutor {
         // GUI öffnen
         GamemodeGui.open(player, target);
         return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        List<String> completions = new ArrayList<>();
+
+        if (args.length == 1) {
+            completions.addAll(Bukkit.getOnlinePlayers().stream()
+                    .map(Player::getName)
+                    .filter(name -> name.toLowerCase().startsWith(args[0].toLowerCase()))
+                    .toList());
+        }
+
+        return completions;
     }
 }

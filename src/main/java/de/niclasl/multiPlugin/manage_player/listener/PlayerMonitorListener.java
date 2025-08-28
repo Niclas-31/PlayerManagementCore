@@ -1,6 +1,7 @@
 package de.niclasl.multiPlugin.manage_player.listener;
 
 import de.niclasl.multiPlugin.ban_system.gui.BanHistoryGui;
+import de.niclasl.multiPlugin.mob_system.gui.MobGui;
 import de.niclasl.multiPlugin.report_system.gui.ReportGui;
 import de.niclasl.multiPlugin.gamemode_manage.gui.GamemodeGui;
 import de.niclasl.multiPlugin.manage_player.gui.WatchGuiManager;
@@ -8,24 +9,26 @@ import de.niclasl.multiPlugin.stats.gui.StatsGui;
 import de.niclasl.multiPlugin.teleport.gui.DimensionGui;
 import de.niclasl.multiPlugin.vanish_system.manager.VanishManager;
 import de.niclasl.multiPlugin.warn_system.gui.WarnGui;
-import org.bukkit.BanList;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 public class PlayerMonitorListener implements Listener {
 
-    private final WarnGui warnGui;
+    private static WarnGui warnGui;
+    private static final Map<UUID, String> currentMode = new HashMap<>();
+    private static final Map<UUID, Integer> cooldownSeconds = new HashMap<>();
 
     public PlayerMonitorListener(WarnGui warnGui) {
-        this.warnGui = warnGui;
+        PlayerMonitorListener.warnGui = warnGui;
     }
 
     @EventHandler
@@ -38,6 +41,7 @@ public class PlayerMonitorListener implements Listener {
         if (event.getCurrentItem() == null) return;
 
         Player player = (Player) event.getWhoClicked();
+        int slot = event.getSlot();
 
         // Zielspieler über Spielerkopf ermitteln
         Player target = null;
@@ -54,11 +58,13 @@ public class PlayerMonitorListener implements Listener {
             return;
         }
 
-        ItemStack clickedItem = event.getCurrentItem();
-        Material clickedType = clickedItem.getType();
-        String clickedName = clickedItem.getItemMeta() != null ? ChatColor.stripColor(clickedItem.getItemMeta().getDisplayName()) : "";
+        UUID targetId = target.getUniqueId();
 
-        // Aktionen
+        // Alle anderen Items weiter wie gewohnt behandeln:
+        Material clickedType = event.getCurrentItem().getType();
+        String clickedName = event.getCurrentItem().getItemMeta() != null
+                ? ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()) : "";
+
         switch (clickedType) {
             case ENDER_EYE -> player.openInventory(target.getInventory());
             case ENDER_CHEST -> player.openInventory(target.getEnderChest());
@@ -81,13 +87,10 @@ public class PlayerMonitorListener implements Listener {
                 }
                 player.closeInventory();
             }
-            case ENCHANTED_BOOK -> // Warn GUI öffnen
-                    warnGui.open(player, target, 1);
-            case ENDER_PEARL -> // Dimension GUI öffnen
-                    DimensionGui.open(player, target);
+            case ENCHANTED_BOOK -> warnGui.open(player, target, 1);
+            case ENDER_PEARL -> DimensionGui.open(player, target, 1);
             case BOOK -> BanHistoryGui.open(player, target, 1);
             case RED_CONCRETE, LIME_CONCRETE -> {
-                // optional: check item name if you want to avoid conflicts
                 if (clickedName.contains("Vanish")) {
                     boolean isVanished = VanishManager.isVanished(target.getUniqueId());
                     VanishManager.setVanish(target.getUniqueId(), !isVanished);
@@ -97,6 +100,7 @@ public class PlayerMonitorListener implements Listener {
             case COMPASS -> StatsGui.open(player, target);
             case COMMAND_BLOCK -> GamemodeGui.open(player, target);
             case KNOWLEDGE_BOOK -> ReportGui.open(player, target, 1);
+            case SPAWNER -> MobGui.open(player, target, 1);
             case BEDROCK -> {
                 if (target.isOp()) {
                     player.sendMessage(ChatColor.RED + "You cannot kick an admin.");
@@ -106,7 +110,6 @@ public class PlayerMonitorListener implements Listener {
                 }
             }
             case ARROW -> {
-                // Navigation
                 if (clickedName.equalsIgnoreCase("Further")) {
                     WatchGuiManager.openPage2(player, target);
                 } else if (clickedName.equalsIgnoreCase("Back")) {

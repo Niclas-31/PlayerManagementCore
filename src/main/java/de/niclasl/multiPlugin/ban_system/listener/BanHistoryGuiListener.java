@@ -1,5 +1,6 @@
 package de.niclasl.multiPlugin.ban_system.listener;
 
+import de.niclasl.multiPlugin.GuiConstants;
 import de.niclasl.multiPlugin.ban_system.gui.BanHistoryGui;
 import de.niclasl.multiPlugin.ban_system.manager.BanHistoryManager;
 import de.niclasl.multiPlugin.ban_system.model.BanRecord;
@@ -20,20 +21,10 @@ import java.util.UUID;
 
 public class BanHistoryGuiListener implements Listener {
 
-    private final BanHistoryManager banHistoryManager;
-
-    // Slots, die Bans anzeigen (müssen mit BanHistoryGui übereinstimmen)
-    private final int[] allowedSlots = {
-            0,1,2,3,4,5,6,7,
-            9,10,11,12,13,14,15,16,
-            18,19,20,21,22,23,24,25,
-            27,28,29,30,31,32,33,34,
-            36,37,38,39,40,41,42,43,
-            45,46,47,48,49,50,51,52
-    };
+    private static BanHistoryManager banHistoryManager;
 
     public BanHistoryGuiListener(BanHistoryManager banHistoryManager) {
-        this.banHistoryManager = banHistoryManager;
+        BanHistoryGuiListener.banHistoryManager = banHistoryManager;
     }
 
     @EventHandler
@@ -76,7 +67,7 @@ public class BanHistoryGuiListener implements Listener {
         // Klick auf Nächste Seite Button (Slot 44)
         if (slot == 44) {
             List<BanRecord> bans = BanHistoryManager.getBanHistory(targetUUID);
-            int warningsPerPage = allowedSlots.length;
+            int warningsPerPage = GuiConstants.ALLOWED_SLOTS.length;
             int totalPages = (int) Math.ceil(bans.size() / (double) warningsPerPage);
             if (page < totalPages) {
                 OfflinePlayer target = Bukkit.getOfflinePlayer(targetUUID);
@@ -88,8 +79,8 @@ public class BanHistoryGuiListener implements Listener {
         // Klick auf Warnungen
         // Prüfen, ob Slot in allowedSlots ist
         int indexInPage = -1;
-        for (int i = 0; i < allowedSlots.length; i++) {
-            if (allowedSlots[i] == slot) {
+        for (int i = 0; i < GuiConstants.ALLOWED_SLOTS.length; i++) {
+            if (GuiConstants.ALLOWED_SLOTS[i] == slot) {
                 indexInPage = i;
                 break;
             }
@@ -98,7 +89,7 @@ public class BanHistoryGuiListener implements Listener {
 
         List<BanRecord> bans = BanHistoryManager.getBanHistory(targetUUID);
 
-        int banIndex = (page - 1) * allowedSlots.length + indexInPage;
+        int banIndex = (page - 1) * GuiConstants.ALLOWED_SLOTS.length + indexInPage;
         if (banIndex < 0 || banIndex >= bans.size()) {
             player.sendMessage("§cInvalid ban slot.");
             return;

@@ -5,10 +5,10 @@ import java.util.List;
 
 public class ReasonManager {
 
-    private final List<String> reasons;
+    private static List<String> reasons;
 
     public ReasonManager(FileConfiguration config) {
-        this.reasons = config.getStringList("reasons");
+        reasons = config.getStringList("reasons");
     }
 
     public boolean isValidReason(String reason) {

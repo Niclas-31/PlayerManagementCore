@@ -1,17 +1,13 @@
 package de.niclasl.multiPlugin.filter.manager;
 
-import org.bukkit.configuration.file.FileConfiguration;
-
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class MuteManager {
 
     private final Map<UUID, Long> mutedPlayers = new HashMap<>();
-
-    public MuteManager(FileConfiguration chatFilterConfig) {
-    }
 
     /**
      * Spieler muten für Dauer in Millisekunden
@@ -35,5 +31,9 @@ public class MuteManager {
 
     public void unmutePlayer(UUID uuid) {
         mutedPlayers.remove(uuid);
+    }
+
+    public Set<UUID> getMutedPlayers() {
+        return mutedPlayers.keySet();
     }
 }

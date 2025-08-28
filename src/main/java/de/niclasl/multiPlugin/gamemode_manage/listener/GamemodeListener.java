@@ -9,7 +9,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import static de.niclasl.multiPlugin.gamemode_manage.gui.GamemodeGui.plugin;
@@ -19,7 +18,6 @@ public class GamemodeListener implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player viewer)) return;
-        Inventory inv = event.getInventory();
 
         if (event.getCurrentItem() == null || event.getCurrentItem().getType() == Material.AIR) return;
 
@@ -42,8 +40,7 @@ public class GamemodeListener implements Listener {
 
         // Zurück-Button (z. B. Slot 31)
         if (clicked.getType() == Material.BARRIER) {
-            viewer.closeInventory();
-            WatchGuiManager.openPage1(viewer, target);
+            WatchGuiManager.openPage2(viewer, target);
             return;
         }
 

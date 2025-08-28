@@ -12,12 +12,12 @@ import java.util.List;
 
 public class ChatFilterListener implements Listener {
 
-    private final FileConfiguration chatFilterConfig;
-    private final MuteManager muteManager;
+    private static FileConfiguration chatFilterConfig;
+    private static MuteManager muteManager;
 
     public ChatFilterListener(FileConfiguration chatFilterConfig, MuteManager muteManager) {
-        this.chatFilterConfig = chatFilterConfig;
-        this.muteManager = muteManager;
+        ChatFilterListener.chatFilterConfig = chatFilterConfig;
+        ChatFilterListener.muteManager = muteManager;
     }
 
     @EventHandler

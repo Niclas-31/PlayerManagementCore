@@ -13,10 +13,10 @@ import java.util.UUID;
 
 public class LoginListener implements Listener {
 
-    private final BanHistoryManager banHistoryManager;
+    private static BanHistoryManager banHistoryManager;
 
     public LoginListener(BanHistoryManager banHistoryManager) {
-        this.banHistoryManager = banHistoryManager;
+        LoginListener.banHistoryManager = banHistoryManager;
     }
 
     @EventHandler

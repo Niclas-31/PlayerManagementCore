@@ -1,0 +1,11 @@
+warn-actions:
+  "5":
+    action: kick
+    reason: "You have received too many warnings!"
+    resetPoints: false
+
+  "10":
+    action: ban
+    reason: "Too many warnings"
+    duration: "1d"
+    resetPoints: true

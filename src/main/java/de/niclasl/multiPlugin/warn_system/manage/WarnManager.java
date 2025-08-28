@@ -9,10 +9,10 @@ import java.util.*;
 
 public class WarnManager {
 
-    private final File warnFolder;
+    private static File warnFolder;
 
     public WarnManager(File pluginDataFolder) {
-        this.warnFolder = new File(pluginDataFolder, "warnings");
+        warnFolder = new File(pluginDataFolder, "warnings");
         if (!warnFolder.exists()) {
             warnFolder.mkdirs();
         }
@@ -84,7 +84,7 @@ public class WarnManager {
     public void addWarning(UUID playerUUID, String reason, String by, String date) {
         List<Warning> warnings = getWarnings(playerUUID);
 
-        Warning warning = new Warning(UUID.randomUUID().toString(), reason, date, by, false, 3);
+        Warning warning = new Warning(UUID.randomUUID().toString(), reason, date, by, false, 1);
 
         warnings.add(warning);
         saveWarnings(playerUUID, warnings);

@@ -89,15 +89,16 @@ public class BanRecord {
 
             while (matcher.find()) {
                 int value = Integer.parseInt(matcher.group(1));
-                switch (matcher.group(2)) {
-                    case "s": banTime = banTime.plusSeconds(value); break;
-                    case "m": banTime = banTime.plusMinutes(value); break;
-                    case "h": banTime = banTime.plusHours(value); break;
-                    case "d": banTime = banTime.plusDays(value); break;
-                    case "w": banTime = banTime.plusWeeks(value); break;
-                    case "M": banTime = banTime.plusMonths(value); break;
-                    case "y": banTime = banTime.plusYears(value); break;
-                }
+                banTime = switch (matcher.group(2)) {
+                    case "s" -> banTime.plusSeconds(value);
+                    case "m" -> banTime.plusMinutes(value);
+                    case "h" -> banTime.plusHours(value);
+                    case "d" -> banTime.plusDays(value);
+                    case "w" -> banTime.plusWeeks(value);
+                    case "M" -> banTime.plusMonths(value);
+                    case "y" -> banTime.plusYears(value);
+                    default -> banTime;
+                };
             }
 
             return formatter.format(banTime);
