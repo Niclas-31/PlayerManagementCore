@@ -78,6 +78,12 @@ public class WarnGuiListener implements Listener {
             return;
         }
 
+        if (slot == 17) {
+            WarnGui.toggleSort(player);
+            OfflinePlayer target = Bukkit.getOfflinePlayer(UUID.fromString(player.getMetadata("warn_target").get(0).asString()));
+            warnGui.open(player, target, 1); // GUI neu öffnen
+        }
+
         // Klick auf Warnungen
         // Prüfen, ob Slot in allowedSlots ist
         int indexInPage = -1;
