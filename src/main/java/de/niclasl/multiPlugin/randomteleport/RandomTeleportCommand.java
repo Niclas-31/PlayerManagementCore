@@ -10,7 +10,7 @@ import org.bukkit.World.Environment;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class RandomTeleportCommand implements CommandExecutor {
+public class RandomTeleportCommand implements CommandExecutor, TabCompleter {
 
     private final MultiPlugin plugin;
     private final Map<Player, Long> cooldowns = new HashMap<>();
@@ -114,5 +114,11 @@ public class RandomTeleportCommand implements CommandExecutor {
             }
         }
         return -1;
+    }
+
+
+    @Override
+    public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
+        return List.of();
     }
 }

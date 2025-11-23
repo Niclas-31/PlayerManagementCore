@@ -14,15 +14,9 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import java.util.List;
 import java.util.Objects;
 
-public class SpawnProtectionMovementListener implements Listener {
+public record SpawnProtectionMovementListener(MultiPlugin plugin) implements Listener {
 
-    private final MultiPlugin plugin;
-
-    private static final double triggerRadius = 63;
-
-    public SpawnProtectionMovementListener(MultiPlugin plugin) {
-        this.plugin = plugin;
-    }
+    private static final double triggerRadius = 64;
 
     @EventHandler
     public void onMove(PlayerMoveEvent event) {

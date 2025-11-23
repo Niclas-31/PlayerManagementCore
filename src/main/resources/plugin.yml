@@ -1,8 +1,9 @@
 name: Multi-Plugin
-version: 1.21.8
+version: 4.0.0
 main: de.niclasl.multiPlugin.MultiPlugin
 api-version: 1.21
 authors: [ Niclas ]
+softdepend: [Vault, Teamwar]
 
 commands:
   manage:

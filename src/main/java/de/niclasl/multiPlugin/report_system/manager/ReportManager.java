@@ -20,11 +20,11 @@ public class ReportManager {
         }
     }
 
-    private File getFile(UUID uuid) {
+    private static File getFile(UUID uuid) {
         return new File(reportFolder, uuid.toString() + ".yml");
     }
 
-    public List<Report> getReports(UUID playerUUID) {
+    public static List<Report> getReports(UUID playerUUID) {
         File file = getFile(playerUUID);
         if (!file.exists()) return new ArrayList<>();
 

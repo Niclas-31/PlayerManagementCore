@@ -1,10 +1,12 @@
 package de.niclasl.multiPlugin.manage_player.listener;
 
+import de.niclasl.multiPlugin.armor.manager.RepairManager;
 import de.niclasl.multiPlugin.ban_system.gui.BanHistoryGui;
+import de.niclasl.multiPlugin.effects.gui.PlayerEffectsGui;
+import de.niclasl.multiPlugin.manage_player.gui.WatchGuiManager;
 import de.niclasl.multiPlugin.mob_system.gui.MobGui;
 import de.niclasl.multiPlugin.report_system.gui.ReportGui;
 import de.niclasl.multiPlugin.gamemode_manage.gui.GamemodeGui;
-import de.niclasl.multiPlugin.manage_player.gui.WatchGuiManager;
 import de.niclasl.multiPlugin.stats.gui.StatsGui;
 import de.niclasl.multiPlugin.teleport.gui.DimensionGui;
 import de.niclasl.multiPlugin.vanish_system.manager.VanishManager;
@@ -16,19 +18,16 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 public class PlayerMonitorListener implements Listener {
 
     private static WarnGui warnGui;
-    private static final Map<UUID, String> currentMode = new HashMap<>();
-    private static final Map<UUID, Integer> cooldownSeconds = new HashMap<>();
+    private static PlayerEffectsGui playerEffectsGui;
 
-    public PlayerMonitorListener(WarnGui warnGui) {
+    public PlayerMonitorListener(WarnGui warnGui, PlayerEffectsGui playerEffectsGui) {
         PlayerMonitorListener.warnGui = warnGui;
+        PlayerMonitorListener.playerEffectsGui = playerEffectsGui;
     }
 
     @EventHandler
@@ -57,8 +56,6 @@ public class PlayerMonitorListener implements Listener {
             player.sendMessage("§cCould not identify target player.");
             return;
         }
-
-        UUID targetId = target.getUniqueId();
 
         // Alle anderen Items weiter wie gewohnt behandeln:
         Material clickedType = event.getCurrentItem().getType();
@@ -109,13 +106,32 @@ public class PlayerMonitorListener implements Listener {
                     player.closeInventory();
                 }
             }
-            case ARROW -> {
-                if (clickedName.equalsIgnoreCase("Further")) {
-                    WatchGuiManager.openPage2(player, target);
-                } else if (clickedName.equalsIgnoreCase("Back")) {
-                    WatchGuiManager.openPage1(player, target);
+            case FEATHER -> {
+                if (target.getAllowFlight()) {
+                    target.setAllowFlight(false);
+                    target.setFlying(false);
+                    target.sendMessage("§cYour airplane mode has been disabled!");
                 } else {
-                    player.closeInventory();
+                    target.setAllowFlight(true);
+                    target.setFlying(true); // optional direkt starten
+                    target.sendMessage("§aYour airplane mode has been activated!");
+                }
+            }
+            case DIAMOND_CHESTPLATE -> {
+                if (clickedName.contains("Repair Items")) {
+                    boolean isRepairing = RepairManager.isRepairEnabled(target);
+                    RepairManager.setRepairEnabled(target, !isRepairing);
+
+                    player.sendMessage("§7Repair Mode for §e" + target.getName() + " §7is now "
+                            + (!isRepairing ? "§aenabled" : "§cdisabled") + "§7.");
+                }
+            }
+            case POTION -> playerEffectsGui.open(player, target);
+            case ARROW -> {
+                if (slot == 53) {
+                    WatchGuiManager.open2(player, target);
+                } else if (slot == 45) {
+                    WatchGuiManager.open1(player, target);
                 }
             }
         }

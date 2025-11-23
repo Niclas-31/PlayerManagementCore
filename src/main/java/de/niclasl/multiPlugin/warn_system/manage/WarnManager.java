@@ -18,11 +18,11 @@ public class WarnManager {
         }
     }
 
-    private File getFile(UUID uuid) {
+    private static File getFile(UUID uuid) {
         return new File(warnFolder, uuid.toString() + ".yml");
     }
 
-    public List<Warning> getWarnings(UUID playerUUID) {
+    public static List<Warning> getWarnings(UUID playerUUID) {
         File file = getFile(playerUUID);
         if (!file.exists()) return new ArrayList<>();
 

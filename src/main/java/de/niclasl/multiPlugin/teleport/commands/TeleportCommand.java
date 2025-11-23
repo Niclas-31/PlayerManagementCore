@@ -114,12 +114,12 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
         // INVITE
         if (args[0].equalsIgnoreCase("invite")) {
             if (args.length < 3) {
-                player.sendMessage(ChatColor.RED + "Usage: /teleport-dimension invite <player> <world>");
+                player.sendMessage(ChatColor.RED + "Usage: /teleport-dimension invite <world> <player>");
                 return true;
             }
 
-            String targetName = args[1];
-            String dimension = args[2];
+            String targetName = args[2];
+            String dimension = args[1];
 
             Player target = Bukkit.getPlayer(targetName);
             if (target == null) {
@@ -219,7 +219,7 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
             completions.addAll(Arrays.asList("set", "create", "delete", "invite", "setdelay"));
             completions.addAll(TeleportManager.getAllDimensions()); // Direkter Teleport
         } else if (args.length == 2) {
-            if (args[0].equalsIgnoreCase("invite") || args[0].equalsIgnoreCase("delete") || args[0].equalsIgnoreCase("setdelay")) {
+            if (args[0].equalsIgnoreCase("invite") || args[0].equalsIgnoreCase("delete") || args[0].equalsIgnoreCase("setdelay") || args[0].equalsIgnoreCase("set")) {
                 completions.addAll(TeleportManager.getAllDimensions());
             }
         } else if (args.length == 3) {
@@ -227,6 +227,11 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     completions.add(p.getName());
                 }
+            }
+        }
+        if (args.length == 3) {
+            if (args[0].equalsIgnoreCase("create")) {
+                completions.addAll(Arrays.asList("overworld", "nether", "end"));
             }
         }
         return completions;

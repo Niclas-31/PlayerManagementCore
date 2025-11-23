@@ -1,6 +1,9 @@
 package de.niclasl.multiPlugin.warn_system.commands;
 
+import de.niclasl.multiPlugin.GuiConstants;
 import de.niclasl.multiPlugin.warn_system.gui.WarnGui;
+import de.niclasl.multiPlugin.warn_system.manage.WarnManager;
+import de.niclasl.multiPlugin.warn_system.model.Warning;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -89,12 +92,23 @@ public class WarnHistoryCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        // Optional: Vorschläge für die Seite (zweites Argument)
-        else if (args.length == 2) {
-            completions.add("1");
-            completions.add("2");
-            completions.add("3");
-            // Du könntest hier auch dynamisch die maximale Seitenzahl aus der WarnGui ziehen
+        // Vorschläge für Seitenzahlen (zweites Argument)
+        if (args.length == 2) {
+            OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
+            if (target.hasPlayedBefore()) {
+                List<Warning> warnings = WarnManager.getWarnings(target.getUniqueId());
+                int warningsPerPage = GuiConstants.ALLOWED_SLOTS.length;
+                int totalPages = (int) Math.ceil(warnings.size() / (double) warningsPerPage);
+                if (totalPages < 1) totalPages = 1;
+
+                String partialPage = args[1].toLowerCase();
+                for (int i = 1; i <= totalPages; i++) {
+                    String s = String.valueOf(i);
+                    if (partialPage.isEmpty() || s.startsWith(partialPage)) {
+                        completions.add(s);
+                    }
+                }
+            }
         }
 
         return completions;

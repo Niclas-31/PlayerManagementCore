@@ -1,8 +1,8 @@
 package de.niclasl.multiPlugin.stats.listener;
 
 import de.niclasl.multiPlugin.GuiConstants;
-import de.niclasl.multiPlugin.stats.gui.MinedBlocksGui;
 import de.niclasl.multiPlugin.stats.gui.StatsGui;
+import de.niclasl.multiPlugin.stats.gui.UsedItemsGui;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -34,21 +34,22 @@ public class UsedItemsGuiListener implements Listener {
 
         int slot = event.getSlot();
 
-        int totalMinedBlocks = 0;
+        // Anzahl der Items zählen, die verwendet wurden
+        int totalUsedItems = 0;
         for (Material mat : Material.values()) {
-            if (!mat.isBlock()) continue;
             try {
                 int count = Bukkit.getOfflinePlayer(targetUUID).getStatistic(Statistic.USE_ITEM, mat);
-                if (count > 0) totalMinedBlocks++;
-            } catch (IllegalArgumentException ignored) {}
+                if (count > 0) totalUsedItems++;
+            } catch (IllegalArgumentException ignored) {
+            }
         }
 
-        int usedItemsPerPage = GuiConstants.ALLOWED_SLOTS.length; // oder hardcoded: 45
-        int totalPages = (int) Math.ceil(totalMinedBlocks / (double) usedItemsPerPage);
+        int itemsPerPage = GuiConstants.ALLOWED_SLOTS.length;
+        int totalPages = (int) Math.ceil(totalUsedItems / (double) itemsPerPage);
         if (totalPages == 0) totalPages = 1;
 
         // Button: Zurück zur Übersicht
-        if (slot == 26) { // zurück zur Übersicht
+        if (slot == 26) {
             OfflinePlayer target = getTarget(player);
             if (target instanceof Player onlineTarget)
                 StatsGui.open(player, onlineTarget);
@@ -62,14 +63,14 @@ public class UsedItemsGuiListener implements Listener {
         // Button: Vorherige Seite
         if (slot == 35 && page > 1) {
             OfflinePlayer target = Bukkit.getOfflinePlayer(targetUUID);
-            MinedBlocksGui.open(player, target, page - 1);
+            UsedItemsGui.open(player, target, page - 1);
             return;
         }
 
         // Button: Nächste Seite
         if (slot == 44 && page < totalPages) {
             OfflinePlayer target = Bukkit.getOfflinePlayer(targetUUID);
-            MinedBlocksGui.open(player, target, page + 1);
+            UsedItemsGui.open(player, target, page + 1);
         }
     }
 

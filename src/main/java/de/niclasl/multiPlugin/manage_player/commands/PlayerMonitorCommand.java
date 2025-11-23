@@ -39,7 +39,7 @@ public class PlayerMonitorCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        WatchGuiManager.openPage1(player, target);
+        WatchGuiManager.open1(player, target);
         return true;
     }
 

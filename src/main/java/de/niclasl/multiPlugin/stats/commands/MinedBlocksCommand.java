@@ -1,6 +1,6 @@
 package de.niclasl.multiPlugin.stats.commands;
 
-import de.niclasl.multiPlugin.stats.gui.StatsGui;
+import de.niclasl.multiPlugin.stats.gui.MinedBlocksGui;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -9,12 +9,12 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
-public class StatsCommand implements CommandExecutor, TabCompleter {
+public class MinedBlocksCommand implements CommandExecutor, TabCompleter {
 
-    private static StatsGui statsGui;
+    private static MinedBlocksGui minedBlocksGui;
 
-    public StatsCommand(StatsGui statsGui) {
-        StatsCommand.statsGui = statsGui;
+    public MinedBlocksCommand(MinedBlocksGui minedBlocksGui) {
+        MinedBlocksCommand.minedBlocksGui = minedBlocksGui;
     }
 
     @Override
@@ -24,12 +24,12 @@ public class StatsCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (!sender.hasPermission("multiplugin.stats")) {
+        if (!sender.hasPermission("multiplugin.minedblocks")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }
 
-        statsGui.open(player, player);
+        minedBlocksGui.open(player, player, 1);
         return true;
     }
 

@@ -2,7 +2,6 @@ package de.niclasl.multiPlugin.stats.listener;
 
 import de.niclasl.multiPlugin.GuiConstants;
 import de.niclasl.multiPlugin.stats.gui.CraftedItemsGui;
-import de.niclasl.multiPlugin.stats.gui.MinedBlocksGui;
 import de.niclasl.multiPlugin.stats.gui.StatsGui;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -16,6 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.UUID;
 
 public class CraftedItemsGuiListener implements Listener {
+
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
@@ -35,21 +35,21 @@ public class CraftedItemsGuiListener implements Listener {
 
         int slot = event.getSlot();
 
-        int totalMinedBlocks = 0;
+        // Anzahl der Items zählen
+        int totalCraftedItems = 0;
         for (Material mat : Material.values()) {
-            if (!mat.isBlock()) continue;
             try {
                 int count = Bukkit.getOfflinePlayer(targetUUID).getStatistic(Statistic.CRAFT_ITEM, mat);
-                if (count > 0) totalMinedBlocks++;
+                if (count > 0) totalCraftedItems++;
             } catch (IllegalArgumentException ignored) {}
         }
 
-        int craftedItemsPerPage = GuiConstants.ALLOWED_SLOTS.length; // oder hardcoded: 45
-        int totalPages = (int) Math.ceil(totalMinedBlocks / (double) craftedItemsPerPage);
+        int itemsPerPage = GuiConstants.ALLOWED_SLOTS.length;
+        int totalPages = (int) Math.ceil(totalCraftedItems / (double) itemsPerPage);
         if (totalPages == 0) totalPages = 1;
 
         // Button: Zurück zur Übersicht
-        if (slot == 26) { // zurück zur Übersicht
+        if (slot == 26) {
             OfflinePlayer target = getTarget(player);
             if (target instanceof Player onlineTarget)
                 StatsGui.open(player, onlineTarget);

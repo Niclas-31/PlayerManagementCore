@@ -33,7 +33,7 @@ public class StatsGuiListener implements Listener {
                 // Hole den Zielspieler (du brauchst eine Zuordnung: Wer betrachtet wen)
                 OfflinePlayer target = getTarget(viewer); // <- das musst du ggf. anpassen
                 if (target != null) {
-                    WatchGuiManager.openPage2(viewer, (Player) target);
+                    WatchGuiManager.open1(viewer, (Player) target);
                 } else {
                     viewer.sendMessage("§cError: Target player not found.");
                     viewer.closeInventory();

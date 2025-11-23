@@ -4,7 +4,9 @@ import de.niclasl.multiPlugin.mob_system.MobCategories;
 import de.niclasl.multiPlugin.mob_system.model.MobSpawnRequest;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +16,7 @@ public class MobManager {
 
     private static File mobFolder;
     private static final Map<UUID, MobSpawnRequest> spawnInputMap = new HashMap<>();
+    private static final Map<UUID, UUID> spawnedMobs = new HashMap<>();
 
     public MobManager(File pluginDataFolder) {
         mobFolder = new File(pluginDataFolder, "mob_spawns");
@@ -33,10 +36,12 @@ public class MobManager {
         List<MobSpawnRequest> defaultSpawns = new ArrayList<>();
 
         Set<EntityType> allRelevantMobs = EnumSet.noneOf(EntityType.class);
+        allRelevantMobs.addAll(MobCategories.UNUSED_MOBS);
         allRelevantMobs.addAll(MobCategories.HOSTILE_MOBS);
         allRelevantMobs.addAll(MobCategories.NEUTRAL_MOBS);
         allRelevantMobs.addAll(MobCategories.PASSIVE_MOBS);
-        allRelevantMobs.addAll(MobCategories.CAN_HOGLIN_IN_PEACEFUL);
+        allRelevantMobs.addAll(MobCategories.CAN_IN_PEACEFUL);
+        allRelevantMobs.addAll(MobCategories.HOSTILE_EXCEPTIONS_IN_PEACEFUL);
 
         for (EntityType type : allRelevantMobs) {
             defaultSpawns.add(new MobSpawnRequest(type));
@@ -130,10 +135,19 @@ public class MobManager {
         allRelevantMobs.addAll(MobCategories.HOSTILE_MOBS);
         allRelevantMobs.addAll(MobCategories.NEUTRAL_MOBS);
         allRelevantMobs.addAll(MobCategories.PASSIVE_MOBS);
-        allRelevantMobs.addAll(MobCategories.CAN_HOGLIN_IN_PEACEFUL);
+        allRelevantMobs.addAll(MobCategories.CAN_IN_PEACEFUL);
 
         return allRelevantMobs.stream()
                 .map(MobSpawnRequest::new)
                 .toList(); // Java 16+; falls du Java 8 nutzt: collect(Collectors.toList())
+    }
+
+    public static void registerSpawn(Entity mob, Player owner) {
+        spawnedMobs.put(mob.getUniqueId(), owner.getUniqueId());
+    }
+
+    public static boolean isOwner(Entity mob, Player player) {
+        return spawnedMobs.getOrDefault(mob.getUniqueId(), null) != null
+                && spawnedMobs.get(mob.getUniqueId()).equals(player.getUniqueId());
     }
 }

@@ -1,11 +1,19 @@
 package de.niclasl.multiPlugin;
 
+import de.niclasl.multiPlugin.armor.listener.DamageListener;
+import de.niclasl.multiPlugin.armor.manager.CombatManager;
+import de.niclasl.multiPlugin.armor.manager.RepairManager;
+import de.niclasl.multiPlugin.armor.task.RepairTask;
 import de.niclasl.multiPlugin.ban_system.commands.BanCommand;
 import de.niclasl.multiPlugin.ban_system.commands.BanHistoryCommand;
 import de.niclasl.multiPlugin.ban_system.commands.UnbanCommand;
 import de.niclasl.multiPlugin.ban_system.gui.BanHistoryGui;
 import de.niclasl.multiPlugin.ban_system.listener.BanHistoryGuiListener;
 import de.niclasl.multiPlugin.ban_system.listener.LoginListener;
+import de.niclasl.multiPlugin.effects.gui.AddEffectGui;
+import de.niclasl.multiPlugin.effects.gui.PlayerEffectsGui;
+import de.niclasl.multiPlugin.effects.listener.AddEffectGuiListener;
+import de.niclasl.multiPlugin.effects.listener.PlayerEffectsListener;
 import de.niclasl.multiPlugin.filter.commands.MuteCommand;
 import de.niclasl.multiPlugin.filter.commands.UnmuteCommand;
 import de.niclasl.multiPlugin.filter.listener.ChatFilterListener;
@@ -21,13 +29,16 @@ import de.niclasl.multiPlugin.mob_system.commands.MobCommand;
 import de.niclasl.multiPlugin.mob_system.commands.MobCountCommand;
 import de.niclasl.multiPlugin.mob_system.gui.MobGui;
 import de.niclasl.multiPlugin.mob_system.listener.MobGuiListener;
+import de.niclasl.multiPlugin.mob_system.listener.MobIgnoreListener;
 import de.niclasl.multiPlugin.mob_system.listener.PlayerJoinListener;
 import de.niclasl.multiPlugin.mob_system.manager.MobManager;
 import de.niclasl.multiPlugin.permission.commands.PermissionCommand;
 import de.niclasl.multiPlugin.playtime.listener.PlaytimeListener;
 import de.niclasl.multiPlugin.playtime.manager.PlaytimeManager;
 import de.niclasl.multiPlugin.portal.commands.PortalCommand;
-import de.niclasl.multiPlugin.portal.manager.PortalManager;
+import de.niclasl.multiPlugin.portal.gui.PortalGui;
+import de.niclasl.multiPlugin.portal.listener.TeleportBlockerListener;
+import de.niclasl.multiPlugin.portal.manager.PortalConfigManager;
 import de.niclasl.multiPlugin.randomteleport.RandomTeleportCommand;
 import de.niclasl.multiPlugin.report_system.commands.ReportCommand;
 import de.niclasl.multiPlugin.report_system.commands.ReportGuiCommand;
@@ -37,7 +48,10 @@ import de.niclasl.multiPlugin.report_system.manager.ReportManager;
 import de.niclasl.multiPlugin.spawn_protection.listener.SpawnProtectionListener;
 import de.niclasl.multiPlugin.spawn_protection.listener.SpawnProtectionMovementListener;
 import de.niclasl.multiPlugin.spawn_protection.manager.SpawnManager;
+import de.niclasl.multiPlugin.stats.commands.CraftedItemsCommand;
+import de.niclasl.multiPlugin.stats.commands.MinedBlocksCommand;
 import de.niclasl.multiPlugin.stats.commands.StatsCommand;
+import de.niclasl.multiPlugin.stats.commands.UsedItemsCommand;
 import de.niclasl.multiPlugin.stats.gui.CraftedItemsGui;
 import de.niclasl.multiPlugin.stats.gui.MinedBlocksGui;
 import de.niclasl.multiPlugin.stats.gui.StatsGui;
@@ -48,6 +62,7 @@ import de.niclasl.multiPlugin.stats.listener.StatsGuiListener;
 import de.niclasl.multiPlugin.stats.listener.UsedItemsGuiListener;
 import de.niclasl.multiPlugin.teleport.commands.DimensionCommand;
 import de.niclasl.multiPlugin.teleport.commands.TeleportCommand;
+import de.niclasl.multiPlugin.teleport.gui.DimensionGui;
 import de.niclasl.multiPlugin.teleport.listener.DimensionGuiListener;
 import de.niclasl.multiPlugin.teleport.manager.TeleportManager;
 import de.niclasl.multiPlugin.vanish_system.command.VanishCommand;
@@ -59,8 +74,11 @@ import de.niclasl.multiPlugin.warn_system.gui.WarnGui;
 import de.niclasl.multiPlugin.warn_system.listener.WarnGuiListener;
 import de.niclasl.multiPlugin.warn_system.manage.WarnActionConfigManager;
 import de.niclasl.multiPlugin.warn_system.manage.WarnManager;
+import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -77,9 +95,14 @@ public class MultiPlugin extends JavaPlugin {
     private static FileConfiguration chatFilterConfig;
     private static File vanishFile;
     private static FileConfiguration vanishConfig;
+    private static Economy econ = null;
 
     @Override
     public void onEnable() {
+
+        if (!setupEconomy()) {
+            getLogger().warning("No Vault-compatible economy found! Economy features will be disabled.");
+        }
 
         // 1. Konfigurationsdateien vorbereiten
         createReasonsFile(); // ← ganz am Anfang!
@@ -103,7 +126,7 @@ public class MultiPlugin extends JavaPlugin {
         WarnActionConfigManager warnActionConfigManager = new WarnActionConfigManager(this);
         PlaytimeManager playtimeManager = new PlaytimeManager(getDataFolder());
         SpawnManager spawnManager = new SpawnManager(this);
-        PortalManager portalManager = new PortalManager();
+        PortalConfigManager portalManager = new PortalConfigManager();
 
         // 3. GUIs
         WarnGui warnGui = new WarnGui(this, warnManager);
@@ -114,8 +137,9 @@ public class MultiPlugin extends JavaPlugin {
         MinedBlocksGui minedBlocksGui = new MinedBlocksGui(this);
         UsedItemsGui usedItemsGui = new UsedItemsGui(this);
         CraftedItemsGui craftedItemsGui = new CraftedItemsGui(this);
-
-        StatsCommand statsCommand = new StatsCommand(statsGui, minedBlocksGui, usedItemsGui, craftedItemsGui);
+        DimensionGui dimensionGui = new DimensionGui(this, teleportManager);
+        PlayerEffectsGui playerEffectsGui = new PlayerEffectsGui(this);
+        AddEffectGui addEffectGui = new AddEffectGui(this);
 
         // 4. Commands setzen
         Objects.requireNonNull(getCommand("manage")).setExecutor(new PlayerMonitorCommand());
@@ -168,15 +192,20 @@ public class MultiPlugin extends JavaPlugin {
         Objects.requireNonNull(getCommand("mobcount")).setExecutor(new MobCountCommand());
         Objects.requireNonNull(getCommand("mobcount")).setTabCompleter(new MobCountCommand());
 
-        Objects.requireNonNull(getCommand("stats")).setExecutor(statsCommand);
+        Objects.requireNonNull(getCommand("stats")).setExecutor(new StatsCommand(statsGui));
+        Objects.requireNonNull(getCommand("stats")).setTabCompleter(new StatsCommand(statsGui));
 
-        Objects.requireNonNull(getCommand("minedblocks")).setExecutor(statsCommand);
+        Objects.requireNonNull(getCommand("minedblocks")).setExecutor(new MinedBlocksCommand(minedBlocksGui));
+        Objects.requireNonNull(getCommand("minedblocks")).setTabCompleter(new MinedBlocksCommand(minedBlocksGui));
 
-        Objects.requireNonNull(getCommand("useditems")).setExecutor(statsCommand);
+        Objects.requireNonNull(getCommand("useditems")).setExecutor(new UsedItemsCommand(usedItemsGui));
+        Objects.requireNonNull(getCommand("useditems")).setTabCompleter(new UsedItemsCommand(usedItemsGui));
 
-        Objects.requireNonNull(getCommand("crafteditems")).setExecutor(statsCommand);
+        Objects.requireNonNull(getCommand("crafteditems")).setExecutor(new CraftedItemsCommand(craftedItemsGui));
+        Objects.requireNonNull(getCommand("crafteditems")).setTabCompleter(new CraftedItemsCommand(craftedItemsGui));
 
         Objects.requireNonNull(getCommand("randomteleport")).setExecutor(new RandomTeleportCommand(this));
+        Objects.requireNonNull(getCommand("randomteleport")).setTabCompleter(new RandomTeleportCommand(this));
 
         Objects.requireNonNull(getCommand("portal")).setExecutor(new PortalCommand());
         Objects.requireNonNull(getCommand("portal")).setTabCompleter(new PortalCommand());
@@ -186,7 +215,7 @@ public class MultiPlugin extends JavaPlugin {
 
         // 5. Listener registrieren
         getServer().getPluginManager().registerEvents(new BanHistoryGuiListener(banHistoryManager), this);
-        getServer().getPluginManager().registerEvents(new PlayerMonitorListener(warnGui), this);
+        getServer().getPluginManager().registerEvents(new PlayerMonitorListener(warnGui, playerEffectsGui), this);
         getServer().getPluginManager().registerEvents(new LoginListener(banHistoryManager), this);
         getServer().getPluginManager().registerEvents(new DimensionGuiListener(teleportManager), this);
         getServer().getPluginManager().registerEvents(new GamemodeListener(), this);
@@ -194,7 +223,7 @@ public class MultiPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new WarnGuiListener(warnManager, warnGui), this);
         getServer().getPluginManager().registerEvents(new StatsGuiListener(), this);
         getServer().getPluginManager().registerEvents(new ReportListener(reportManager), this);
-        getServer().getPluginManager().registerEvents(new MobGuiListener(mobManager, mobGui, this), this);
+        getServer().getPluginManager().registerEvents(new MobGuiListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(mobManager), this);
         getServer().getPluginManager().registerEvents(new MinedBlocksGuiListener(), this);
         getServer().getPluginManager().registerEvents(new UsedItemsGuiListener(), this);
@@ -202,14 +231,33 @@ public class MultiPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlaytimeListener(this, playtimeManager), this);
         getServer().getPluginManager().registerEvents(new SpawnProtectionListener(), this);
         getServer().getPluginManager().registerEvents(new SpawnProtectionMovementListener(this), this);
-        getServer().getPluginManager().registerEvents(new PortalManager(), this);
+        getServer().getPluginManager().registerEvents(new TeleportBlockerListener(), this);
+        getServer().getPluginManager().registerEvents(new MobIgnoreListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerEffectsListener(playerEffectsGui), this);
+        getServer().getPluginManager().registerEvents(new AddEffectGuiListener(playerEffectsGui), this);
+        getServer().getPluginManager().registerEvents(new DamageListener(), this);
+        getServer().getPluginManager().registerEvents(new PortalGui(), this);
+
+        // Combat-System jede Sekunde aufräumen
+        Bukkit.getScheduler().runTaskTimer(
+                this,
+                CombatManager::cleanup,
+                20L, 20L // alle 20 Ticks = 1 Sekunde
+        );
 
         // GUI Init
         GamemodeGui.init(this);
 
-        PortalManager.init(this);
+        PortalConfigManager.init(this);
+
+        RepairManager.init(getDataFolder());
+        PortalConfigManager.init(this);
 
         SpawnManager.loadAllSpawns();
+
+        // Task starter
+        RepairTask.startAutoRepair(this, 20, 10.0, 5);
+
     }
 
     @Override
@@ -223,6 +271,8 @@ public class MultiPlugin extends JavaPlugin {
 
         // Chat Filter file save
         saveChatFilterToFile();
+
+        RepairManager.save();
     }
 
     public void createReasonsFile() {
@@ -365,5 +415,17 @@ public class MultiPlugin extends JavaPlugin {
         }
 
         vanishConfig = YamlConfiguration.loadConfiguration(vanishFile);
+    }
+
+    private boolean setupEconomy() {
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            return false;
+        }
+        RegisteredServiceProvider<Economy> rsp = Bukkit.getServicesManager().getRegistration(Economy.class);
+        if (rsp == null) {
+            return false;
+        }
+        econ = rsp.getProvider();
+        return true;
     }
 }

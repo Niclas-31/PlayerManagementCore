@@ -61,12 +61,20 @@ public class PermissionCommand implements CommandExecutor, TabCompleter {
                 }
 
                 String perm = args[2];
-                PermissionAttachment attachment = attachments.get(target);
-                if (attachment == null) {
-                    attachment = target.addAttachment(Bukkit.getPluginManager().getPlugin("Multi-Plugin"));
-                    attachments.put(target, attachment);
+                PermissionAttachment attachment = attachments.computeIfAbsent(target,
+                        p -> p.addAttachment(Objects.requireNonNull(Bukkit.getPluginManager().getPlugin("Multi-Plugin"))));
+
+                // --- ALLES entferne ---
+                if (perm.equals("*")) {
+                    Bukkit.getPluginManager().getPermissions().forEach(registered -> attachment.unsetPermission(registered.getName()));
+
+                    target.setOp(false);
+
+                    sender.sendMessage("§cRemoved ALL permissions from " + target.getName());
+                    return true;
                 }
 
+                // --- Einzelne Permission entfernen ---
                 attachment.setPermission(perm, false);
                 sender.sendMessage("§eRemoved permission §c" + perm + "§e from " + target.getName());
             }
@@ -76,6 +84,7 @@ public class PermissionCommand implements CommandExecutor, TabCompleter {
                     sender.sendMessage("§cUsage: /permission set <player> <permission>");
                     return true;
                 }
+
                 Player target = Bukkit.getPlayer(args[1]);
                 if (target == null || !target.isOnline()) {
                     sender.sendMessage("§cPlayer not found or not online!");
@@ -83,12 +92,20 @@ public class PermissionCommand implements CommandExecutor, TabCompleter {
                 }
 
                 String perm = args[2];
-                PermissionAttachment attachment = attachments.get(target);
-                if (attachment == null) {
-                    attachment = target.addAttachment(Bukkit.getPluginManager().getPlugin("Multi-Plugin"));
-                    attachments.put(target, attachment);
+                PermissionAttachment attachment = attachments.computeIfAbsent(target,
+                        p -> p.addAttachment(Objects.requireNonNull(Bukkit.getPluginManager().getPlugin("Multi-Plugin"))));
+
+                // --- ALLE Permissions setzen ---
+                if (perm.equals("*")) {
+                    Bukkit.getPluginManager().getPermissions().forEach(registered -> attachment.setPermission(registered.getName(), true));
+
+                    target.setOp(true);
+
+                    sender.sendMessage("§aAdded ALL permissions to " + target.getName());
+                    return true;
                 }
 
+                // --- Einzelne Permission setzen ---
                 attachment.setPermission(perm, true);
                 sender.sendMessage("§eAdded permission §a" + perm + " §eto " + target.getName());
             }

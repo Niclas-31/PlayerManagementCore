@@ -15,8 +15,8 @@ public class ProtectionActionbarTask extends BukkitRunnable {
 
     private final Player player;
 
-    private static final double blockProtectionRadius = 17;
-    private static final double damageProtectionRadius = 63;
+    private static final double blockProtectionRadius = 18;
+    private static final double damageProtectionRadius = 46 + blockProtectionRadius;
 
     private int lastRemainingBlocks = -1;
 

@@ -50,7 +50,7 @@ public class WarnGuiListener implements Listener {
             // Hole den Zielspieler (du brauchst eine Zuordnung: Wer betrachtet wen)
             OfflinePlayer target = getTarget(player); // <- das musst du ggf. anpassen
             if (target != null) {
-                WatchGuiManager.openPage1(player, (Player) target);
+                WatchGuiManager.open1(player, (Player) target);
             } else {
                 player.sendMessage("§cError: Target player not found.");
                 player.closeInventory();
@@ -68,7 +68,7 @@ public class WarnGuiListener implements Listener {
 
         // Klick auf Nächste Seite Button (Slot 44)
         if (slot == 44) {
-            List<Warning> warnings = warnManager.getWarnings(targetUUID);
+            List<Warning> warnings = WarnManager.getWarnings(targetUUID);
             int warningsPerPage = GuiConstants.ALLOWED_SLOTS.length;
             int totalPages = (int) Math.ceil(warnings.size() / (double) warningsPerPage);
             if (page < totalPages) {
@@ -89,7 +89,7 @@ public class WarnGuiListener implements Listener {
         }
         if (indexInPage == -1) return; // Kein gültiger Slot
 
-        List<Warning> warnings = warnManager.getWarnings(targetUUID);
+        List<Warning> warnings = WarnManager.getWarnings(targetUUID);
 
         int warningIndex = (page - 1) * GuiConstants.ALLOWED_SLOTS.length + indexInPage;
         if (warningIndex < 0 || warningIndex >= warnings.size()) {

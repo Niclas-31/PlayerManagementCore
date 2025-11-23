@@ -19,7 +19,6 @@ public class TeleportManager {
     private static final Map<String, Set<UUID>> invitations = new HashMap<>();
     private final Map<UUID, BukkitTask> pendingTeleports = new HashMap<>();
     private static final Map<String, File> dimensionFiles = new HashMap<>();
-    private static final Map<String, UUID> owners = new HashMap<>();   // Dimension → Besitzer
     private static final Map<String, Set<UUID>> invitedPlayers = new HashMap<>(); // Dimension → Liste eingeladener Spieler
 
     public TeleportManager(File dataFolder, MultiPlugin plugin) {
@@ -484,7 +483,14 @@ public class TeleportManager {
     }
 
     public static boolean isOwner(Player player, String dimension) {
-        return owners.getOrDefault(dimension, UUID.randomUUID()).equals(player.getUniqueId());
+        File file = dimensionFiles.get(dimension + ".yml");
+        if (file == null || !file.exists()) return false;
+
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        String ownerUUID = config.getString("owner");
+        if (ownerUUID == null) return false;
+
+        return player.getUniqueId().toString().equals(ownerUUID);
     }
 
     public static void invite(Player owner, String dimension, Player target) {

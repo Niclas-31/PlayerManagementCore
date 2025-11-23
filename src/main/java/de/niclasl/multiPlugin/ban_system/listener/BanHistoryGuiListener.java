@@ -48,7 +48,7 @@ public class BanHistoryGuiListener implements Listener {
             // Hole den Zielspieler (du brauchst eine Zuordnung: Wer betrachtet wen)
             OfflinePlayer target = getTarget(player); // <- das musst du ggf. anpassen
             if (target != null) {
-                WatchGuiManager.openPage1(player, (Player) target);
+                WatchGuiManager.open1(player, (Player) target);
             } else {
                 player.sendMessage("§cError: Target player not found.");
                 player.closeInventory();

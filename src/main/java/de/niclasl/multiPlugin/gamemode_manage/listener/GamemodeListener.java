@@ -40,7 +40,7 @@ public class GamemodeListener implements Listener {
 
         // Zurück-Button (z. B. Slot 31)
         if (clicked.getType() == Material.BARRIER) {
-            WatchGuiManager.openPage2(viewer, target);
+            WatchGuiManager.open1(viewer, target);
             return;
         }
 

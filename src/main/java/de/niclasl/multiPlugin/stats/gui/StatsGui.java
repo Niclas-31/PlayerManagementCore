@@ -1,8 +1,11 @@
 package de.niclasl.multiPlugin.stats.gui;
 
 import de.niclasl.multiPlugin.MultiPlugin;
+import de.niclasl.multiPlugin.mob_system.manager.MobManager;
 import de.niclasl.multiPlugin.playtime.manager.PlaytimeManager;
 import org.bukkit.*;
+import org.bukkit.advancement.Advancement;
+import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -11,12 +14,14 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.lang.reflect.InvocationTargetException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class StatsGui {
 
-    public static Object player;
     private static MultiPlugin plugin;
 
     public StatsGui(MultiPlugin plugin) {
@@ -177,6 +182,44 @@ public class StatsGui {
         crafting.setItemMeta(craftingMeta);
         inv.setItem(37, crafting);
 
+        inv.setItem(39, createAdvancementsItem(viewer));
+
+        UUID targetUUID = target.getUniqueId();
+
+        ItemStack mobItem = new ItemStack(Material.ZOMBIE_HEAD);
+        ItemMeta mobMeta = mobItem.getItemMeta();
+        if (mobMeta != null) {
+            mobMeta.setDisplayName("§4Player Mobs");
+            int mobCount = MobManager.getRequests(targetUUID).size(); // Anzahl der Mob
+            mobMeta.setLore(List.of("§4Mobs: " + mobCount));
+            mobItem.setItemMeta(mobMeta);
+        }
+
+        // Dann ins GUI setzen, z. B. Slot 10
+        inv.setItem(41, mobItem);
+
+        // Vorher im open() - Bereich, wo Economy angezeigt wird
+        ItemStack balanceItem;
+        try {
+            Class<?> econClass = Class.forName("net.milkbowl.vault.economy.Economy");
+            Object rsp = Bukkit.getServicesManager().getRegistration(econClass);
+            if (rsp != null) {
+                Object vaultEco = rsp.getClass().getMethod("getProvider").invoke(rsp);
+                balanceItem = createBalanceItem(vaultEco, target);
+            } else {
+                // Kein Economy-Plugin registriert
+                balanceItem = createNoEconomyItem();
+            }
+        } catch (ClassNotFoundException | NoSuchMethodException ignored) {
+            // Vault nicht installiert → Fallback
+            balanceItem = createNoEconomyItem();
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+
+// Slot 43 setzen
+        inv.setItem(43, balanceItem);
+
         // Zurück-Button
         ItemStack back = new ItemStack(Material.BARRIER);
         ItemMeta backMeta = back.getItemMeta();
@@ -227,6 +270,17 @@ public class StatsGui {
         }.runTaskTimer(plugin, 0L, 20L); // Jede Sekunde (20 Ticks)
     }
 
+    private static ItemStack createNoEconomyItem() {
+        ItemStack item = new ItemStack(Material.RED_STAINED_GLASS_PANE);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName("§cNo Economy plugin found");
+            meta.setLore(List.of("§7Balance cannot be displayed"));
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
     private static String formatDate(long millis) {
         if (millis <= 0) return "§7Unknown";
         return new SimpleDateFormat("dd.MM.yyyy HH:mm").format(new Date(millis));
@@ -260,5 +314,84 @@ public class StatsGui {
 
         String result = sb.toString().trim();
         return result.isEmpty() ? "0s" : result;
+    }
+
+    private static ItemStack createAdvancementsItem(Player player) {
+        int unlocked = 0;
+        int total = 0;
+
+        // Für Sortierung nach Datum
+        List<Map.Entry<String, Date>> unlockedWithDate = new ArrayList<>();
+
+        for (Iterator<Advancement> it = Bukkit.getServer().advancementIterator(); it.hasNext();) {
+            Advancement adv = it.next();
+            if (adv.getDisplay() == null) continue; // nur sichtbare
+
+            AdvancementProgress progress = player.getAdvancementProgress(adv);
+            total++;
+
+            if (progress.isDone()) {
+                unlocked++;
+
+                Date lastDate = null;
+                for (String criteria : progress.getAwardedCriteria()) {
+                    Date d = progress.getDateAwarded(criteria);
+                    if (d != null && (lastDate == null || d.after(lastDate))) {
+                        lastDate = d;
+                    }
+                }
+
+                if (lastDate != null) {
+                    unlockedWithDate.add(Map.entry(adv.getDisplay().getTitle(), lastDate));
+                }
+            }
+        }
+
+        // Nach Datum sortieren → neueste zuerst
+        unlockedWithDate.sort((a, b) -> b.getValue().compareTo(a.getValue()));
+
+        ItemStack book = new ItemStack(Material.ENCHANTED_BOOK);
+        ItemMeta meta = book.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName("§aAdvancements");
+            List<String> lore = new ArrayList<>();
+            lore.add("§7Unlocked: §e" + unlocked + "§7 / §e" + total);
+
+            if (!unlockedWithDate.isEmpty()) {
+                lore.add("§7Last unlocked:");
+                for (int i = 0; i < Math.min(3, unlockedWithDate.size()); i++) {
+                    lore.add("§f- " + unlockedWithDate.get(i).getKey());
+                }
+            }
+
+            meta.setLore(lore);
+            book.setItemMeta(meta);
+        }
+        return book;
+    }
+
+    private static ItemStack createBalanceItem(Object eco, OfflinePlayer player) {
+        double balance = 0;
+        try {
+            balance = (double) eco.getClass()
+                    .getMethod("getBalance", OfflinePlayer.class)
+                    .invoke(eco, player);
+        } catch (Exception ignored) { }
+
+        // Deutsches Zahlenformat
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.GERMANY);
+        symbols.setDecimalSeparator(',');
+        symbols.setGroupingSeparator('.');
+        DecimalFormat df = new DecimalFormat("#,##0.00", symbols);
+        String formattedBalance = df.format(balance);
+
+        ItemStack gold = new ItemStack(Material.GOLD_INGOT);
+        ItemMeta meta = gold.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName("§6Balance");
+            meta.setLore(List.of("§7Dollar: §e" + formattedBalance));
+            gold.setItemMeta(meta);
+        }
+        return gold;
     }
 }

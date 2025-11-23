@@ -14,7 +14,7 @@ import java.util.List;
 
 public class SpawnProtectionListener implements Listener {
 
-    private static final double blockProtectionRadius = 17;
+    private static final double blockProtectionRadius = 18;
     private static final double damageProtectionRadius = 46 + blockProtectionRadius;
 
     @EventHandler

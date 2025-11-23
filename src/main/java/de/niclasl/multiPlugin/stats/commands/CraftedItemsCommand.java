@@ -1,6 +1,6 @@
 package de.niclasl.multiPlugin.stats.commands;
 
-import de.niclasl.multiPlugin.stats.gui.StatsGui;
+import de.niclasl.multiPlugin.stats.gui.CraftedItemsGui;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -9,12 +9,12 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
-public class StatsCommand implements CommandExecutor, TabCompleter {
+public class CraftedItemsCommand implements CommandExecutor, TabCompleter {
 
-    private static StatsGui statsGui;
+    private static CraftedItemsGui craftedItemsGui;
 
-    public StatsCommand(StatsGui statsGui) {
-        StatsCommand.statsGui = statsGui;
+    public CraftedItemsCommand(CraftedItemsGui craftedItemsGui) {
+        CraftedItemsCommand.craftedItemsGui = craftedItemsGui;
     }
 
     @Override
@@ -24,12 +24,12 @@ public class StatsCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (!sender.hasPermission("multiplugin.stats")) {
+        if (!sender.hasPermission("multiplugin.crafteditems")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }
 
-        statsGui.open(player, player);
+        craftedItemsGui.open(player, player, 1);
         return true;
     }
 

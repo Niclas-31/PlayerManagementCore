@@ -1,6 +1,9 @@
 package de.niclasl.multiPlugin.report_system.commands;
 
+import de.niclasl.multiPlugin.GuiConstants;
 import de.niclasl.multiPlugin.report_system.gui.ReportGui;
+import de.niclasl.multiPlugin.report_system.manager.ReportManager;
+import de.niclasl.multiPlugin.report_system.model.Report;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -74,14 +77,38 @@ public class ReportGuiCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> completions = new ArrayList<>();
+
+        // 1. Argument: Spielernamen
         if (args.length == 1) {
+            String partial = args[0].toLowerCase();
+
             for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
                 String name = p.getName();
-                if (name != null && name.toLowerCase().startsWith(args[0].toLowerCase())) {
+                if (name != null && name.toLowerCase().startsWith(partial)) {
                     completions.add(name);
                 }
             }
         }
+
+        // 2. Argument: Seitenzahlen
+        if (args.length == 2) {
+            OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
+            if (target.getName() != null && target.hasPlayedBefore()) {
+                List<Report> warnings = ReportManager.getReports(target.getUniqueId());
+                int warningsPerPage = GuiConstants.ALLOWED_SLOTS.length;
+                int totalPages = (int) Math.ceil(warnings.size() / (double) warningsPerPage);
+                if (totalPages < 1) totalPages = 1;
+
+                String partialPage = args[1].toLowerCase();
+                for (int i = 1; i <= totalPages; i++) {
+                    String s = String.valueOf(i);
+                    if (partialPage.isEmpty() || s.startsWith(partialPage)) {
+                        completions.add(s);
+                    }
+                }
+            }
+        }
+
         return completions;
     }
 }
