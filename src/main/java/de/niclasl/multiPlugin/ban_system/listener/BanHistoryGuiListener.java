@@ -76,6 +76,12 @@ public class BanHistoryGuiListener implements Listener {
             return;
         }
 
+        if (slot == 17) {
+            BanHistoryGui.toggleSort(player);
+            OfflinePlayer target = Bukkit.getOfflinePlayer(UUID.fromString(player.getMetadata("ban_target").get(0).asString()));
+            BanHistoryGui.open(player, target, 1); // GUI neu öffnen
+        }
+
         // Klick auf Warnungen
         // Prüfen, ob Slot in allowedSlots ist
         int indexInPage = -1;
