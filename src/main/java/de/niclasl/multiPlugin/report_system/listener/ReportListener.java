@@ -66,7 +66,7 @@ public class ReportListener implements Listener {
 
         // Klick auf Nächste Seite Button (Slot 44)
         if (slot == 44) {
-            List<Report> warnings = reportManager.getReports(targetUUID);
+            List<Report> warnings = ReportManager.getReports(targetUUID);
             int warningsPerPage = GuiConstants.ALLOWED_SLOTS.length;
             int totalPages = (int) Math.ceil(warnings.size() / (double) warningsPerPage);
             if (page < totalPages) {
@@ -74,6 +74,12 @@ public class ReportListener implements Listener {
                 ReportGui.open(player, target, page + 1);
             }
             return;
+        }
+
+        if (slot == 17) {
+            ReportGui.toggleSort(player);
+            OfflinePlayer target = Bukkit.getOfflinePlayer(UUID.fromString(player.getMetadata("report_target").get(0).asString()));
+            ReportGui.open(player, target, 1); // GUI neu öffnen
         }
 
         // Klick auf Warnungen
@@ -87,7 +93,7 @@ public class ReportListener implements Listener {
         }
         if (indexInPage == -1) return; // Kein gültiger Slot
 
-        List<Report> reports = reportManager.getReports(targetUUID);
+        List<Report> reports = ReportManager.getReports(targetUUID);
 
         int reportIndex = (page - 1) * GuiConstants.ALLOWED_SLOTS.length + indexInPage;
         if (reportIndex < 0 || reportIndex >= reports.size()) {
