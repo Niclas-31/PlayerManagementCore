@@ -16,11 +16,14 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 public class BanHistoryGui {
 
     private static MultiPlugin plugin;
+    private static final HashMap<UUID, Boolean> playerSortMode = new HashMap<>();
 
     public BanHistoryGui(MultiPlugin plugin) {
         BanHistoryGui.plugin = plugin;
@@ -28,6 +31,12 @@ public class BanHistoryGui {
 
     public static void open(Player viewer, OfflinePlayer target, int page) {
         List<BanRecord> bans = BanHistoryManager.getBanHistory(target.getUniqueId());
+
+        boolean newestFirst = playerSortMode.getOrDefault(viewer.getUniqueId(), true);
+        bans.sort((w1, w2) -> newestFirst
+                ? w2.getDate().compareTo(w1.getDate())
+                : w1.getDate().compareTo(w2.getDate())
+        );
 
         int bansPerPage = GuiConstants.ALLOWED_SLOTS.length;
         int totalPages = (int) Math.ceil(bans.size() / (double) bansPerPage);
@@ -39,7 +48,7 @@ public class BanHistoryGui {
 
         // Rand
         ItemStack glass = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
-        for (int i : new int[]{8,17}) {
+        for (int i : new int[]{8}) {
             inv.setItem(i, glass);
         }
 
@@ -144,6 +153,14 @@ public class BanHistoryGui {
             inv.setItem(44, nextArrow);
         }
 
+        ItemStack sortBook = new ItemStack(Material.BOOK);
+        ItemMeta bookMeta = sortBook.getItemMeta();
+        assert bookMeta != null;
+        bookMeta.setDisplayName("§eSort: " + (newestFirst ? "§aNewest → Oldest" : "§cOldest → Newest"));
+        bookMeta.setLore(List.of("§7Click to toggle sort order"));
+        sortBook.setItemMeta(bookMeta);
+        inv.setItem(17, sortBook);
+
         viewer.openInventory(inv);
         viewer.setMetadata("ban_target", new FixedMetadataValue(plugin, target.getUniqueId().toString()));
         viewer.setMetadata("ban_page", new FixedMetadataValue(plugin, page));
@@ -156,6 +173,11 @@ public class BanHistoryGui {
         int totalPages = (int) Math.ceil(bans.size() / (double) bansPerPage);
         if (totalPages == 0) totalPages = 1;
         return totalPages;
+    }
+
+    public static void toggleSort(Player player) {
+        boolean mode = playerSortMode.getOrDefault(player.getUniqueId(), true);
+        playerSortMode.put(player.getUniqueId(), !mode);
     }
 
     private static ItemStack createItem(Material material, String name, String... lore) {
