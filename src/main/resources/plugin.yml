@@ -8,137 +8,139 @@ softdepend: [Vault, Teamwar]
 commands:
   manage:
     description: Manage players.
-    permission: multipugin.manage
+    permission: multiplugin.manage
     permission-message: You don't have permission to use this command!
 
   vanish:
     description: Toggle invisibility.
-    permission: multipugin.vanish
+    permission: multiplugin.vanish
     permission-message: You don't have permission to use this command!
 
   ban:
     description: Ban players.
-    permission: multipugin.ban
+    permission: multiplugin.ban
     permission-message: You don't have permission to use this command!
 
   unban:
     description: Unban a player.
-    permission: multipugin.unban
+    permission: multiplugin.unban
     permission-message: You don't have permission to use this command!
 
   ban-history:
     description: Shows a player's ban history.
     usage: /ban-history <player> [page]
-    permission: multipugin.ban.history
+    permission: multiplugin.banhistory
     permission-message: You don't have permission to use this command!
 
   teleport-dimension:
     description: Teleport or set teleport locations in dimensions.
     usage: /teleport-dimension <set|dimension> <dimension>
-    permission: multipugin.teleport.dimension
+    permission: multiplugin.teleport.dimension
 
   dimension:
     usage: /dimension setprivat <world_name> <true|false>
     description: Manage custom worlds
-    permission: multipugin.teleport.dimension
+    permission: multiplugin.dimension
 
   gamemode-gui:
     description: Open Gamemode GUI.
     usage: /gamemode-gui
-    permission: multipugin.gamemode.gui
+    permission: multiplugin.gamemode
     permission-message: You don't have permission to use this command!
 
   mute:
     description: Mute players.
     usage: /mute <player> <duration> <reason>
-    permission: multipugin.mute
+    permission: multiplugin.mute
     permission-message: You don't have permission to use this command!
 
   unmute:
     description: Unmute players.
     usage: /unmute <player>
-    permission: multipugin.unmute
+    permission: multiplugin.unmute
     permission-message: You don't have permission to use this command!
 
   warn:
     description: Warn a player.
     usage: /warn <player> <reason>
-    permission: multipugin.warn
+    permission: multiplugin.warn
     permission-message: You don't have permission to use this command!
 
   warn-history:
     description: Show a player's warn history.
     usage: /warn-history <player> [page]
-    permission: multipugin.warn.history
+    permission: multiplugin.warnhistory
     permission-message: You don't have permission to use this command!
 
   unwarn:
     description: Remove a warning from a player.
     usage: /unwarn <player> <Warn-ID>
-    permission: multipugin.warn.unwarn
+    permission: multiplugin.unwarn
     permission-message: You don't have permission to use this command!
 
   report:
     description: Report a player.
     usage: /report <player> <reason>
-    permission: multipugin.report
+    permission: multiplugin.report
     permission-message: You don't have permission to use this command!
 
   report-history:
     usage: /report-history <player> [page]
-    description: Open report GUI/history.
-    permission: multipugin.report.history
+    description: Open report history.
+    permission: multiplugin.reporthistory
     permission-message: You don't have permission to use this command!
 
   mob:
     description: Open mob GUI for a target player.
     usage: /mob <player>
-    permission: multipugin.mob
+    permission: multiplugin.mob
     permission-message: You don't have permission to use this command!
 
   mobcount:
-    description: Count mobs in the world/config.
+    description: Count mobs in a world.
     usage: /mobcount <player>
-    permission: multipugin.mobcount
+    permission: multiplugin.mobcount
     permission-message: You don't have permission to use this command!
 
   stats:
-    description: Opens the Statistics GUI.
+    description: Opens the statistics GUI.
     usage: /stats
+    permission: multiplugin.stats
 
   minedblocks:
     description: Opens the GUI with mined blocks.
     usage: /minedblocks
+    permission: multiplugin.minedblocks
 
   useditems:
     description: Opens the GUI with used items.
     usage: /useditems
+    permission: multiplugin.useditems
 
   crafteditems:
     description: Opens the GUI with crafted items.
     usage: /crafteditems
+    permission: multiplugin.crafteditems
 
   randomteleport:
     description: Teleports you to a random location.
     usage: /randomteleport
-    aliases:
-      - rtp
+    aliases: [rtp]
 
   portal:
-    description: Enable or disable Nether/End portals.
-    usage: /portal <nether|end> <on|off>
-    permission: multipugin.portal.toggle
+    description: Enable or disable portals.
+    permission: multiplugin.portal.toggle
     permission-message: You don't have permission to use this command!
 
   permission:
-    description: Give or Take Permission of a Player
+    description: Manage permissions of players.
     usage: /permission <remove|list|set> <player> <permission>
     permission: multiplugin.permission.manage
     permission-message: You don't have permission to use this command!
 
 permissions:
   multiplugin.manage:
-    description: Zugriff auf den Manage-Befehl (/manage)
+    description: Zugriff auf den Manage-Befehl
     default: op
 
   multiplugin.vanish:
@@ -148,16 +150,19 @@ permissions:
   multiplugin.ban:
     description: Spieler bannen
     default: op
+
   multiplugin.unban:
     description: Spieler entbannen
     default: op
-  multiplugin.ban.history:
+
+  multiplugin.banhistory:
     description: Ban-Historie ansehen
     default: op
 
   multiplugin.mute:
     description: Spieler stummschalten
     default: op
+
   multiplugin.unmute:
     description: Spieler entstummen
     default: op
@@ -165,64 +170,61 @@ permissions:
   multiplugin.warn:
     description: Spieler verwarnen
     default: op
+
   multiplugin.unwarn:
-    description: Verwarnung aufheben
+    description: Verwarnung entfernen
     default: op
-  multiplugin.warn.history:
+
+  multiplugin.warnhistory:
     description: Verwarnungshistorie ansehen
     default: op
 
   multiplugin.teleport.dimension:
-    description: Erlaubt Teleports in Dimensionen
+    description: Zugriffsrecht für Dimensionsteleport
     default: true
-  multiplugin.teleport.dimension.setcoords:
-    description: Admin darf Koordinaten für Dimensionen setzen
-    default: op
-  multiplugin.teleport.dimension.create:
-    description: Alle dürfen Dimensionen erstellen
-    default: true
-  multiplugin.teleport.dimension.delete:
-    description: Admin darf Dimensionen löschen
-    default: op
-  multiplugin.teleport.dimension.private.<dimension_name>:
-    description: Erlaubt Teleport in private Dimension <dimension_name>
-    default: false
 
-  multiplugin.gamemode.gui:
+  multiplugin.teleport.dimension.setcoords:
+    description: Erlaubt Setzen der Teleport-Koordinaten
+    default: op
+
+  multiplugin.teleport.dimension.create:
+    description: Erlaubt Erstellen eigener Dimensionen
+    default: true
+
+  multiplugin.teleport.dimension.delete:
+    description: Erlaubt Löschen von Dimensionen
+    default: op
+
+  multiplugin.gamemode:
     description: Zugriff auf das Gamemode-GUI
     default: op
 
   multiplugin.stats:
-    description: Zugriff auf Statistiken
     default: true
+
   multiplugin.minedblocks:
-    description: Zugriff auf abgebaute Blöcke
     default: true
+
   multiplugin.useditems:
-    description: Zugriff auf benutzte Items/Blöcke
     default: true
+
   multiplugin.crafteditems:
-    description: Zugriff auf hergestellte Items/Blöcke
     default: true
 
   multiplugin.report:
-    description: Spieler reporten
     default: true
-  multiplugin.report.history:
-    description: Zugriff auf Report History
+
+  multiplugin.reporthistory:
     default: op
 
   multiplugin.mob:
-    description: Zugriff auf das Mob-GUI
     default: op
+
   multiplugin.mobcount:
-    description: Mobs zählen
     default: op
 
   multiplugin.portal.toggle:
-    description: Nether- und End-Portale ein-/ausschalten
     default: op
 
   multiplugin.permission.manage:
-    description: Allows managing permissions
     default: op
