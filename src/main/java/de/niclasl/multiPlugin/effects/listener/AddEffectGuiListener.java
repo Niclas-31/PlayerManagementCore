@@ -87,8 +87,8 @@ public class AddEffectGuiListener implements Listener {
                 return;
             }
 
-            // Beispiel: Standardwerte 60s Dauer, Stärke 1
-            PotionEffect effect = new PotionEffect(type, 20 * 60, 0);
+            // Beispiel: Standardwerte 30s Dauer, Stärke 1
+            PotionEffect effect = new PotionEffect(type, 20 * 30, 0);
             assert target != null;
             target.addPotionEffect(effect);
 
@@ -108,3 +108,4 @@ public class AddEffectGuiListener implements Listener {
         return Bukkit.getOfflinePlayer(ChatColor.stripColor(meta.getDisplayName()));
     }
 }
+
