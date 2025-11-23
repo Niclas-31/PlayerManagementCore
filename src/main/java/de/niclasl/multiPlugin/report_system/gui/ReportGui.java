@@ -18,12 +18,15 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 public class ReportGui {
 
     private static MultiPlugin plugin;
     private static ReportManager reportManager;
+    private static final HashMap<UUID, Boolean> playerSortMode = new HashMap<>();
 
     public ReportGui(MultiPlugin plugin, ReportManager reportManager) {
         ReportGui.plugin = plugin;
@@ -31,7 +34,13 @@ public class ReportGui {
     }
 
     public static void open(Player viewer, OfflinePlayer target, int page) {
-        List<Report> reports = reportManager.getReports(target.getUniqueId());
+        List<Report> reports = ReportManager.getReports(target.getUniqueId());
+
+        boolean newestFirst = playerSortMode.getOrDefault(viewer.getUniqueId(), true);
+        reports.sort((w1, w2) -> newestFirst
+                ? w2.getTime().compareTo(w1.getTime())
+                : w1.getTime().compareTo(w2.getTime())
+        );
 
         // Slots, die für Warnungen benutzt werden (48 Slots verteilt auf 6 Reihen, je 8 Slots, ohne die jeweils 9., 17., 26., 35., 44., 53. Slots)
         int[] allowedSlots = {
@@ -53,7 +62,7 @@ public class ReportGui {
 
         // Rand
         ItemStack glass = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
-        for (int i : new int[]{8,17}) {
+        for (int i : new int[]{8}) {
             inv.setItem(i, glass);
         }
 
@@ -144,6 +153,14 @@ public class ReportGui {
             inv.setItem(44, nextArrow);
         }
 
+        ItemStack sortBook = new ItemStack(Material.BOOK);
+        ItemMeta bookMeta = sortBook.getItemMeta();
+        assert bookMeta != null;
+        bookMeta.setDisplayName("§eSort: " + (newestFirst ? "§aNewest → Oldest" : "§cOldest → Newest"));
+        bookMeta.setLore(List.of("§7Click to toggle sort order"));
+        sortBook.setItemMeta(bookMeta);
+        inv.setItem(17, sortBook);
+
         viewer.openInventory(inv);
         viewer.setMetadata("report_target", new FixedMetadataValue(plugin, target.getUniqueId().toString()));
         viewer.setMetadata("report_page", new FixedMetadataValue(plugin, page));
@@ -156,6 +173,11 @@ public class ReportGui {
         int totalPages = (int) Math.ceil(bans.size() / (double) bansPerPage);
         if (totalPages == 0) totalPages = 1;
         return totalPages;
+    }
+
+    public static void toggleSort(Player player) {
+        boolean mode = playerSortMode.getOrDefault(player.getUniqueId(), true);
+        playerSortMode.put(player.getUniqueId(), !mode);
     }
 
     private static ItemStack createItem(Material material, String name, String... lore) {
