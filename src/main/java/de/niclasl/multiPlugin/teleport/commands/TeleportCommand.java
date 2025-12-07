@@ -1,6 +1,6 @@
 package de.niclasl.multiPlugin.teleport.commands;
 
-import de.niclasl.multiPlugin.teleport.gui.DimensionGui;
+import de.niclasl.multiPlugin.MultiPlugin;
 import de.niclasl.multiPlugin.teleport.manager.TeleportManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -11,17 +11,16 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class TeleportCommand implements CommandExecutor, TabCompleter {
 
     private static TeleportManager teleportManager;
+    private final MultiPlugin plugin;
 
-    public TeleportCommand(TeleportManager teleportManager) {
+    public TeleportCommand(TeleportManager teleportManager, MultiPlugin plugin) {
         TeleportCommand.teleportManager = teleportManager;
+        this.plugin = plugin;
     }
 
     @Override
@@ -32,7 +31,7 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 0) {
-            DimensionGui.open(player, player, 1);
+            plugin.getDimensionGui().open(player, player, 1);
             return true;
         }
 

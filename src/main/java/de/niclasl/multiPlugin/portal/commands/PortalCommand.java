@@ -1,5 +1,6 @@
 package de.niclasl.multiPlugin.portal.commands;
 
+import de.niclasl.multiPlugin.MultiPlugin;
 import de.niclasl.multiPlugin.portal.PortalType;
 import de.niclasl.multiPlugin.portal.gui.PortalGui;
 import de.niclasl.multiPlugin.portal.manager.PortalConfigManager;
@@ -14,9 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class PortalCommand implements CommandExecutor, TabCompleter {
-
-    public PortalCommand() {}
+public record PortalCommand(MultiPlugin plugin) implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -51,7 +50,7 @@ public class PortalCommand implements CommandExecutor, TabCompleter {
                 try {
                     PortalType type = PortalType.valueOf(args[1].toUpperCase());
                     boolean enabled = PortalConfigManager.isPortalEnabled(type);
-                    PortalConfigManager.setPortalEnabled(type, !enabled);
+                    plugin.getPortalConfigManager().setPortalEnabled(type, !enabled);
                     sender.sendMessage(ChatColor.GREEN + type.name() + " set to " + !enabled);
                 } catch (IllegalArgumentException e) {
                     sender.sendMessage(ChatColor.RED + "Unknown PortalType. Use one of: " +
@@ -71,7 +70,7 @@ public class PortalCommand implements CommandExecutor, TabCompleter {
                             return true;
                         }
                         String pluginName = args[2];
-                        PortalConfigManager.addToWhitelist(pluginName);
+                        plugin.getPortalConfigManager().addToWhitelist(pluginName);
                         sender.sendMessage(ChatColor.GREEN + "Added " + pluginName + " to portal whitelist.");
                     }
                     case "remove" -> {
@@ -80,7 +79,7 @@ public class PortalCommand implements CommandExecutor, TabCompleter {
                             return true;
                         }
                         String pluginName = args[2];
-                        PortalConfigManager.removeFromWhitelist(pluginName);
+                        plugin.getPortalConfigManager().removeFromWhitelist(pluginName);
                         sender.sendMessage(ChatColor.GREEN + "Removed " + pluginName + " from portal whitelist.");
                     }
                     case "list" -> {

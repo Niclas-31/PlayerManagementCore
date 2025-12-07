@@ -58,7 +58,7 @@ public class WarnGui {
 
         // Rand
         ItemStack glass = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
-        for (int i : new int[]{8,17}) inv.setItem(i, glass);
+        for (int i : new int[]{8}) inv.setItem(i, glass);
         if (totalPages == 1 || page == 1) inv.setItem(35, glass);
         if (totalPages == 1 || totalPages == page) inv.setItem(44, glass);
 

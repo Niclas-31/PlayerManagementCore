@@ -1,5 +1,6 @@
 package de.niclasl.multiPlugin.mob_system.commands;
 
+import de.niclasl.multiPlugin.MultiPlugin;
 import de.niclasl.multiPlugin.mob_system.gui.MobGui;
 import de.niclasl.multiPlugin.mob_system.manager.MobManager;
 import de.niclasl.multiPlugin.mob_system.model.MobSpawnRequest;
@@ -19,9 +20,11 @@ import java.util.List;
 public class MobCommand implements CommandExecutor, TabCompleter {
 
     private static MobGui mobGui;
+    private final MultiPlugin plugin;
 
-    public MobCommand(MobGui mobGui) {
+    public MobCommand(MobGui mobGui, MultiPlugin plugin) {
         MobCommand.mobGui = mobGui;
+        this.plugin = plugin;
     }
 
     @Override
@@ -70,8 +73,8 @@ public class MobCommand implements CommandExecutor, TabCompleter {
         }
 
         // --- Metadaten setzen & GUI öffnen ---
-        player.setMetadata("mob_target", new FixedMetadataValue(MobGui.plugin, target.getUniqueId().toString()));
-        player.setMetadata("mob_page", new FixedMetadataValue(MobGui.plugin, page));
+        player.setMetadata("mob_target", new FixedMetadataValue(plugin.getMobGui().plugin(), target.getUniqueId().toString()));
+        player.setMetadata("mob_page", new FixedMetadataValue(plugin.getMobGui().plugin(), page));
         mobGui.open(player, target, page);
         return true;
     }

@@ -61,7 +61,7 @@ public class AddEffectGuiListener implements Listener {
 
         // Zielspieler holen (aus Metadata gesetzt in PlayerEffectsGui oder AddEffectGui)
         if (!viewer.hasMetadata("effect_target")) return;
-        String uuidStr = viewer.getMetadata("effect_target").get(0).asString();
+        String uuidStr = viewer.getMetadata("effect_target").getFirst().asString();
         Player target = Bukkit.getPlayer(java.util.UUID.fromString(uuidStr));
 
         // Slot für Zurück / Barrier
@@ -108,4 +108,3 @@ public class AddEffectGuiListener implements Listener {
         return Bukkit.getOfflinePlayer(ChatColor.stripColor(meta.getDisplayName()));
     }
 }
-

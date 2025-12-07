@@ -15,7 +15,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class UsedItemsGui {
+public record UsedItemsGui(MultiPlugin plugin) {
 
     private static final int[] allowedSlots = {
             0, 1, 2, 3, 4, 5, 6, 7,
@@ -26,13 +26,7 @@ public class UsedItemsGui {
             45, 46, 47, 48, 49, 50, 51, 52
     };
 
-    public static MultiPlugin plugin;
-
-    public UsedItemsGui(MultiPlugin plugin) {
-        UsedItemsGui.plugin = plugin;
-    }
-
-    public static void open(Player viewer, OfflinePlayer target, int page) {
+    public void open(Player viewer, OfflinePlayer target, int page) {
         List<Material> usedItems = new ArrayList<>();
 
         // Alle Blöcke mit >0 Statistiken sammeln

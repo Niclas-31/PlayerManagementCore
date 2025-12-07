@@ -1,15 +1,11 @@
 package de.niclasl.multiPlugin.manage_player.listener;
 
+import de.niclasl.multiPlugin.MultiPlugin;
 import de.niclasl.multiPlugin.armor.manager.RepairManager;
 import de.niclasl.multiPlugin.ban_system.gui.BanHistoryGui;
 import de.niclasl.multiPlugin.effects.gui.PlayerEffectsGui;
-import de.niclasl.multiPlugin.manage_player.gui.WatchGuiManager;
-import de.niclasl.multiPlugin.mob_system.gui.MobGui;
 import de.niclasl.multiPlugin.report_system.gui.ReportGui;
 import de.niclasl.multiPlugin.gamemode_manage.gui.GamemodeGui;
-import de.niclasl.multiPlugin.stats.gui.StatsGui;
-import de.niclasl.multiPlugin.teleport.gui.DimensionGui;
-import de.niclasl.multiPlugin.vanish_system.manager.VanishManager;
 import de.niclasl.multiPlugin.warn_system.gui.WarnGui;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -24,10 +20,12 @@ public class PlayerMonitorListener implements Listener {
 
     private static WarnGui warnGui;
     private static PlayerEffectsGui playerEffectsGui;
+    private final MultiPlugin plugin;
 
-    public PlayerMonitorListener(WarnGui warnGui, PlayerEffectsGui playerEffectsGui) {
+    public PlayerMonitorListener(WarnGui warnGui, PlayerEffectsGui playerEffectsGui, MultiPlugin plugin) {
         PlayerMonitorListener.warnGui = warnGui;
         PlayerMonitorListener.playerEffectsGui = playerEffectsGui;
+        this.plugin = plugin;
     }
 
     @EventHandler
@@ -85,19 +83,19 @@ public class PlayerMonitorListener implements Listener {
                 player.closeInventory();
             }
             case ENCHANTED_BOOK -> warnGui.open(player, target, 1);
-            case ENDER_PEARL -> DimensionGui.open(player, target, 1);
+            case ENDER_PEARL -> plugin.getDimensionGui().open(player, target, 1);
             case BOOK -> BanHistoryGui.open(player, target, 1);
             case RED_CONCRETE, LIME_CONCRETE -> {
                 if (clickedName.contains("Vanish")) {
-                    boolean isVanished = VanishManager.isVanished(target.getUniqueId());
-                    VanishManager.setVanish(target.getUniqueId(), !isVanished);
+                    boolean isVanished = plugin.getVanishManager().isVanished(target.getUniqueId());
+                    plugin.getVanishManager().setVanish(target.getUniqueId(), !isVanished);
                     player.sendMessage("§7Vanish for §e" + target.getName() + " §7is now " + (!isVanished ? "§aenabled" : "§cdisabled") + "§7.");
                 }
             }
-            case COMPASS -> StatsGui.open(player, target);
+            case COMPASS -> plugin.getStatsGui().open(player, target);
             case COMMAND_BLOCK -> GamemodeGui.open(player, target);
             case KNOWLEDGE_BOOK -> ReportGui.open(player, target, 1);
-            case SPAWNER -> MobGui.open(player, target, 1);
+            case SPAWNER -> plugin.getMobGui().open(player, target, 1);
             case BEDROCK -> {
                 if (target.isOp()) {
                     player.sendMessage(ChatColor.RED + "You cannot kick an admin.");
@@ -127,11 +125,12 @@ public class PlayerMonitorListener implements Listener {
                 }
             }
             case POTION -> playerEffectsGui.open(player, target);
+            case EXPERIENCE_BOTTLE -> plugin.getEnchantGUI().open(player, target);
             case ARROW -> {
                 if (slot == 53) {
-                    WatchGuiManager.open2(player, target);
+                    plugin.getWatchGuiManager().open2(player, target);
                 } else if (slot == 45) {
-                    WatchGuiManager.open1(player, target);
+                    plugin.getWatchGuiManager().open1(player, target);
                 }
             }
         }

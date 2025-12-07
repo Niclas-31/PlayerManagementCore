@@ -11,19 +11,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SpawnManager {
-
-    private static MultiPlugin plugin;
+public record SpawnManager(MultiPlugin plugin) {
 
     private static final List<Location> netherSpawns = new ArrayList<>();
     private static final List<Location> overworldSpawns = new ArrayList<>();
     private static final List<Location> endSpawns = new ArrayList<>();
 
-    public SpawnManager(MultiPlugin plugin) {
-        SpawnManager.plugin = plugin;
-    }
-
-    public static void loadAllSpawns() {
+    public void loadAllSpawns() {
         netherSpawns.clear();
         overworldSpawns.clear();
         endSpawns.clear();

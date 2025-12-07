@@ -1,6 +1,6 @@
 package de.niclasl.multiPlugin.gamemode_manage.listener;
 
-import de.niclasl.multiPlugin.manage_player.gui.WatchGuiManager;
+import de.niclasl.multiPlugin.MultiPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -11,9 +11,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
 
-import static de.niclasl.multiPlugin.gamemode_manage.gui.GamemodeGui.plugin;
-
-public class GamemodeListener implements Listener {
+public record GamemodeListener(MultiPlugin plugin) implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
@@ -28,7 +26,7 @@ public class GamemodeListener implements Listener {
 
         if (!viewer.hasMetadata("gm_target")) return;
 
-        String targetName = viewer.getMetadata("gm_target").get(0).asString();
+        String targetName = viewer.getMetadata("gm_target").getFirst().asString();
         Player target = Bukkit.getPlayerExact(targetName);
         if (target == null) {
             viewer.sendMessage("§cTarget player is not online.");
@@ -40,7 +38,7 @@ public class GamemodeListener implements Listener {
 
         // Zurück-Button (z. B. Slot 31)
         if (clicked.getType() == Material.BARRIER) {
-            WatchGuiManager.open1(viewer, target);
+            plugin.getWatchGuiManager().open1(viewer, target);
             return;
         }
 

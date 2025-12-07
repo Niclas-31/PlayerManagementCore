@@ -1,8 +1,8 @@
 package de.niclasl.multiPlugin.stats.listener;
 
 import de.niclasl.multiPlugin.GuiConstants;
+import de.niclasl.multiPlugin.MultiPlugin;
 import de.niclasl.multiPlugin.stats.gui.CraftedItemsGui;
-import de.niclasl.multiPlugin.stats.gui.StatsGui;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,8 +14,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.UUID;
 
-public class CraftedItemsGuiListener implements Listener {
-
+public record CraftedItemsGuiListener(MultiPlugin plugin) implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
@@ -30,8 +29,8 @@ public class CraftedItemsGuiListener implements Listener {
         // Metadaten prüfen
         if (!player.hasMetadata("craft_target") || !player.hasMetadata("craft_page")) return;
 
-        UUID targetUUID = UUID.fromString(player.getMetadata("craft_target").get(0).asString());
-        int page = player.getMetadata("craft_page").get(0).asInt();
+        UUID targetUUID = UUID.fromString(player.getMetadata("craft_target").getFirst().asString());
+        int page = player.getMetadata("craft_page").getFirst().asInt();
 
         int slot = event.getSlot();
 
@@ -41,7 +40,8 @@ public class CraftedItemsGuiListener implements Listener {
             try {
                 int count = Bukkit.getOfflinePlayer(targetUUID).getStatistic(Statistic.CRAFT_ITEM, mat);
                 if (count > 0) totalCraftedItems++;
-            } catch (IllegalArgumentException ignored) {}
+            } catch (IllegalArgumentException ignored) {
+            }
         }
 
         int itemsPerPage = GuiConstants.ALLOWED_SLOTS.length;
@@ -52,8 +52,8 @@ public class CraftedItemsGuiListener implements Listener {
         if (slot == 26) {
             OfflinePlayer target = getTarget(player);
             if (target instanceof Player onlineTarget)
-                StatsGui.open(player, onlineTarget);
-            else {
+                plugin.getStatsGui().open(player, onlineTarget);
+            else{
                 player.sendMessage("§cTarget player not found.");
                 player.closeInventory();
             }
@@ -63,14 +63,14 @@ public class CraftedItemsGuiListener implements Listener {
         // Button: Vorherige Seite
         if (slot == 35 && page > 1) {
             OfflinePlayer target = Bukkit.getOfflinePlayer(targetUUID);
-            CraftedItemsGui.open(player, target, page - 1);
+            plugin.getCraftedItemsGui().open(player, target, page - 1);
             return;
         }
 
         // Button: Nächste Seite
         if (slot == 44 && page < totalPages) {
             OfflinePlayer target = Bukkit.getOfflinePlayer(targetUUID);
-            CraftedItemsGui.open(player, target, page + 1);
+            plugin.getCraftedItemsGui().open(player, target, page + 1);
         }
     }
 

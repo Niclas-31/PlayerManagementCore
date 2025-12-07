@@ -1,6 +1,6 @@
 package de.niclasl.multiPlugin.manage_player.gui;
 
-import de.niclasl.multiPlugin.vanish_system.manager.VanishManager;
+import de.niclasl.multiPlugin.MultiPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -8,20 +8,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 
-import static de.niclasl.multiPlugin.gamemode_manage.gui.GamemodeGui.plugin;
+public record WatchGuiManager(MultiPlugin plugin) {
 
-public class WatchGuiManager {
-
-    public static void open1(Player viewer, Player target) {
+    public void open1(Player viewer, Player target) {
         Inventory managePlayer1 = Bukkit.createInventory(null, 54, "§8Manage: " + target.getName() + " (1/2)");
 
         // Rand
         ItemStack glass = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
-        for (int i : new int[]{1,2,3,4,5,6,7,9,17,18,  26,27,35,36,44,45,46,47,48,50,51,52}) {
+        for (int i : new int[]{1, 2, 3, 4, 5, 6, 7, 9, 17, 18, 26, 27, 35, 36, 44, 45, 46, 47, 48, 50, 51, 52}) {
             managePlayer1.setItem(i, glass);
         }
 
@@ -193,7 +192,7 @@ public class WatchGuiManager {
                 }
 
                 // Vanish-Status (immer)
-                boolean isVanished = VanishManager.isVanished(target.getUniqueId()); // oder dein eigenes System
+                boolean isVanished = plugin.getVanishManager().isVanished(target.getUniqueId()); // oder dein eigenes System
                 Material vanishMat = isVanished ? Material.LIME_CONCRETE : Material.RED_CONCRETE;
                 String vanishName = "§7Vanish: " + (isVanished ? "§aOn" : "§cOFF");
 
@@ -208,12 +207,12 @@ public class WatchGuiManager {
         }.runTaskTimer(plugin, 0, 10); // Alle 0,5 Sekunden
     }
 
-    public static void open2(Player viewer, Player target) {
+    public void open2(Player viewer, Player target) {
         Inventory managePlayer2 = Bukkit.createInventory(null, 54, "§8Manage: " + target.getName() + " (2/2)");
 
         // Rand
         ItemStack glass = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
-        for (int i : new int[]{1,2,3,4,5,6,7,9,17,18,  26,27,35,36,44,46,47,48,50,51,52,53}) {
+        for (int i : new int[]{1, 2, 3, 4, 5, 6, 7, 9, 17, 18, 26, 27, 35, 36, 44, 46, 47, 48, 50, 51, 52, 53}) {
             managePlayer2.setItem(i, glass);
         }
 
@@ -224,6 +223,13 @@ public class WatchGuiManager {
         potionMeta.setLore(List.of(ChatColor.WHITE + "Manage Potion for " + target.getName()));
         potion.setItemMeta(potionMeta);
         managePlayer2.setItem(10, potion);
+
+        ItemStack enchant = new ItemStack(Material.EXPERIENCE_BOTTLE);
+        ItemMeta enchantMeta = enchant.getItemMeta();
+        assert enchantMeta != null;
+        enchantMeta.setDisplayName(ChatColor.GOLD + "Enchant Items for " + target.getName());
+        enchant.setItemMeta(enchantMeta);
+        managePlayer2.setItem(12, enchant);
 
         ItemStack back = new ItemStack(Material.ARROW);
         ItemMeta backMeta = back.getItemMeta();
@@ -288,7 +294,7 @@ public class WatchGuiManager {
     private static ItemStack createPlayerHead(Player target) {
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
         ItemMeta meta = head.getItemMeta();
-        if (meta instanceof org.bukkit.inventory.meta.SkullMeta skullMeta) {
+        if (meta instanceof SkullMeta skullMeta) {
             skullMeta.setOwningPlayer(target);
             skullMeta.setDisplayName("§b" + target.getName());
             head.setItemMeta(skullMeta);

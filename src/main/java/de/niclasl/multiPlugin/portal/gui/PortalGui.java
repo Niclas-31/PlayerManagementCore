@@ -1,5 +1,6 @@
 package de.niclasl.multiPlugin.portal.gui;
 
+import de.niclasl.multiPlugin.MultiPlugin;
 import de.niclasl.multiPlugin.portal.PortalType;
 import de.niclasl.multiPlugin.portal.manager.PortalConfigManager;
 import org.bukkit.Bukkit;
@@ -15,7 +16,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.List;
 import java.util.Objects;
 
-public class PortalGui implements Listener {
+public record PortalGui(MultiPlugin plugin) implements Listener {
 
     private static final String TITLE = "Portal Settings";
 
@@ -53,7 +54,7 @@ public class PortalGui implements Listener {
         try {
             PortalType type = PortalType.valueOf(name);
             boolean enabled = PortalConfigManager.isPortalEnabled(type);
-            PortalConfigManager.setPortalEnabled(type, !enabled);
+            plugin.getPortalConfigManager().setPortalEnabled(type, !enabled);
             p.sendMessage("Set " + type.name() + " = " + !enabled);
             p.closeInventory();
         } catch (IllegalArgumentException ignored) {}

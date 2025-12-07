@@ -20,15 +20,9 @@ import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class StatsGui {
+public record StatsGui(MultiPlugin plugin) {
 
-    private static MultiPlugin plugin;
-
-    public StatsGui(MultiPlugin plugin) {
-        StatsGui.plugin = plugin;
-    }
-
-    public static void open(Player viewer, OfflinePlayer target) {
+    public void open(Player viewer, OfflinePlayer target) {
         Inventory inv = Bukkit.createInventory(null, 54, "§8Stats: §7" + target.getName());
 
         boolean isOnline = target.isOnline();
@@ -217,7 +211,7 @@ public class StatsGui {
             throw new RuntimeException(e);
         }
 
-// Slot 43 setzen
+        // Slot 43 setzen
         inv.setItem(43, balanceItem);
 
         // Zurück-Button

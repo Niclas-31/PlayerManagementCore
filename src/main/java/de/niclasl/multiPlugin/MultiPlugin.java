@@ -22,6 +22,7 @@ import de.niclasl.multiPlugin.gamemode_manage.command.GamemodeCommand;
 import de.niclasl.multiPlugin.gamemode_manage.gui.GamemodeGui;
 import de.niclasl.multiPlugin.gamemode_manage.listener.GamemodeListener;
 import de.niclasl.multiPlugin.manage_player.commands.*;
+import de.niclasl.multiPlugin.manage_player.gui.WatchGuiManager;
 import de.niclasl.multiPlugin.manage_player.listener.PlayerMonitorListener;
 import de.niclasl.multiPlugin.ban_system.manager.BanHistoryManager;
 import de.niclasl.multiPlugin.ban_system.manager.ReasonManager;
@@ -32,6 +33,7 @@ import de.niclasl.multiPlugin.mob_system.listener.MobGuiListener;
 import de.niclasl.multiPlugin.mob_system.listener.MobIgnoreListener;
 import de.niclasl.multiPlugin.mob_system.listener.PlayerJoinListener;
 import de.niclasl.multiPlugin.mob_system.manager.MobManager;
+import de.niclasl.multiPlugin.multienchant.*;
 import de.niclasl.multiPlugin.permission.commands.PermissionCommand;
 import de.niclasl.multiPlugin.playtime.listener.PlaytimeListener;
 import de.niclasl.multiPlugin.playtime.manager.PlaytimeManager;
@@ -72,7 +74,6 @@ import de.niclasl.multiPlugin.warn_system.commands.WarnCommand;
 import de.niclasl.multiPlugin.warn_system.commands.WarnHistoryCommand;
 import de.niclasl.multiPlugin.warn_system.gui.WarnGui;
 import de.niclasl.multiPlugin.warn_system.listener.WarnGuiListener;
-import de.niclasl.multiPlugin.warn_system.manage.WarnActionConfigManager;
 import de.niclasl.multiPlugin.warn_system.manage.WarnManager;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
@@ -97,6 +98,21 @@ public class MultiPlugin extends JavaPlugin {
     private static FileConfiguration vanishConfig;
     private static Economy econ = null;
 
+    private final LevelGUI levelGUI = new LevelGUI(this);
+    private final AddEffectGui addEffectGui = new AddEffectGui(this);
+    private final MobGui mobGui = new MobGui(this);
+    private final EnchantGUI enchantGUI = new EnchantGUI(this);
+    private final DimensionGui dimensionGui = new DimensionGui(this);
+    private final StatsGui statsGui = new StatsGui(this);
+    private final MinedBlocksGui minedBlocksGui = new MinedBlocksGui(this);
+    private final UsedItemsGui usedItemsGui = new UsedItemsGui(this);
+    private final CraftedItemsGui craftedItemsGui = new CraftedItemsGui(this);
+    private final WatchGuiManager watchGuiManager = new WatchGuiManager(this);
+
+    private final VanishManager vanishManager = new VanishManager(this);
+    private final SpawnManager spawnManager = new SpawnManager(this);
+    private final PortalConfigManager portalConfigManager = new PortalConfigManager(this);
+
     @Override
     public void onEnable() {
 
@@ -118,32 +134,21 @@ public class MultiPlugin extends JavaPlugin {
         ReasonManager reasonManager = new ReasonManager(getReasonsConfig());
         BanHistoryManager banHistoryManager = new BanHistoryManager(getDataFolder());
         WarnManager warnManager = new WarnManager(getDataFolder());
-        VanishManager vanishManager = new VanishManager(this);
         TeleportManager teleportManager = new TeleportManager(getDataFolder(), this);
         MuteManager muteManager = new MuteManager();
         ReportManager reportManager = new ReportManager(getDataFolder());
         MobManager mobManager = new MobManager(getDataFolder());
-        WarnActionConfigManager warnActionConfigManager = new WarnActionConfigManager(this);
         PlaytimeManager playtimeManager = new PlaytimeManager(getDataFolder());
-        SpawnManager spawnManager = new SpawnManager(this);
-        PortalConfigManager portalManager = new PortalConfigManager();
 
         // 3. GUIs
         WarnGui warnGui = new WarnGui(this, warnManager);
         ReportGui reportGui = new ReportGui(this, reportManager);
         BanHistoryGui banHistoryGui = new BanHistoryGui(this);
-        MobGui mobGui = new MobGui(this);
-        StatsGui statsGui = new StatsGui(this);
-        MinedBlocksGui minedBlocksGui = new MinedBlocksGui(this);
-        UsedItemsGui usedItemsGui = new UsedItemsGui(this);
-        CraftedItemsGui craftedItemsGui = new CraftedItemsGui(this);
-        DimensionGui dimensionGui = new DimensionGui(this, teleportManager);
         PlayerEffectsGui playerEffectsGui = new PlayerEffectsGui(this);
-        AddEffectGui addEffectGui = new AddEffectGui(this);
 
         // 4. Commands setzen
-        Objects.requireNonNull(getCommand("manage")).setExecutor(new PlayerMonitorCommand());
-        Objects.requireNonNull(getCommand("manage")).setTabCompleter(new PlayerMonitorCommand());
+        Objects.requireNonNull(getCommand("manage")).setExecutor(new PlayerMonitorCommand(this));
+        Objects.requireNonNull(getCommand("manage")).setTabCompleter(new PlayerMonitorCommand(this));
 
         Objects.requireNonNull(getCommand("vanish")).setExecutor(new VanishCommand(this, vanishManager));
 
@@ -156,8 +161,8 @@ public class MultiPlugin extends JavaPlugin {
         Objects.requireNonNull(getCommand("ban-history")).setExecutor(new BanHistoryCommand(banHistoryGui));
         Objects.requireNonNull(getCommand("ban-history")).setTabCompleter(new BanHistoryCommand(banHistoryGui));
 
-        Objects.requireNonNull(getCommand("teleport-dimension")).setExecutor(new TeleportCommand(teleportManager));
-        Objects.requireNonNull(getCommand("teleport-dimension")).setTabCompleter(new TeleportCommand(teleportManager));
+        Objects.requireNonNull(getCommand("teleport-dimension")).setExecutor(new TeleportCommand(teleportManager, this));
+        Objects.requireNonNull(getCommand("teleport-dimension")).setTabCompleter(new TeleportCommand(teleportManager, this));
 
         Objects.requireNonNull(getCommand("dimension")).setExecutor(new DimensionCommand());
         Objects.requireNonNull(getCommand("dimension")).setTabCompleter(new DimensionCommand());
@@ -186,8 +191,8 @@ public class MultiPlugin extends JavaPlugin {
         Objects.requireNonNull(getCommand("report-history")).setExecutor(new ReportGuiCommand(reportGui));
         Objects.requireNonNull(getCommand("report-history")).setTabCompleter(new ReportGuiCommand(reportGui));
 
-        Objects.requireNonNull(getCommand("mob")).setExecutor(new MobCommand(mobGui));
-        Objects.requireNonNull(getCommand("mob")).setTabCompleter(new MobCommand(mobGui));
+        Objects.requireNonNull(getCommand("mob")).setExecutor(new MobCommand(mobGui, this));
+        Objects.requireNonNull(getCommand("mob")).setTabCompleter(new MobCommand(mobGui, this));
 
         Objects.requireNonNull(getCommand("mobcount")).setExecutor(new MobCountCommand());
         Objects.requireNonNull(getCommand("mobcount")).setTabCompleter(new MobCountCommand());
@@ -207,36 +212,39 @@ public class MultiPlugin extends JavaPlugin {
         Objects.requireNonNull(getCommand("randomteleport")).setExecutor(new RandomTeleportCommand(this));
         Objects.requireNonNull(getCommand("randomteleport")).setTabCompleter(new RandomTeleportCommand(this));
 
-        Objects.requireNonNull(getCommand("portal")).setExecutor(new PortalCommand());
-        Objects.requireNonNull(getCommand("portal")).setTabCompleter(new PortalCommand());
+        Objects.requireNonNull(getCommand("portal")).setExecutor(new PortalCommand(this));
+        Objects.requireNonNull(getCommand("portal")).setTabCompleter(new PortalCommand(this));
 
         Objects.requireNonNull(getCommand("permission")).setExecutor(new PermissionCommand());
         Objects.requireNonNull(getCommand("permission")).setTabCompleter(new PermissionCommand());
+        Objects.requireNonNull(getCommand("enchant-gui")).setExecutor(new EnchantCommand(this));
 
         // 5. Listener registrieren
-        getServer().getPluginManager().registerEvents(new BanHistoryGuiListener(banHistoryManager), this);
-        getServer().getPluginManager().registerEvents(new PlayerMonitorListener(warnGui, playerEffectsGui), this);
+        getServer().getPluginManager().registerEvents(new BanHistoryGuiListener(banHistoryManager, this), this);
+        getServer().getPluginManager().registerEvents(new PlayerMonitorListener(warnGui, playerEffectsGui, this), this);
         getServer().getPluginManager().registerEvents(new LoginListener(banHistoryManager), this);
-        getServer().getPluginManager().registerEvents(new DimensionGuiListener(teleportManager), this);
-        getServer().getPluginManager().registerEvents(new GamemodeListener(), this);
+        getServer().getPluginManager().registerEvents(new DimensionGuiListener(teleportManager, this), this);
+        getServer().getPluginManager().registerEvents(new GamemodeListener(this), this);
         getServer().getPluginManager().registerEvents(new ChatFilterListener(chatFilterConfig, muteManager), this);
-        getServer().getPluginManager().registerEvents(new WarnGuiListener(warnManager, warnGui), this);
-        getServer().getPluginManager().registerEvents(new StatsGuiListener(), this);
-        getServer().getPluginManager().registerEvents(new ReportListener(reportManager), this);
+        getServer().getPluginManager().registerEvents(new WarnGuiListener(warnManager, warnGui, this), this);
+        getServer().getPluginManager().registerEvents(new StatsGuiListener(this), this);
+        getServer().getPluginManager().registerEvents(new ReportListener(reportManager, this), this);
         getServer().getPluginManager().registerEvents(new MobGuiListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(mobManager), this);
-        getServer().getPluginManager().registerEvents(new MinedBlocksGuiListener(), this);
-        getServer().getPluginManager().registerEvents(new UsedItemsGuiListener(), this);
-        getServer().getPluginManager().registerEvents(new CraftedItemsGuiListener(), this);
+        getServer().getPluginManager().registerEvents(new MinedBlocksGuiListener(this), this);
+        getServer().getPluginManager().registerEvents(new UsedItemsGuiListener(this), this);
+        getServer().getPluginManager().registerEvents(new CraftedItemsGuiListener(this), this);
         getServer().getPluginManager().registerEvents(new PlaytimeListener(this, playtimeManager), this);
         getServer().getPluginManager().registerEvents(new SpawnProtectionListener(), this);
         getServer().getPluginManager().registerEvents(new SpawnProtectionMovementListener(this), this);
         getServer().getPluginManager().registerEvents(new TeleportBlockerListener(), this);
         getServer().getPluginManager().registerEvents(new MobIgnoreListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerEffectsListener(playerEffectsGui), this);
+        getServer().getPluginManager().registerEvents(new PlayerEffectsListener(this, playerEffectsGui), this);
         getServer().getPluginManager().registerEvents(new AddEffectGuiListener(playerEffectsGui), this);
         getServer().getPluginManager().registerEvents(new DamageListener(), this);
-        getServer().getPluginManager().registerEvents(new PortalGui(), this);
+        getServer().getPluginManager().registerEvents(new PortalGui(this), this);
+        getServer().getPluginManager().registerEvents(new EnchantListener(this), this);
+        getServer().getPluginManager().registerEvents(new LevelListener(this), this);
 
         // Combat-System jede Sekunde aufräumen
         Bukkit.getScheduler().runTaskTimer(
@@ -248,12 +256,12 @@ public class MultiPlugin extends JavaPlugin {
         // GUI Init
         GamemodeGui.init(this);
 
-        PortalConfigManager.init(this);
+        portalConfigManager.init();
 
         RepairManager.init(getDataFolder());
-        PortalConfigManager.init(this);
+        portalConfigManager.init();
 
-        SpawnManager.loadAllSpawns();
+        spawnManager.loadAllSpawns();
 
         // Task starter
         RepairTask.startAutoRepair(this, 20, 10.0, 5);
@@ -427,5 +435,53 @@ public class MultiPlugin extends JavaPlugin {
         }
         econ = rsp.getProvider();
         return true;
+    }
+
+    public LevelGUI getLevelGUI() {
+        return levelGUI;
+    }
+
+    public AddEffectGui getAddEffectGui() {
+        return addEffectGui;
+    }
+
+    public MobGui getMobGui() {
+        return mobGui;
+    }
+
+    public EnchantGUI getEnchantGUI() {
+        return enchantGUI;
+    }
+
+    public DimensionGui getDimensionGui() {
+        return dimensionGui;
+    }
+
+    public StatsGui getStatsGui() {
+        return statsGui;
+    }
+
+    public MinedBlocksGui getMinedBlocksGui() {
+        return minedBlocksGui;
+    }
+
+    public UsedItemsGui getUsedItemsGui() {
+        return usedItemsGui;
+    }
+
+    public CraftedItemsGui getCraftedItemsGui() {
+        return craftedItemsGui;
+    }
+
+    public WatchGuiManager getWatchGuiManager() {
+        return watchGuiManager;
+    }
+
+    public VanishManager getVanishManager() {
+        return vanishManager;
+    }
+
+    public PortalConfigManager getPortalConfigManager() {
+        return portalConfigManager;
     }
 }

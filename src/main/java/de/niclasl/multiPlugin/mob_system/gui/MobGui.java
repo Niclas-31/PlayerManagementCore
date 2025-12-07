@@ -17,20 +17,15 @@ import de.niclasl.multiPlugin.MultiPlugin;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class MobGui {
+public record MobGui(MultiPlugin plugin) {
 
     public static final Character[] ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".chars()
             .mapToObj(c -> (char) c)
             .toArray(Character[]::new);
 
     public static HashMap<UUID, Integer> playerFilterIndex = new HashMap<>();
-    public static MultiPlugin plugin;
 
-    public MobGui(MultiPlugin plugin) {
-        MobGui.plugin = plugin;
-    }
-
-    public static void open(Player viewer, OfflinePlayer target, int page) {
+    public void open(Player viewer, OfflinePlayer target, int page) {
 
         // Filter laden
         int filterIndex = playerFilterIndex.getOrDefault(viewer.getUniqueId(), -1);

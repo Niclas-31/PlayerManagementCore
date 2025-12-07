@@ -1,8 +1,6 @@
 package de.niclasl.multiPlugin.warn_system.model;
 
-import java.lang.annotation.Annotation;
-
-public class Warning implements org.bukkit.Warning {
+public class Warning {
     private final String id;
     private final String reason;
     private final String date;
@@ -41,21 +39,6 @@ public class Warning implements org.bukkit.Warning {
 
     public void setPermanent(boolean permanent) {
         this.permanent = permanent;
-    }
-
-    @Override
-    public boolean value() {
-        return false;
-    }
-
-    @Override
-    public String reason() {
-        return "";
-    }
-
-    @Override
-    public Class<? extends Annotation> annotationType() {
-        return null;
     }
 
     public int getPoints() {

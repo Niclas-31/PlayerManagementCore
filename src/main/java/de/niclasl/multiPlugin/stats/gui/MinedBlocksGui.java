@@ -12,7 +12,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class MinedBlocksGui {
+public record MinedBlocksGui(MultiPlugin plugin) {
 
     private static final int[] allowedSlots = {
             0, 1, 2, 3, 4, 5, 6, 7,
@@ -23,13 +23,7 @@ public class MinedBlocksGui {
             45, 46, 47, 48, 49, 50, 51, 52
     };
 
-    public static MultiPlugin plugin;
-
-    public MinedBlocksGui(MultiPlugin plugin) {
-        MinedBlocksGui.plugin = plugin;
-    }
-
-    public static void open(Player viewer, OfflinePlayer target, int page) {
+    public void open(Player viewer, OfflinePlayer target, int page) {
         List<Material> minedBlocks = new ArrayList<>();
 
         // Alle Blöcke mit >0 Statistiken sammeln

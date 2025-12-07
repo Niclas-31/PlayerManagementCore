@@ -1,6 +1,6 @@
 package de.niclasl.multiPlugin.manage_player.commands;
 
-import de.niclasl.multiPlugin.manage_player.gui.WatchGuiManager;
+import de.niclasl.multiPlugin.MultiPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -12,12 +12,12 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlayerMonitorCommand implements CommandExecutor, TabCompleter {
+public record PlayerMonitorCommand(MultiPlugin plugin) implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
-        if(!(sender instanceof Player player)){
+        if (!(sender instanceof Player player)) {
             sender.sendMessage(ChatColor.RED + "Only players can use this command");
             return true;
         }
@@ -34,12 +34,12 @@ public class PlayerMonitorCommand implements CommandExecutor, TabCompleter {
 
         Player target = Bukkit.getPlayer(args[0]);
 
-        if(target == null){
+        if (target == null) {
             player.sendMessage(ChatColor.RED + "Player not found!");
             return true;
         }
 
-        WatchGuiManager.open1(player, target);
+        plugin.getWatchGuiManager().open1(player, target);
         return true;
     }
 

@@ -8,14 +8,12 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.File;
 import java.util.List;
 
-public final class PortalConfigManager {
+public record PortalConfigManager(MultiPlugin plugin) {
 
     private static File dataFile;
     private static FileConfiguration cfg;
-    private static MultiPlugin plugin;
 
-    public static void init(MultiPlugin pl) {
-        plugin = pl;
+    public void init() {
         dataFile = new File(plugin.getDataFolder(), "portals.yml");
 
         if (!dataFile.exists()) {
@@ -54,7 +52,7 @@ public final class PortalConfigManager {
         return cfg.getBoolean("portals." + type.name(), true);
     }
 
-    public static void setPortalEnabled(PortalType type, boolean enabled) {
+    public void setPortalEnabled(PortalType type, boolean enabled) {
         if (cfg == null) return;
         cfg.set("portals." + type.name(), enabled);
         save();
@@ -65,7 +63,7 @@ public final class PortalConfigManager {
         return cfg.getStringList("whitelist");
     }
 
-    public static void addToWhitelist(String pluginName) {
+    public void addToWhitelist(String pluginName) {
         List<String> wl = cfg.getStringList("whitelist");
         if (!wl.contains(pluginName)) {
             wl.add(pluginName);
@@ -74,7 +72,7 @@ public final class PortalConfigManager {
         }
     }
 
-    public static void removeFromWhitelist(String pluginName) {
+    public void removeFromWhitelist(String pluginName) {
         List<String> wl = cfg.getStringList("whitelist");
         if (wl.removeIf(s -> s.equalsIgnoreCase(pluginName))) {
             cfg.set("whitelist", wl);
@@ -82,7 +80,7 @@ public final class PortalConfigManager {
         }
     }
 
-    public static void save() {
+    public void save() {
         try {
             cfg.save(dataFile);
         } catch (Exception e) {

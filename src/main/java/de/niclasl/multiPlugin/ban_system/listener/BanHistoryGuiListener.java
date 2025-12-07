@@ -1,10 +1,10 @@
 package de.niclasl.multiPlugin.ban_system.listener;
 
 import de.niclasl.multiPlugin.GuiConstants;
+import de.niclasl.multiPlugin.MultiPlugin;
 import de.niclasl.multiPlugin.ban_system.gui.BanHistoryGui;
 import de.niclasl.multiPlugin.ban_system.manager.BanHistoryManager;
 import de.niclasl.multiPlugin.ban_system.model.BanRecord;
-import de.niclasl.multiPlugin.manage_player.gui.WatchGuiManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -22,9 +22,11 @@ import java.util.UUID;
 public class BanHistoryGuiListener implements Listener {
 
     private static BanHistoryManager banHistoryManager;
+    private final MultiPlugin plugin;
 
-    public BanHistoryGuiListener(BanHistoryManager banHistoryManager) {
+    public BanHistoryGuiListener(BanHistoryManager banHistoryManager, MultiPlugin plugin) {
         BanHistoryGuiListener.banHistoryManager = banHistoryManager;
+        this.plugin = plugin;
     }
 
     @EventHandler
@@ -39,8 +41,8 @@ public class BanHistoryGuiListener implements Listener {
 
         if (!player.hasMetadata("ban_target") || !player.hasMetadata("ban_page")) return;
 
-        UUID targetUUID = UUID.fromString(player.getMetadata("ban_target").get(0).asString());
-        int page = player.getMetadata("ban_page").get(0).asInt();
+        UUID targetUUID = UUID.fromString(player.getMetadata("ban_target").getFirst().asString());
+        int page = player.getMetadata("ban_page").getFirst().asInt();
 
         int slot = e.getSlot();
 
@@ -48,7 +50,7 @@ public class BanHistoryGuiListener implements Listener {
             // Hole den Zielspieler (du brauchst eine Zuordnung: Wer betrachtet wen)
             OfflinePlayer target = getTarget(player); // <- das musst du ggf. anpassen
             if (target != null) {
-                WatchGuiManager.open1(player, (Player) target);
+                plugin.getWatchGuiManager().open1(player, (Player) target);
             } else {
                 player.sendMessage("§cError: Target player not found.");
                 player.closeInventory();
@@ -78,7 +80,7 @@ public class BanHistoryGuiListener implements Listener {
 
         if (slot == 17) {
             BanHistoryGui.toggleSort(player);
-            OfflinePlayer target = Bukkit.getOfflinePlayer(UUID.fromString(player.getMetadata("ban_target").get(0).asString()));
+            OfflinePlayer target = Bukkit.getOfflinePlayer(UUID.fromString(player.getMetadata("ban_target").getFirst().asString()));
             BanHistoryGui.open(player, target, 1); // GUI neu öffnen
         }
 

@@ -1,7 +1,7 @@
 package de.niclasl.multiPlugin.stats.listener;
 
 import de.niclasl.multiPlugin.GuiConstants;
-import de.niclasl.multiPlugin.stats.gui.StatsGui;
+import de.niclasl.multiPlugin.MultiPlugin;
 import de.niclasl.multiPlugin.stats.gui.UsedItemsGui;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -14,7 +14,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.UUID;
 
-public class UsedItemsGuiListener implements Listener {
+public record UsedItemsGuiListener(MultiPlugin plugin) implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
@@ -29,8 +29,8 @@ public class UsedItemsGuiListener implements Listener {
         // Metadaten prüfen
         if (!player.hasMetadata("item_target") || !player.hasMetadata("item_page")) return;
 
-        UUID targetUUID = UUID.fromString(player.getMetadata("item_target").get(0).asString());
-        int page = player.getMetadata("item_page").get(0).asInt();
+        UUID targetUUID = UUID.fromString(player.getMetadata("item_target").getFirst().asString());
+        int page = player.getMetadata("item_page").getFirst().asInt();
 
         int slot = event.getSlot();
 
@@ -52,7 +52,7 @@ public class UsedItemsGuiListener implements Listener {
         if (slot == 26) {
             OfflinePlayer target = getTarget(player);
             if (target instanceof Player onlineTarget)
-                StatsGui.open(player, onlineTarget);
+                plugin.getStatsGui().open(player, onlineTarget);
             else {
                 player.sendMessage("§cTarget player not found.");
                 player.closeInventory();
@@ -63,14 +63,14 @@ public class UsedItemsGuiListener implements Listener {
         // Button: Vorherige Seite
         if (slot == 35 && page > 1) {
             OfflinePlayer target = Bukkit.getOfflinePlayer(targetUUID);
-            UsedItemsGui.open(player, target, page - 1);
+            plugin.getUsedItemsGui().open(player, target, page - 1);
             return;
         }
 
         // Button: Nächste Seite
         if (slot == 44 && page < totalPages) {
             OfflinePlayer target = Bukkit.getOfflinePlayer(targetUUID);
-            UsedItemsGui.open(player, target, page + 1);
+            plugin.getUsedItemsGui().open(player, target, page + 1);
         }
     }
 

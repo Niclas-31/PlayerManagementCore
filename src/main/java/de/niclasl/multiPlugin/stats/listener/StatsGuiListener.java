@@ -1,9 +1,7 @@
 package de.niclasl.multiPlugin.stats.listener;
 
+import de.niclasl.multiPlugin.MultiPlugin;
 import de.niclasl.multiPlugin.manage_player.gui.WatchGuiManager;
-import de.niclasl.multiPlugin.stats.gui.CraftedItemsGui;
-import de.niclasl.multiPlugin.stats.gui.MinedBlocksGui;
-import de.niclasl.multiPlugin.stats.gui.UsedItemsGui;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -15,7 +13,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class StatsGuiListener implements Listener {
+public record StatsGuiListener(MultiPlugin plugin) implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
@@ -33,7 +31,7 @@ public class StatsGuiListener implements Listener {
                 // Hole den Zielspieler (du brauchst eine Zuordnung: Wer betrachtet wen)
                 OfflinePlayer target = getTarget(viewer); // <- das musst du ggf. anpassen
                 if (target != null) {
-                    WatchGuiManager.open1(viewer, (Player) target);
+                    plugin.getWatchGuiManager().open1(viewer, (Player) target);
                 } else {
                     viewer.sendMessage("§cError: Target player not found.");
                     viewer.closeInventory();
@@ -47,21 +45,21 @@ public class StatsGuiListener implements Listener {
             OfflinePlayer target = getTarget(viewer);
 
             assert target != null;
-            MinedBlocksGui.open(viewer, target, 1);
+            plugin.getMinedBlocksGui().open(viewer, target, 1);
         }
 
         if (slot == 28) {
             OfflinePlayer target = getTarget(viewer);
 
             assert target != null;
-            UsedItemsGui.open(viewer, target, 1);
+            plugin.getUsedItemsGui().open(viewer, target, 1);
         }
 
         if (slot == 37) {
             OfflinePlayer target = getTarget(viewer);
 
             assert target != null;
-            CraftedItemsGui.open(viewer, target, 1);
+            plugin.getCraftedItemsGui().open(viewer, target, 1);
         }
     }
 

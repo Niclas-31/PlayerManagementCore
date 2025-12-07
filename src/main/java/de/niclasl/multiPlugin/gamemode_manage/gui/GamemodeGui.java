@@ -1,5 +1,6 @@
 package de.niclasl.multiPlugin.gamemode_manage.gui;
 
+import de.niclasl.multiPlugin.MultiPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -8,13 +9,13 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.metadata.FixedMetadataValue;
 
 public class GamemodeGui {
 
-    public static JavaPlugin plugin;
+    public static MultiPlugin plugin;
 
-    public static void init(JavaPlugin plugin) {
+    public static void init(MultiPlugin plugin) {
         GamemodeGui.plugin = plugin;
     }
 
@@ -42,7 +43,7 @@ public class GamemodeGui {
         inv.setItem(22, createSkull(target.getName()));
 
         player.openInventory(inv);
-        player.setMetadata("gm_target", new org.bukkit.metadata.FixedMetadataValue(plugin, target.getName()));
+        player.setMetadata("gm_target", new FixedMetadataValue(plugin, target.getName()));
     }
 
     private static ItemStack createItem(Material material, String name) {

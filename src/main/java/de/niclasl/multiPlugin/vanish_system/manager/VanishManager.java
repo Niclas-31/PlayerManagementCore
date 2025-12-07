@@ -6,19 +6,13 @@ import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-public class VanishManager {
+public record VanishManager(MultiPlugin plugin) {
 
-    private static MultiPlugin plugin;
-
-    public VanishManager(MultiPlugin plugin) {
-        VanishManager.plugin = plugin;
-    }
-
-    public static boolean isVanished(UUID uuid) {
+    public boolean isVanished(UUID uuid) {
         return plugin.getVanishConfig().getBoolean(uuid.toString(), false);
     }
 
-    public static void setVanish(UUID uuid, boolean vanish) {
+    public void setVanish(UUID uuid, boolean vanish) {
         plugin.getVanishConfig().set(uuid.toString(), vanish);
         plugin.saveVanishConfig();
 

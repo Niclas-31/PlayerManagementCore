@@ -6,7 +6,6 @@ import de.niclasl.multiPlugin.mob_system.MobCategories;
 import de.niclasl.multiPlugin.mob_system.gui.MobGui;
 import de.niclasl.multiPlugin.mob_system.manager.MobManager;
 import de.niclasl.multiPlugin.mob_system.model.MobSpawnRequest;
-import de.niclasl.multiPlugin.manage_player.gui.WatchGuiManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Difficulty;
@@ -45,8 +44,8 @@ public class MobGuiListener implements Listener {
 
         if (!player.hasMetadata("mob_target") || !player.hasMetadata("mob_page")) return;
 
-        UUID targetUUID = UUID.fromString(player.getMetadata("mob_target").get(0).asString());
-        int page = player.getMetadata("mob_page").get(0).asInt();
+        UUID targetUUID = UUID.fromString(player.getMetadata("mob_target").getFirst().asString());
+        int page = player.getMetadata("mob_page").getFirst().asInt();
 
         int slot = e.getSlot();
 
@@ -55,7 +54,7 @@ public class MobGuiListener implements Listener {
             // Hole den Zielspieler (du brauchst eine Zuordnung: Wer betrachtet wen)
             OfflinePlayer target = getTarget(player); // <- das musst du ggf. anpassen
             if (target != null) {
-                WatchGuiManager.open1(player, (Player) target);
+                plugin.getWatchGuiManager().open1(player, (Player) target);
             } else {
                 player.sendMessage("§cError: Target player not found.");
                 player.closeInventory();
@@ -79,12 +78,12 @@ public class MobGuiListener implements Listener {
             }
 
             MobGui.playerFilterIndex.put(player.getUniqueId(), idx);
-            OfflinePlayer target = Bukkit.getOfflinePlayer(UUID.fromString(player.getMetadata("mob_target").get(0).asString()));
-            MobGui.open(player, target, 1);
+            OfflinePlayer target = Bukkit.getOfflinePlayer(UUID.fromString(player.getMetadata("mob_target").getFirst().asString()));
+            plugin.getMobGui().open(player, target, 1);
             return;
         }
 
-        OfflinePlayer target = Bukkit.getOfflinePlayer(UUID.fromString(player.getMetadata("mob_target").get(0).asString()));
+        OfflinePlayer target = Bukkit.getOfflinePlayer(UUID.fromString(player.getMetadata("mob_target").getFirst().asString()));
 
         // Hole gefilterte Mobs für den aktuellen Buchstaben
         int filterIndex = MobGui.playerFilterIndex.getOrDefault(player.getUniqueId(), -1); // -1 = Alle
@@ -104,11 +103,11 @@ public class MobGuiListener implements Listener {
 
         // Navigation
         if (slot == 35 && page > 1) { // zurück
-            MobGui.open(player, target, page - 1);
+            plugin.getMobGui().open(player, target, page - 1);
             return;
         }
         if (slot == 44 && page < totalPages) { // weiter
-            MobGui.open(player, target, page + 1);
+            plugin.getMobGui().open(player, target, page + 1);
             return;
         }
 

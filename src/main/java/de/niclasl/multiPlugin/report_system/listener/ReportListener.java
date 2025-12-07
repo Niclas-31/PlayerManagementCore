@@ -1,7 +1,7 @@
 package de.niclasl.multiPlugin.report_system.listener;
 
 import de.niclasl.multiPlugin.GuiConstants;
-import de.niclasl.multiPlugin.manage_player.gui.WatchGuiManager;
+import de.niclasl.multiPlugin.MultiPlugin;
 import de.niclasl.multiPlugin.report_system.gui.ReportGui;
 import de.niclasl.multiPlugin.report_system.manager.ReportManager;
 import de.niclasl.multiPlugin.report_system.model.Report;
@@ -22,9 +22,11 @@ import java.util.UUID;
 public class ReportListener implements Listener {
 
     private static ReportManager reportManager;
+    private final MultiPlugin plugin;
 
-    public ReportListener(ReportManager reportManager) {
+    public ReportListener(ReportManager reportManager, MultiPlugin plugin) {
         ReportListener.reportManager = reportManager;
+        this.plugin = plugin;
     }
 
     @EventHandler
@@ -39,8 +41,8 @@ public class ReportListener implements Listener {
 
         if (!player.hasMetadata("report_target") || !player.hasMetadata("report_page")) return;
 
-        UUID targetUUID = UUID.fromString(player.getMetadata("report_target").get(0).asString());
-        int page = player.getMetadata("report_page").get(0).asInt();
+        UUID targetUUID = UUID.fromString(player.getMetadata("report_target").getFirst().asString());
+        int page = player.getMetadata("report_page").getFirst().asInt();
 
         int slot = e.getSlot();
 
@@ -48,7 +50,7 @@ public class ReportListener implements Listener {
             // Hole den Zielspieler (du brauchst eine Zuordnung: Wer betrachtet wen)
             OfflinePlayer target = getTarget(player); // <- das musst du ggf. anpassen
             if (target != null) {
-                WatchGuiManager.open1(player, (Player) target);
+                plugin.getWatchGuiManager().open1(player, (Player) target);
             } else {
                 player.sendMessage("§cError: Target player not found.");
                 player.closeInventory();
@@ -78,7 +80,7 @@ public class ReportListener implements Listener {
 
         if (slot == 17) {
             ReportGui.toggleSort(player);
-            OfflinePlayer target = Bukkit.getOfflinePlayer(UUID.fromString(player.getMetadata("report_target").get(0).asString()));
+            OfflinePlayer target = Bukkit.getOfflinePlayer(UUID.fromString(player.getMetadata("report_target").getFirst().asString()));
             ReportGui.open(player, target, 1); // GUI neu öffnen
         }
 

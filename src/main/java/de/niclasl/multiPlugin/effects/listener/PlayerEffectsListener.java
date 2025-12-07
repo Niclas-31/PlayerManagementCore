@@ -1,8 +1,7 @@
 package de.niclasl.multiPlugin.effects.listener;
 
-import de.niclasl.multiPlugin.effects.gui.AddEffectGui;
+import de.niclasl.multiPlugin.MultiPlugin;
 import de.niclasl.multiPlugin.effects.gui.PlayerEffectsGui;
-import de.niclasl.multiPlugin.manage_player.gui.WatchGuiManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -22,10 +21,12 @@ import java.util.UUID;
 
 public class PlayerEffectsListener implements Listener {
 
+    private final MultiPlugin plugin;
     private static PlayerEffectsGui playerEffectsGui;
 
-    public PlayerEffectsListener(PlayerEffectsGui playerEffectsGui) {
+    public PlayerEffectsListener(MultiPlugin plugin, PlayerEffectsGui playerEffectsGui) {
         PlayerEffectsListener.playerEffectsGui = playerEffectsGui;
+        this.plugin = plugin;
     }
 
     @EventHandler
@@ -40,7 +41,7 @@ public class PlayerEffectsListener implements Listener {
 
             // Target UUID aus Metadata ziehen
             if (!viewer.hasMetadata("effect_target")) return;
-            UUID targetUUID = UUID.fromString(viewer.getMetadata("effect_target").get(0).asString());
+            UUID targetUUID = UUID.fromString(viewer.getMetadata("effect_target").getFirst().asString());
             Player target1 = Bukkit.getPlayer(targetUUID);
             if (target1 == null) return;
 
@@ -49,7 +50,7 @@ public class PlayerEffectsListener implements Listener {
                 // Hole den Zielspieler (du brauchst eine Zuordnung: Wer betrachtet wen)
                 OfflinePlayer target = getTarget(viewer); // <- das musst du ggf. anpassen
                 if (target != null) {
-                    WatchGuiManager.open2(viewer, (Player) target);
+                    plugin.getWatchGuiManager().open2(viewer, (Player) target);
                 } else {
                     viewer.sendMessage("§cError: Target player not found.");
                     viewer.closeInventory();
@@ -59,7 +60,7 @@ public class PlayerEffectsListener implements Listener {
             // Klick auf Book → neues Effekt-GUI öffnen
             if (clicked.getType() == Material.BOOK) {
                 viewer.closeInventory();
-                AddEffectGui.open(viewer, target1); // <-- musst du bauen
+                plugin.getAddEffectGui().open(viewer, target1); // <-- musst du bauen
                 return;
             }
 

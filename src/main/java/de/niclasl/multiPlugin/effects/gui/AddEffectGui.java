@@ -18,9 +18,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class AddEffectGui {
-
-    public static MultiPlugin plugin;
+public record AddEffectGui(MultiPlugin plugin) {
 
     // Whitelist: Nur Effekte, die als Potion im Creative-Tab existieren
     private static final Set<PotionEffectType> CREATIVE_POTIONS = Set.of(
@@ -45,11 +43,7 @@ public class AddEffectGui {
             PotionEffectType.INFESTED
     );
 
-    public AddEffectGui(MultiPlugin plugin) {
-        AddEffectGui.plugin = plugin;
-    }
-
-    public static void open(Player viewer, Player target) {
+    public void open(Player viewer, Player target) {
         Inventory inv = Bukkit.createInventory(null, 54, "§8Add Effect to " + target.getName());
 
         int slot = 0;

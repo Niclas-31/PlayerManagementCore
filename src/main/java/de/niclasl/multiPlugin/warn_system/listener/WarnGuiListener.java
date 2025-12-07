@@ -1,7 +1,7 @@
 package de.niclasl.multiPlugin.warn_system.listener;
 
 import de.niclasl.multiPlugin.GuiConstants;
-import de.niclasl.multiPlugin.manage_player.gui.WatchGuiManager;
+import de.niclasl.multiPlugin.MultiPlugin;
 import de.niclasl.multiPlugin.warn_system.gui.WarnGui;
 import de.niclasl.multiPlugin.warn_system.manage.WarnManager;
 import de.niclasl.multiPlugin.warn_system.model.Warning;
@@ -23,10 +23,12 @@ public class WarnGuiListener implements Listener {
 
     private static WarnManager warnManager;
     private static WarnGui warnGui;
+    private final MultiPlugin plugin;
 
-    public WarnGuiListener(WarnManager warnManager, WarnGui warnGui) {
+    public WarnGuiListener(WarnManager warnManager, WarnGui warnGui, MultiPlugin plugin) {
         WarnGuiListener.warnManager = warnManager;
         WarnGuiListener.warnGui = warnGui;
+        this.plugin = plugin;
     }
 
     @EventHandler
@@ -41,8 +43,8 @@ public class WarnGuiListener implements Listener {
 
         if (!player.hasMetadata("warn_target") || !player.hasMetadata("warn_page")) return;
 
-        UUID targetUUID = UUID.fromString(player.getMetadata("warn_target").get(0).asString());
-        int page = player.getMetadata("warn_page").get(0).asInt();
+        UUID targetUUID = UUID.fromString(player.getMetadata("warn_target").getFirst().asString());
+        int page = player.getMetadata("warn_page").getFirst().asInt();
 
         int slot = e.getSlot();
 
@@ -50,7 +52,7 @@ public class WarnGuiListener implements Listener {
             // Hole den Zielspieler (du brauchst eine Zuordnung: Wer betrachtet wen)
             OfflinePlayer target = getTarget(player); // <- das musst du ggf. anpassen
             if (target != null) {
-                WatchGuiManager.open1(player, (Player) target);
+                plugin.getWatchGuiManager().open1(player, (Player) target);
             } else {
                 player.sendMessage("§cError: Target player not found.");
                 player.closeInventory();
@@ -80,7 +82,7 @@ public class WarnGuiListener implements Listener {
 
         if (slot == 17) {
             WarnGui.toggleSort(player);
-            OfflinePlayer target = Bukkit.getOfflinePlayer(UUID.fromString(player.getMetadata("warn_target").get(0).asString()));
+            OfflinePlayer target = Bukkit.getOfflinePlayer(UUID.fromString(player.getMetadata("warn_target").getFirst().asString()));
             warnGui.open(player, target, 1); // GUI neu öffnen
         }
 

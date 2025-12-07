@@ -1,8 +1,8 @@
 package de.niclasl.multiPlugin.teleport.listener;
 
 import de.niclasl.multiPlugin.GuiConstants;
+import de.niclasl.multiPlugin.MultiPlugin;
 import de.niclasl.multiPlugin.manage_player.gui.WatchGuiManager;
-import de.niclasl.multiPlugin.teleport.gui.DimensionGui;
 import de.niclasl.multiPlugin.teleport.manager.TeleportManager;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -19,9 +19,11 @@ import java.util.UUID;
 public class DimensionGuiListener implements Listener {
 
     private static TeleportManager teleportManager;
+    private final MultiPlugin plugin;
 
-    public DimensionGuiListener(TeleportManager teleportManager) {
+    public DimensionGuiListener(TeleportManager teleportManager, MultiPlugin plugin) {
         DimensionGuiListener.teleportManager = teleportManager;
+        this.plugin = plugin;
     }
 
     @EventHandler
@@ -37,8 +39,8 @@ public class DimensionGuiListener implements Listener {
         // Metadata auslesen (angepasst auf DimensionGui)
         if (!player.hasMetadata("dimension_target") || !player.hasMetadata("dimension_page")) return;
 
-        UUID targetUUID = UUID.fromString(player.getMetadata("dimension_target").get(0).asString());
-        int page = player.getMetadata("dimension_page").get(0).asInt();
+        UUID targetUUID = UUID.fromString(player.getMetadata("dimension_target").getFirst().asString());
+        int page = player.getMetadata("dimension_page").getFirst().asInt();
 
         int slot = event.getSlot();
 
@@ -48,7 +50,7 @@ public class DimensionGuiListener implements Listener {
                 // Hole den Zielspieler (du brauchst eine Zuordnung: Wer betrachtet wen)
                 OfflinePlayer target = getTarget(player); // <- das musst du ggf. anpassen
                 if (target != null) {
-                    WatchGuiManager.open1(player, (Player) target);
+                    plugin.getWatchGuiManager().open1(player, (Player) target);
                 } else {
                     player.sendMessage("§cError: Target player not found.");
                     player.closeInventory();
@@ -62,19 +64,19 @@ public class DimensionGuiListener implements Listener {
         if (slot == 35) {
             if (page > 1) {
                 OfflinePlayer target = Bukkit.getOfflinePlayer(targetUUID);
-                DimensionGui.open(player, target, page - 1);
+                plugin.getDimensionGui().open(player, target, page - 1);
             }
             return;
         }
 
         // Klick auf Nächste Seite Button (Slot 44)
         if (slot == 44) {
-            List<String> dimensions = teleportManager.getAllDimensions();
+            List<String> dimensions = TeleportManager.getAllDimensions();
             int dimensionsPerPage = GuiConstants.ALLOWED_SLOTS.length;
             int totalPages = (int) Math.ceil(dimensions.size() / (double) dimensionsPerPage);
             if (page < totalPages) {
                 OfflinePlayer target = Bukkit.getOfflinePlayer(targetUUID);
-                DimensionGui.open(player, target, page + 1);
+                plugin.getDimensionGui().open(player, target, page + 1);
             }
             return;
         }
@@ -97,14 +99,14 @@ public class DimensionGuiListener implements Listener {
             }
         }
 
-        Location targetLoc = teleportManager.getLocation(dimension);
+        Location targetLoc = TeleportManager.getLocation(dimension);
 
         if (targetLoc == null) {
             player.sendMessage(ChatColor.RED + "No location set for dimension §6'" + dimension + "'§c.");
             return;
         }
 
-        UUID owner = teleportManager.getOwner(dimension);
+        UUID owner = TeleportManager.getOwner(dimension);
 
         if (owner != null && !owner.equals(player.getUniqueId())) {
             if (!player.hasPermission("teleport.dimension." + dimension)) {

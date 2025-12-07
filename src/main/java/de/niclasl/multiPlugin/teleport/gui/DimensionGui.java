@@ -15,18 +15,10 @@ import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.*;
 
-public class DimensionGui {
+public record DimensionGui(MultiPlugin plugin) {
 
-    private static MultiPlugin plugin;
-    private static TeleportManager teleportManager;
-
-    public DimensionGui(MultiPlugin plugin, TeleportManager teleportManager) {
-        DimensionGui.plugin = plugin;
-        DimensionGui.teleportManager = teleportManager;
-    }
-
-    public static void open(Player player, OfflinePlayer target, int page) {
-        List<String> dimensions = teleportManager.getAllDimensions();
+    public void open(Player player, OfflinePlayer target, int page) {
+        List<String> dimensions = TeleportManager.getAllDimensions();
 
         // Slots, die für Warnungen benutzt werden (48 Slots verteilt auf 6 Reihen, je 8 Slots, ohne die jeweils 9., 17., 26., 35., 44., 53. Slots)
         int[] allowedSlots = {
