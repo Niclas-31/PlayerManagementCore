@@ -1,6 +1,9 @@
 package de.niclasl.multiPlugin.warn_system.commands;
 
 import de.niclasl.multiPlugin.MultiPlugin;
+import de.niclasl.multiPlugin.audit.AuditManager;
+import de.niclasl.multiPlugin.audit.model.AuditAction;
+import de.niclasl.multiPlugin.audit.model.AuditType;
 import de.niclasl.multiPlugin.warn_system.manage.WarnActionConfigManager;
 import de.niclasl.multiPlugin.warn_system.manage.WarnManager;
 import de.niclasl.multiPlugin.ban_system.manager.BanHistoryManager;
@@ -14,6 +17,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.NonNull;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -33,7 +37,12 @@ public class WarnCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, String @NonNull [] args) {
+
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("§cOnly players can use this command.");
+            return true;
+        }
 
         if (!sender.hasPermission("multiplugin.warn")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
@@ -62,15 +71,20 @@ public class WarnCommand implements CommandExecutor, TabCompleter {
         String by = sender.getName();
         String date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"));
 
-        // Warnung hinzufügen (automatisch 3 Punkte)
         warnManager.addWarning(uuid, reason, by, date);
         sender.sendMessage("§a" + target.getName() + " was warned (§7Reason: §e" + reason + "§a).");
 
-        // Punkte prüfen
         WarnActionConfigManager warnConfig = new WarnActionConfigManager(plugin);
         int totalPoints = warnManager.getTotalPoints(uuid);
 
-        // Schwellen sortieren (absteigend)
+        AuditManager.log(
+                target,
+                AuditType.WARN,
+                AuditAction.ADD,
+                player,
+                reason
+        );
+
         List<String> thresholds = new ArrayList<>(warnConfig.getThresholds());
         thresholds.sort((a, b) -> Integer.compare(Integer.parseInt(b), Integer.parseInt(a)));
 
@@ -82,7 +96,7 @@ public class WarnCommand implements CommandExecutor, TabCompleter {
                 String durationArg = section.getString("duration", null);
                 boolean resetPoints = section.getBoolean("resetPoints", false);
 
-                switch (action.toLowerCase()) {
+                switch (Objects.requireNonNull(action).toLowerCase()) {
                     case "kick" -> {
                         if (target.isOnline() && target instanceof Player onlinePlayer) {
                             onlinePlayer.kickPlayer("§cYou have been kicked!\n§7Reason: §e" + reason);
@@ -103,14 +117,14 @@ public class WarnCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (resetPoints) {
-                    List<Warning> updated = warnManager.getWarnings(uuid);
+                    List<Warning> updated = WarnManager.getWarnings(uuid);
                     for (Warning w : updated) {
                         w.setPoints(0);
                     }
                     warnManager.saveWarnings(uuid, updated);
                 }
 
-                break; // Nur erste passende Aktion ausführen
+                break;
             }
         }
 
@@ -118,7 +132,7 @@ public class WarnCommand implements CommandExecutor, TabCompleter {
     }
 
     public LocalDateTime parseDuration(String durationArg) {
-        if (durationArg == null) return LocalDateTime.now().plusYears(100); // praktisch permanent
+        if (durationArg == null) return LocalDateTime.now().plusYears(100);
         int amount = Integer.parseInt(durationArg.substring(0, durationArg.length() - 1));
         char unit = durationArg.charAt(durationArg.length() - 1);
         return switch (unit) {
@@ -130,7 +144,7 @@ public class WarnCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(@NonNull CommandSender sender, @NonNull Command command, @NonNull String alias, String[] args) {
         List<String> completions = new ArrayList<>();
         if (args.length == 1) {
             for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {

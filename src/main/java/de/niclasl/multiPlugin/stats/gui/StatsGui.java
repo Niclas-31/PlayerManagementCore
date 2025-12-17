@@ -33,7 +33,6 @@ public record StatsGui(MultiPlugin plugin) {
             inv.setItem(i, glass);
         }
 
-        // Kategorie: Spielerinfos
         ItemStack nameItem = new ItemStack(Material.NAME_TAG);
         ItemMeta nameMeta = nameItem.getItemMeta();
         assert nameMeta != null;
@@ -60,7 +59,6 @@ public record StatsGui(MultiPlugin plugin) {
         gmItem.setItemMeta(gmMeta);
         inv.setItem(14, gmItem);
 
-        // Kategorie: Kampf & Überleben
         ItemStack killItem = new ItemStack(Material.IRON_SWORD);
         ItemMeta killMeta = killItem.getItemMeta();
         assert killMeta != null;
@@ -84,7 +82,6 @@ public record StatsGui(MultiPlugin plugin) {
         damage.setItemMeta(dmgMeta);
         inv.setItem(19, damage);
 
-        // Kategorie: Bewegung
         ItemStack movementItem = new ItemStack(Material.FEATHER);
         ItemMeta moveMeta = movementItem.getItemMeta();
         assert moveMeta != null;
@@ -99,7 +96,6 @@ public record StatsGui(MultiPlugin plugin) {
         movementItem.setItemMeta(moveMeta);
         inv.setItem(21, movementItem);
 
-        // Kategorie: Interaktionen
         ItemStack interact = new ItemStack(Material.CRAFTING_TABLE);
         ItemMeta interactMeta = interact.getItemMeta();
         assert interactMeta != null;
@@ -114,7 +110,6 @@ public record StatsGui(MultiPlugin plugin) {
         interact.setItemMeta(interactMeta);
         inv.setItem(23, interact);
 
-        // Kategorie: Blöcke & Items
         ItemStack mined = new ItemStack(Material.DIAMOND_PICKAXE);
         ItemMeta minedMeta = mined.getItemMeta();
         assert minedMeta != null;
@@ -184,15 +179,12 @@ public record StatsGui(MultiPlugin plugin) {
         ItemMeta mobMeta = mobItem.getItemMeta();
         if (mobMeta != null) {
             mobMeta.setDisplayName("§4Player Mobs");
-            int mobCount = MobManager.getRequests(targetUUID).size(); // Anzahl der Mob
+            int mobCount = MobManager.getRequests(targetUUID).size();
             mobMeta.setLore(List.of("§4Mobs: " + mobCount));
             mobItem.setItemMeta(mobMeta);
         }
-
-        // Dann ins GUI setzen, z. B. Slot 10
         inv.setItem(41, mobItem);
 
-        // Vorher im open() - Bereich, wo Economy angezeigt wird
         ItemStack balanceItem;
         try {
             Class<?> econClass = Class.forName("net.milkbowl.vault.economy.Economy");
@@ -201,20 +193,15 @@ public record StatsGui(MultiPlugin plugin) {
                 Object vaultEco = rsp.getClass().getMethod("getProvider").invoke(rsp);
                 balanceItem = createBalanceItem(vaultEco, target);
             } else {
-                // Kein Economy-Plugin registriert
                 balanceItem = createNoEconomyItem();
             }
         } catch (ClassNotFoundException | NoSuchMethodException ignored) {
-            // Vault nicht installiert → Fallback
             balanceItem = createNoEconomyItem();
         } catch (InvocationTargetException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-
-        // Slot 43 setzen
         inv.setItem(43, balanceItem);
 
-        // Zurück-Button
         ItemStack back = new ItemStack(Material.BARRIER);
         ItemMeta backMeta = back.getItemMeta();
         assert backMeta != null;
@@ -236,13 +223,10 @@ public record StatsGui(MultiPlugin plugin) {
         new BukkitRunnable() {
             @Override
             public void run() {
-                // Abbrechen, wenn Inventar nicht mehr offen ist
                 if (!viewer.getOpenInventory().getTopInventory().equals(inv)) {
                     cancel();
                     return;
                 }
-
-                // Zeit aktualisieren
                 YamlConfiguration playtimeConfig = PlaytimeManager.getPlayerConfig(target.getUniqueId());
                 String playtimeFormatted = formatPlaytime(playtimeConfig);
                 boolean isOnline = target.isOnline();
@@ -259,9 +243,9 @@ public record StatsGui(MultiPlugin plugin) {
                 ));
                 joinItem.setItemMeta(joinMeta);
 
-                inv.setItem(12, joinItem); // Slot 12 updaten
+                inv.setItem(12, joinItem);
             }
-        }.runTaskTimer(plugin, 0L, 20L); // Jede Sekunde (20 Ticks)
+        }.runTaskTimer(plugin, 0L, 20L);
     }
 
     private static ItemStack createNoEconomyItem() {
@@ -314,12 +298,11 @@ public record StatsGui(MultiPlugin plugin) {
         int unlocked = 0;
         int total = 0;
 
-        // Für Sortierung nach Datum
         List<Map.Entry<String, Date>> unlockedWithDate = new ArrayList<>();
 
         for (Iterator<Advancement> it = Bukkit.getServer().advancementIterator(); it.hasNext();) {
             Advancement adv = it.next();
-            if (adv.getDisplay() == null) continue; // nur sichtbare
+            if (adv.getDisplay() == null) continue;
 
             AdvancementProgress progress = player.getAdvancementProgress(adv);
             total++;
@@ -341,7 +324,6 @@ public record StatsGui(MultiPlugin plugin) {
             }
         }
 
-        // Nach Datum sortieren → neueste zuerst
         unlockedWithDate.sort((a, b) -> b.getValue().compareTo(a.getValue()));
 
         ItemStack book = new ItemStack(Material.ENCHANTED_BOOK);
@@ -372,7 +354,6 @@ public record StatsGui(MultiPlugin plugin) {
                     .invoke(eco, player);
         } catch (Exception ignored) { }
 
-        // Deutsches Zahlenformat
         DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.GERMANY);
         symbols.setDecimalSeparator(',');
         symbols.setGroupingSeparator('.');

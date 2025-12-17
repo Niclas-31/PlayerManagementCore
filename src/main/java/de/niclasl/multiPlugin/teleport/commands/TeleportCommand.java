@@ -1,6 +1,9 @@
 package de.niclasl.multiPlugin.teleport.commands;
 
 import de.niclasl.multiPlugin.MultiPlugin;
+import de.niclasl.multiPlugin.audit.AuditManager;
+import de.niclasl.multiPlugin.audit.model.AuditAction;
+import de.niclasl.multiPlugin.audit.model.AuditType;
 import de.niclasl.multiPlugin.teleport.manager.TeleportManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -10,6 +13,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 
@@ -24,7 +28,7 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(ChatColor.RED + "Only players can execute this command.");
             return true;
@@ -64,7 +68,6 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        // CREATE
         if (args[0].equalsIgnoreCase("create")) {
             if (!player.hasPermission("multiplugin.teleport.dimension.create")) {
                 player.sendMessage(ChatColor.RED + "You don't have permission to create a dimension.");
@@ -89,7 +92,6 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        // DELETE
         if (args[0].equalsIgnoreCase("delete")) {
             if (!player.hasPermission("multiplugin.teleport.dimension.delete")) {
                 player.sendMessage(ChatColor.RED + "You don't have permission to delete dimensions.");
@@ -110,7 +112,6 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        // INVITE
         if (args[0].equalsIgnoreCase("invite")) {
             if (args.length < 3) {
                 player.sendMessage(ChatColor.RED + "Usage: /teleport-dimension invite <world> <player>");
@@ -131,8 +132,7 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
-            // Owner-Check
-            if (!TeleportManager.isOwner(player, dimension)) {
+            if (TeleportManager.isOwner(player, dimension)) {
                 player.sendMessage(ChatColor.RED + "You are not the owner of world '" + dimension + "'.");
                 return true;
             }
@@ -141,7 +141,6 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        // SET DELAY
         if (args[0].equalsIgnoreCase("setdelay")) {
             if (args.length < 3) {
                 player.sendMessage(ChatColor.RED + "Usage: /teleport-dimension setdelay <world> <seconds>");
@@ -156,8 +155,7 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
-            // Owner-Check
-            if (!TeleportManager.isOwner(player, dimension)) {
+            if (TeleportManager.isOwner(player, dimension)) {
                 player.sendMessage(ChatColor.RED + "You are not the owner of world '" + dimension + "'.");
                 return true;
             }
@@ -175,7 +173,6 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        // TELEPORT
         String dimension = args[0].toLowerCase();
 
         if (!TeleportManager.dimensionExists(dimension)) {
@@ -192,7 +189,6 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
         UUID owner = TeleportManager.getOwner(dimension);
 
         if (owner != null && !owner.equals(player.toString())) {
-            // Prüfe auf Einladung oder explizite Permission
             if (!TeleportManager.hasAccess(player, dimension) &&
                     !player.hasPermission("multiplugin.teleport.dimension.private." + dimension)) {
 
@@ -206,17 +202,24 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        // Verzögertes Teleportieren mit Effekten
         teleportManager.teleportWithDelay(player, targetLoc, TeleportManager.getTeleportDelay(dimension), dimension);
+
+        AuditManager.log(
+                player,
+                AuditType.TELEPORT,
+                AuditAction.EXECUTE,
+                player,
+                "Teleport to spawn"
+        );
         return true;
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(@NonNull CommandSender sender, @NonNull Command command, @NonNull String alias, String[] args) {
         List<String> completions = new ArrayList<>();
         if (args.length == 1) {
             completions.addAll(Arrays.asList("set", "create", "delete", "invite", "setdelay"));
-            completions.addAll(TeleportManager.getAllDimensions()); // Direkter Teleport
+            completions.addAll(TeleportManager.getAllDimensions());
         } else if (args.length == 2) {
             if (args[0].equalsIgnoreCase("invite") || args[0].equalsIgnoreCase("delete") || args[0].equalsIgnoreCase("setdelay") || args[0].equalsIgnoreCase("set")) {
                 completions.addAll(TeleportManager.getAllDimensions());

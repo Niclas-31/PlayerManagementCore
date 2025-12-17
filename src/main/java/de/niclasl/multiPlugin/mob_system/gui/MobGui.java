@@ -27,17 +27,14 @@ public record MobGui(MultiPlugin plugin) {
 
     public void open(Player viewer, OfflinePlayer target, int page) {
 
-        // Filter laden
         int filterIndex = playerFilterIndex.getOrDefault(viewer.getUniqueId(), -1);
         Character filterChar = (filterIndex == -1 ? null : ALPHABET[filterIndex]);
 
-        // Requests holen
         List<MobSpawnRequest> requests = MobManager.getRequests(target.getUniqueId());
         List<EntityType> allMobs = requests.stream()
                 .map(MobSpawnRequest::getEntityType)
                 .collect(Collectors.toList());
 
-        // Filter anwenden
         if (filterChar != null) {
             allMobs = allMobs.stream()
                     .filter(type -> type.name().startsWith(filterChar.toString()))
@@ -64,9 +61,10 @@ public record MobGui(MultiPlugin plugin) {
                 "§8Spawn Mobs for " + target.getName() + " §7(" + page + "/" + totalPages + ")"
         );
 
-        // Rand
         ItemStack glass = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
         inv.setItem(8, glass);
+        if (totalPages == 1 || page == 1) inv.setItem(35, glass);
+        if (totalPages == 1 || totalPages == page) inv.setItem(44, glass);
 
         int startIndex = (page - 1) * mobsPerPage;
 
@@ -96,7 +94,6 @@ public record MobGui(MultiPlugin plugin) {
             inv.setItem(slot, item);
         }
 
-        // Kopf
         ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) skull.getItemMeta();
         assert meta != null;
@@ -106,17 +103,14 @@ public record MobGui(MultiPlugin plugin) {
         skull.setItemMeta(meta);
         inv.setItem(53, skull);
 
-        // Back
         inv.setItem(26, createItem(Material.BARRIER, "§cBack"));
 
-        // Page Controls
         if (page > 1)
             inv.setItem(35, createItem(Material.ARROW, "§aPrevious Page"));
 
         if (page < totalPages)
             inv.setItem(44, createItem(Material.ARROW, "§aNext Page"));
 
-        // Filter-Buch
         String filterName = (filterChar == null ? "ALL" : filterChar.toString());
         inv.setItem(17, createItem(
                 Material.BOOK,
@@ -125,7 +119,6 @@ public record MobGui(MultiPlugin plugin) {
                 "§7Right: Previous letter"
         ));
 
-        // Metadata setzen
         viewer.openInventory(inv);
         viewer.setMetadata("mob_target", new FixedMetadataValue(plugin, target.getUniqueId().toString()));
         viewer.setMetadata("mob_page", new FixedMetadataValue(plugin, page));

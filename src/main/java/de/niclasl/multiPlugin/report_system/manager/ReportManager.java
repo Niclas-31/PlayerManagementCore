@@ -83,7 +83,7 @@ public class ReportManager {
     public void addReport(UUID uniqueId, String reason, String name, String time, String status, boolean permanent) {
         List<Report> reports = getReports(uniqueId);
 
-        Report report = new Report(randomUUID().toString(), reason, time, name, status, false);
+        Report report = new Report(randomUUID().toString(), reason, time, name, status, permanent);
 
         reports.add(report);
         saveReports(uniqueId, reports);

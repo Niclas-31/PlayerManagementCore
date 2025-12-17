@@ -24,7 +24,6 @@ public class ChatFilterListener implements Listener {
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
 
-        // Prüfen, ob Spieler gemutet ist
         if (muteManager.isMuted(player.getUniqueId())) {
             player.sendMessage(ChatColor.RED + "You are muted and cannot chat.");
             event.setCancelled(true);

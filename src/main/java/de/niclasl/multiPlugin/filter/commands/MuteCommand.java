@@ -9,6 +9,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,7 @@ public class MuteCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(CommandSender sender, @NonNull Command command, @NonNull String label, String[] args) {
 
         if(!sender.hasPermission("multiplugin.mute")){
             sender.sendMessage(ChatColor.RED + "You don't have permission to use this command!");
@@ -62,7 +63,6 @@ public class MuteCommand implements CommandExecutor, TabCompleter {
 
         sender.sendMessage("§a" + target.getName() + " was muted for " + durationArg + ". Reason: " + reason);
 
-        // Falls der Spieler online ist, benachrichtige ihn
         if (target.isOnline()) {
             Player onlinePlayer = target.getPlayer();
             if (onlinePlayer != null) {
@@ -95,26 +95,23 @@ public class MuteCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(CommandSender sender, @NonNull Command command, @NonNull String alias, String[] args) {
         List<String> completions = new ArrayList<>();
 
         if (!sender.hasPermission("multiplugin.mute")) return completions;
 
         if (args.length == 1) {
-            // Spieler-Vorschläge für den ersten Parameter
             completions.addAll(Bukkit.getOnlinePlayers().stream()
                     .map(Player::getName)
                     .filter(name -> name.toLowerCase().startsWith(args[0].toLowerCase()))
                     .toList());
         } else if (args.length == 2) {
-            // Dauer-Vorschläge für den zweiten Parameter
             completions.add("perm");
             completions.add("10s");
             completions.add("10m");
             completions.add("1h");
             completions.add("1d");
         }
-        // args.length >= 3 => Grund/Reason, hier meist freie Eingabe, kein Completion nötig
 
         return completions;
     }

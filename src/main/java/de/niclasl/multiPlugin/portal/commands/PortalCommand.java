@@ -9,6 +9,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.stream.Stream;
 public record PortalCommand(MultiPlugin plugin) implements CommandExecutor, TabCompleter {
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(CommandSender sender, @NonNull Command command, @NonNull String label, String[] args) {
 
         if (!sender.hasPermission("multiplugin.portal.manage")) {
             sender.sendMessage(ChatColor.RED + "You don't have permission.");
@@ -103,7 +104,7 @@ public record PortalCommand(MultiPlugin plugin) implements CommandExecutor, TabC
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(CommandSender sender, @NonNull Command command, @NonNull String alias, String[] args) {
         if (!sender.hasPermission("multiplugin.portal.manage")) return List.of();
 
         if (args.length == 1) {

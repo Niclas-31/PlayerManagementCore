@@ -25,12 +25,10 @@ import java.util.UUID;
 public class ReportGui {
 
     private static MultiPlugin plugin;
-    private static ReportManager reportManager;
     private static final HashMap<UUID, Boolean> playerSortMode = new HashMap<>();
 
-    public ReportGui(MultiPlugin plugin, ReportManager reportManager) {
+    public ReportGui(MultiPlugin plugin) {
         ReportGui.plugin = plugin;
-        ReportGui.reportManager = reportManager;
     }
 
     public static void open(Player viewer, OfflinePlayer target, int page) {
@@ -42,7 +40,6 @@ public class ReportGui {
                 : w1.getTime().compareTo(w2.getTime())
         );
 
-        // Slots, die für Warnungen benutzt werden (48 Slots verteilt auf 6 Reihen, je 8 Slots, ohne die jeweils 9., 17., 26., 35., 44., 53. Slots)
         int[] allowedSlots = {
                 0,1,2,3,4,5,6,7,
                 9,10,11,12,13,14,15,16,
@@ -60,7 +57,6 @@ public class ReportGui {
 
         Inventory inv = Bukkit.createInventory(null, 54, "§8Reports from " + target.getName() + " §7(" + page + "/" + totalPages + ")");
 
-        // Rand
         ItemStack glass = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
         for (int i : new int[]{8}) {
             inv.setItem(i, glass);
@@ -117,7 +113,6 @@ public class ReportGui {
             inv.setItem(slot, paper);
         }
 
-        // Kopf ganz rechts unten (Slot 53)
         int headSlot = 53;
         ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) skull.getItemMeta();
@@ -135,7 +130,6 @@ public class ReportGui {
         back.setItemMeta(backMeta);
         inv.setItem(26, back);
 
-        // Navigationspfeile:
         if (page > 1) {
             ItemStack backArrow = new ItemStack(Material.ARROW);
             ItemMeta backArrowMeta = backArrow.getItemMeta();

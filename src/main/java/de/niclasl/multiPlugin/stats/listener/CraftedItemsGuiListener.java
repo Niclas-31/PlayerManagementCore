@@ -2,7 +2,6 @@ package de.niclasl.multiPlugin.stats.listener;
 
 import de.niclasl.multiPlugin.GuiConstants;
 import de.niclasl.multiPlugin.MultiPlugin;
-import de.niclasl.multiPlugin.stats.gui.CraftedItemsGui;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -26,7 +25,6 @@ public record CraftedItemsGuiListener(MultiPlugin plugin) implements Listener {
 
         event.setCancelled(true);
 
-        // Metadaten prüfen
         if (!player.hasMetadata("craft_target") || !player.hasMetadata("craft_page")) return;
 
         UUID targetUUID = UUID.fromString(player.getMetadata("craft_target").getFirst().asString());
@@ -34,7 +32,6 @@ public record CraftedItemsGuiListener(MultiPlugin plugin) implements Listener {
 
         int slot = event.getSlot();
 
-        // Anzahl der Items zählen
         int totalCraftedItems = 0;
         for (Material mat : Material.values()) {
             try {
@@ -48,7 +45,6 @@ public record CraftedItemsGuiListener(MultiPlugin plugin) implements Listener {
         int totalPages = (int) Math.ceil(totalCraftedItems / (double) itemsPerPage);
         if (totalPages == 0) totalPages = 1;
 
-        // Button: Zurück zur Übersicht
         if (slot == 26) {
             OfflinePlayer target = getTarget(player);
             if (target instanceof Player onlineTarget)
@@ -60,14 +56,12 @@ public record CraftedItemsGuiListener(MultiPlugin plugin) implements Listener {
             return;
         }
 
-        // Button: Vorherige Seite
         if (slot == 35 && page > 1) {
             OfflinePlayer target = Bukkit.getOfflinePlayer(targetUUID);
             plugin.getCraftedItemsGui().open(player, target, page - 1);
             return;
         }
 
-        // Button: Nächste Seite
         if (slot == 44 && page < totalPages) {
             OfflinePlayer target = Bukkit.getOfflinePlayer(targetUUID);
             plugin.getCraftedItemsGui().open(player, target, page + 1);
@@ -76,7 +70,7 @@ public record CraftedItemsGuiListener(MultiPlugin plugin) implements Listener {
 
     private OfflinePlayer getTarget(Player viewer) {
         Inventory inv = viewer.getOpenInventory().getTopInventory();
-        ItemStack nameTag = inv.getItem(53); // oder anderer Slot
+        ItemStack nameTag = inv.getItem(53);
         if (nameTag == null || !nameTag.hasItemMeta()) return null;
         ItemMeta meta = nameTag.getItemMeta();
         if (meta == null || !meta.hasDisplayName()) return null;

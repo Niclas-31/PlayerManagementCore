@@ -11,6 +11,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +25,9 @@ public class WarnHistoryCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(CommandSender sender, @NonNull Command command, @NonNull String label, String @NonNull [] args) {
 
-        if (!sender.hasPermission("multiplugin.warn.history")) {
+        if (!sender.hasPermission("multiplugin.warnhistory")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }
@@ -63,26 +64,23 @@ public class WarnHistoryCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        // Seitenanzahl prüfen
         int maxPage = warnGui.getTotalPages(target);
         if (page > maxPage) {
             player.sendMessage("§cThis player has only " + maxPage + " page" + (maxPage == 1 ? "" : "s") + " of history.");
             return true;
         }
 
-        warnGui.open(player, target, page); // GUI öffnen, statische Methode
+        warnGui.open(player, target, page);
 
         return true;
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(CommandSender sender, @NonNull Command command, @NonNull String alias, String @NonNull [] args) {
         List<String> completions = new ArrayList<>();
 
-        // Nur Spieler mit Permission
-        if (!sender.hasPermission("multiplugin.warn.history")) return completions;
+        if (!sender.hasPermission("multiplugin.warnhistory")) return completions;
 
-        // Vorschläge für den Spieler-Namen (erstes Argument)
         if (args.length == 1) {
             for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
                 String name = player.getName();
@@ -92,7 +90,6 @@ public class WarnHistoryCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        // Vorschläge für Seitenzahlen (zweites Argument)
         if (args.length == 2) {
             OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
             if (target.hasPlayedBefore()) {

@@ -1,5 +1,8 @@
 package de.niclasl.multiPlugin.warn_system.commands;
 
+import de.niclasl.multiPlugin.audit.AuditManager;
+import de.niclasl.multiPlugin.audit.model.AuditAction;
+import de.niclasl.multiPlugin.audit.model.AuditType;
 import de.niclasl.multiPlugin.warn_system.manage.WarnManager;
 import de.niclasl.multiPlugin.warn_system.model.Warning;
 import org.bukkit.Bukkit;
@@ -8,6 +11,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +27,12 @@ public class UnwarnCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, String @NonNull [] args) {
+
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("§cOnly players can use this command.");
+            return true;
+        }
 
         if (!sender.hasPermission("multiplugin.unwarn")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
@@ -42,13 +52,21 @@ public class UnwarnCommand implements CommandExecutor, TabCompleter {
         UUID uuid = target.getUniqueId();
         String warnId = args[1];
 
-        List<Warning> warnings = warnManager.getWarnings(uuid);
-        if (warnings == null || warnings.isEmpty()) {
+        List<Warning> warnings = WarnManager.getWarnings(uuid);
+        if (warnings.isEmpty()) {
             sender.sendMessage("§cThis player has no warnings.");
             return true;
         }
 
         boolean removed = warnings.removeIf(warn -> warn.getId().equalsIgnoreCase(warnId));
+
+        AuditManager.log(
+                target,
+                AuditType.WARN,
+                AuditAction.REMOVE,
+                player,
+                "Unwarned by staff"
+        );
 
         if (removed) {
             warnManager.saveWarnings(uuid, warnings);
@@ -61,29 +79,25 @@ public class UnwarnCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(CommandSender sender, @NonNull Command command, @NonNull String alias, String @NonNull [] args) {
         List<String> completions = new ArrayList<>();
 
         if (!sender.hasPermission("multiplugin.unwarn")) return completions;
 
         if (args.length == 1) {
-            // Vorschläge für Spielernamen
             for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
                 if (p.getName() != null && p.getName().toLowerCase().startsWith(args[0].toLowerCase())) {
                     completions.add(p.getName());
                 }
             }
         } else if (args.length == 2) {
-            // Vorschläge für Warn-IDs
             OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
             if (target.getName() != null) {
                 UUID uuid = target.getUniqueId();
-                List<Warning> warnings = warnManager.getWarnings(uuid);
-                if (warnings != null) {
-                    for (Warning w : warnings) {
-                        if (w.getId().toLowerCase().startsWith(args[1].toLowerCase())) {
-                            completions.add(w.getId());
-                        }
+                List<Warning> warnings = WarnManager.getWarnings(uuid);
+                for (Warning w : warnings) {
+                    if (w.getId().toLowerCase().startsWith(args[1].toLowerCase())) {
+                        completions.add(w.getId());
                     }
                 }
             }

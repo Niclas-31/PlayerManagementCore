@@ -22,7 +22,6 @@ public class WarnGui {
     private static MultiPlugin plugin;
     public static WarnManager warnManager;
 
-    // Sortiermodus pro Spieler (true = neu → alt, false = alt → neu)
     private static final HashMap<UUID, Boolean> playerSortMode = new HashMap<>();
 
     public WarnGui(MultiPlugin plugin, WarnManager warnManager) {
@@ -33,7 +32,6 @@ public class WarnGui {
     public void open(Player viewer, OfflinePlayer target, int page) {
         List<Warning> warnings = new ArrayList<>(WarnManager.getWarnings(target.getUniqueId()));
 
-        // Sortierung anwenden
         boolean newestFirst = playerSortMode.getOrDefault(viewer.getUniqueId(), true);
         warnings.sort((w1, w2) -> newestFirst
                 ? w2.getDate().compareTo(w1.getDate())
@@ -56,7 +54,6 @@ public class WarnGui {
 
         Inventory inv = Bukkit.createInventory(null, 54, "§8Warnings from " + target.getName() + " §7(" + page + "/" + totalPages + ")");
 
-        // Rand
         ItemStack glass = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
         for (int i : new int[]{8}) inv.setItem(i, glass);
         if (totalPages == 1 || page == 1) inv.setItem(35, glass);
@@ -97,7 +94,6 @@ public class WarnGui {
             inv.setItem(slot, paper);
         }
 
-        // Kopf-Icon (rechts unten)
         int totalPoints = warnManager.getTotalPoints(target.getUniqueId());
         ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) skull.getItemMeta();
@@ -111,7 +107,6 @@ public class WarnGui {
         skull.setItemMeta(meta);
         inv.setItem(53, skull);
 
-        // Zurück-Button
         ItemStack back = new ItemStack(Material.BARRIER);
         ItemMeta backMeta = back.getItemMeta();
         assert backMeta != null;
@@ -119,7 +114,6 @@ public class WarnGui {
         back.setItemMeta(backMeta);
         inv.setItem(26, back);
 
-        // Navigationspfeile
         if (page > 1) {
             ItemStack backArrow = new ItemStack(Material.ARROW);
             ItemMeta backArrowMeta = backArrow.getItemMeta();
@@ -137,7 +131,6 @@ public class WarnGui {
             inv.setItem(44, nextArrow);
         }
 
-        // Sortier-Buch (neu → alt / alt → neu)
         ItemStack sortBook = new ItemStack(Material.BOOK);
         ItemMeta bookMeta = sortBook.getItemMeta();
         assert bookMeta != null;
@@ -161,7 +154,6 @@ public class WarnGui {
         return item;
     }
 
-    // Toggle sort mode für einen Spieler
     public static void toggleSort(Player player) {
         boolean mode = playerSortMode.getOrDefault(player.getUniqueId(), true);
         playerSortMode.put(player.getUniqueId(), !mode);
@@ -170,8 +162,8 @@ public class WarnGui {
     public int getTotalPages(OfflinePlayer target) {
         List<Warning> warnings = WarnManager.getWarnings(target.getUniqueId());
 
-        int bansPerPage = GuiConstants.ALLOWED_SLOTS.length;
-        int totalPages = (int) Math.ceil(warnings.size() / (double) bansPerPage);
+        int warningsPerPage = GuiConstants.ALLOWED_SLOTS.length;
+        int totalPages = (int) Math.ceil(warnings.size() / (double) warningsPerPage);
         if (totalPages == 0) totalPages = 1;
         return totalPages;
     }

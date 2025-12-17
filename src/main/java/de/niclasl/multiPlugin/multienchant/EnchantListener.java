@@ -27,7 +27,6 @@ public record EnchantListener(MultiPlugin plugin) implements Listener {
         Inventory inv = e.getInventory();
         InventoryHolder holder = inv.getHolder();
 
-        // Stelle sicher, dass wir wirklich im EnchantGUI sind
         if (!(holder instanceof EnchantGUI.EnchantSelectionHolder)) return;
 
         e.setCancelled(true);
@@ -35,9 +34,6 @@ public record EnchantListener(MultiPlugin plugin) implements Listener {
         int slot = e.getRawSlot();
         ItemStack clicked = e.getCurrentItem();
 
-        // ==========================
-        // BUTTON: BACK (slot 45)
-        // ==========================
         if (slot == 45) {
             if (p.hasPermission("manage.player")) {
 
@@ -57,16 +53,13 @@ public record EnchantListener(MultiPlugin plugin) implements Listener {
             return;
         }
 
-        // ==========================
-        // ENCHANT-CLICK
-        // ==========================
         if (clicked == null || !clicked.hasItemMeta()) return;
 
         String key = Objects.requireNonNull(clicked.getItemMeta()).getPersistentDataContainer().get(
                 new NamespacedKey(plugin, "ench_key"),
                 PersistentDataType.STRING
         );
-        if (key == null) return; // kein enchant-item
+        if (key == null) return;
 
         Enchantment chosen = Enchantment.getByKey(NamespacedKey.minecraft(key));
 
@@ -88,7 +81,6 @@ public record EnchantListener(MultiPlugin plugin) implements Listener {
     private OfflinePlayer getTarget(Player viewer) {
         Inventory inv = viewer.getOpenInventory().getTopInventory();
 
-        // Slot 10 ist das NameTag-Item (laut StatsGui)
         ItemStack nameTag = inv.getItem(49);
         if (nameTag == null || !nameTag.hasItemMeta()) return null;
 
@@ -96,7 +88,7 @@ public record EnchantListener(MultiPlugin plugin) implements Listener {
         if (meta == null || !meta.hasDisplayName()) return null;
 
         String displayName = meta.getDisplayName();
-        // displayName hat Format: "§aSpielername", wir entfernen den §a-Code
+
         String playerName = ChatColor.stripColor(displayName);
 
         if (playerName.isEmpty()) return null;

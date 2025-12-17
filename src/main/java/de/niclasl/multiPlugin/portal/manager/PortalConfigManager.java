@@ -2,10 +2,12 @@ package de.niclasl.multiPlugin.portal.manager;
 
 import de.niclasl.multiPlugin.MultiPlugin;
 import de.niclasl.multiPlugin.portal.PortalType;
+import de.niclasl.multiPlugin.portal.api.PortalApi;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 
 public record PortalConfigManager(MultiPlugin plugin) {
@@ -23,7 +25,6 @@ public record PortalConfigManager(MultiPlugin plugin) {
 
                 cfg = YamlConfiguration.loadConfiguration(dataFile);
 
-                // Default-Werte
                 cfg.set("portals.NETHER_PORTAL", false);
                 cfg.set("portals.END_PORTAL", false);
                 cfg.set("portals.END_GATEWAY", false);
@@ -36,7 +37,7 @@ public record PortalConfigManager(MultiPlugin plugin) {
                 cfg.set("portals.COMMAND", false);
                 cfg.set("portals.UNKNOWN", true);
 
-                cfg.set("whitelist", java.util.List.of("TeamWar"));
+                cfg.set("whitelist", List.of("TeamWar"));
                 save();
 
             } catch (Exception e) {
@@ -48,7 +49,7 @@ public record PortalConfigManager(MultiPlugin plugin) {
     }
 
     public static boolean isPortalEnabled(PortalType type) {
-        if (cfg == null) return true;
+        if (cfg == null || type == null) return true;
         return cfg.getBoolean("portals." + type.name(), true);
     }
 
@@ -59,22 +60,27 @@ public record PortalConfigManager(MultiPlugin plugin) {
     }
 
     public static List<String> getWhitelist() {
-        if (cfg == null) return java.util.Collections.emptyList();
-        return cfg.getStringList("whitelist");
+        if (cfg == null) return Collections.emptyList();
+        return cfg.getStringList("whitelist").stream()
+                .map(String::toLowerCase)
+                .toList();
     }
 
     public void addToWhitelist(String pluginName) {
+        if (pluginName == null) return;
         List<String> wl = cfg.getStringList("whitelist");
-        if (!wl.contains(pluginName)) {
-            wl.add(pluginName);
+        if (wl.stream().noneMatch(s -> s.equalsIgnoreCase(pluginName))) {
+            wl.add(pluginName.toLowerCase());
             cfg.set("whitelist", wl);
             save();
         }
     }
 
     public void removeFromWhitelist(String pluginName) {
+        if (pluginName == null) return;
         List<String> wl = cfg.getStringList("whitelist");
         if (wl.removeIf(s -> s.equalsIgnoreCase(pluginName))) {
+            PortalApi.removePluginFromBypass(pluginName);
             cfg.set("whitelist", wl);
             save();
         }

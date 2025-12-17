@@ -2,7 +2,9 @@ package de.niclasl.multiPlugin.teleport.listener;
 
 import de.niclasl.multiPlugin.GuiConstants;
 import de.niclasl.multiPlugin.MultiPlugin;
-import de.niclasl.multiPlugin.manage_player.gui.WatchGuiManager;
+import de.niclasl.multiPlugin.audit.AuditManager;
+import de.niclasl.multiPlugin.audit.model.AuditAction;
+import de.niclasl.multiPlugin.audit.model.AuditType;
 import de.niclasl.multiPlugin.teleport.manager.TeleportManager;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -36,7 +38,6 @@ public class DimensionGuiListener implements Listener {
 
         event.setCancelled(true);
 
-        // Metadata auslesen (angepasst auf DimensionGui)
         if (!player.hasMetadata("dimension_target") || !player.hasMetadata("dimension_page")) return;
 
         UUID targetUUID = UUID.fromString(player.getMetadata("dimension_target").getFirst().asString());
@@ -44,11 +45,9 @@ public class DimensionGuiListener implements Listener {
 
         int slot = event.getSlot();
 
-        // BACK Button (Slot 26 im GUI)
         if (slot == 26) {
             if (player.hasPermission("manage.player")) {
-                // Hole den Zielspieler (du brauchst eine Zuordnung: Wer betrachtet wen)
-                OfflinePlayer target = getTarget(player); // <- das musst du ggf. anpassen
+                OfflinePlayer target = getTarget(player);
                 if (target != null) {
                     plugin.getWatchGuiManager().open1(player, (Player) target);
                 } else {
@@ -60,7 +59,6 @@ public class DimensionGuiListener implements Listener {
             }
         }
 
-        // Klick auf vorherige Seite Button (Slot 35)
         if (slot == 35) {
             if (page > 1) {
                 OfflinePlayer target = Bukkit.getOfflinePlayer(targetUUID);
@@ -69,7 +67,6 @@ public class DimensionGuiListener implements Listener {
             return;
         }
 
-        // Klick auf Nächste Seite Button (Slot 44)
         if (slot == 44) {
             List<String> dimensions = TeleportManager.getAllDimensions();
             int dimensionsPerPage = GuiConstants.ALLOWED_SLOTS.length;
@@ -81,7 +78,6 @@ public class DimensionGuiListener implements Listener {
             return;
         }
 
-        // Dimension Items (Slots z.B. 0-43, siehe DimensionGui.allowedSlots)
         ItemStack clickedItem = event.getCurrentItem();
         if (clickedItem == null || !clickedItem.hasItemMeta()) return;
 
@@ -121,15 +117,22 @@ public class DimensionGuiListener implements Listener {
         }
 
 
-        // Verzögertes Teleportieren mit Effekten
         teleportManager.teleportWithDelay(player, targetLoc, TeleportManager.getTeleportDelay(dimension), dimension);
+        OfflinePlayer target = getTarget(player);
+        assert target != null;
+        AuditManager.log(
+                target,
+                AuditType.TELEPORT,
+                AuditAction.EXECUTE,
+                player,
+                "Teleport to spawn"
+        );
         player.closeInventory();
     }
 
     private OfflinePlayer getTarget(Player viewer) {
         Inventory inv = viewer.getOpenInventory().getTopInventory();
 
-        // Slot 10 ist das NameTag-Item (laut StatsGui)
         ItemStack nameTag = inv.getItem(53);
         if (nameTag == null || !nameTag.hasItemMeta()) return null;
 
@@ -137,7 +140,7 @@ public class DimensionGuiListener implements Listener {
         if (meta == null || !meta.hasDisplayName()) return null;
 
         String displayName = meta.getDisplayName();
-        // displayName hat Format: "§aSpielername", wir entfernen den §a-Code
+
         String playerName = ChatColor.stripColor(displayName);
 
         if (playerName.isEmpty()) return null;

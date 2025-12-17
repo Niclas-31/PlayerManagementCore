@@ -7,6 +7,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +17,7 @@ import java.util.UUID;
 public class DimensionCommand implements CommandExecutor, TabCompleter {
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("Only players can execute this command.");
             return true;
@@ -30,14 +31,13 @@ public class DimensionCommand implements CommandExecutor, TabCompleter {
         String dimension = args[1];
         String flag = args[2].toLowerCase();
 
-        // 1. Existiert die Welt?
         if (!TeleportManager.dimensionExists(dimension)) {
             player.sendMessage(ChatColor.RED + "This world does not exist.");
             return true;
         }
 
         // 2. Owner prüfen
-        UUID owner = TeleportManager.getOwner(dimension); // <- musst du im TeleportManager implementieren
+        UUID owner = TeleportManager.getOwner(dimension);
         if (owner == null) {
             player.sendMessage(ChatColor.RED + "This world has no owner defined.");
             return true;
@@ -48,7 +48,6 @@ public class DimensionCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        // 3. Boolean interpretieren
         boolean makePrivate;
         if (flag.equals("true") || flag.equals("yes")) {
             makePrivate = true;
@@ -59,19 +58,18 @@ public class DimensionCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        // 4. Speichern
         TeleportManager.setPrivate(player, dimension, makePrivate);
         player.sendMessage(ChatColor.GREEN + "World " + dimension + " is now set to " + (makePrivate ? "private." : "public."));
         return true;
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(@NonNull CommandSender sender, @NonNull Command command, @NonNull String alias, String[] args) {
         List<String> completions = new ArrayList<>();
         if (args.length == 1) {
             completions.add("setprivate");
         } else if (args.length == 2) {
-            completions.addAll(TeleportManager.getAllDimensions()); // Liste aller Welten
+            completions.addAll(TeleportManager.getAllDimensions());
         } else if (args.length == 3) {
             List<String> options = Arrays.asList("true", "false");
             for (String option : options) {

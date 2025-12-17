@@ -9,10 +9,6 @@ public class MuteManager {
 
     private final Map<UUID, Long> mutedPlayers = new HashMap<>();
 
-    /**
-     * Spieler muten für Dauer in Millisekunden
-     * Dauer == 0 bedeutet permanent
-     */
     public void mutePlayer(UUID uuid, long durationMillis) {
         long unmuteTime = durationMillis == 0 ? Long.MAX_VALUE : System.currentTimeMillis() + durationMillis;
         mutedPlayers.put(uuid, unmuteTime);

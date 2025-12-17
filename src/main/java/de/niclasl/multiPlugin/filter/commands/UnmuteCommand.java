@@ -7,6 +7,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,7 @@ public class UnmuteCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(CommandSender sender, @NonNull Command command, @NonNull String label, String[] args) {
 
         if (!sender.hasPermission("multiplugin.unmute")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
@@ -51,13 +52,12 @@ public class UnmuteCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(CommandSender sender, @NonNull Command command, @NonNull String alias, String[] args) {
         List<String> completions = new ArrayList<>();
 
         if (!sender.hasPermission("multiplugin.unmute")) return completions;
 
         if (args.length == 1) {
-            // Alle aktuell gemuteten Spieler
             for (UUID mutedUUID : muteManager.getMutedPlayers()) {
                 OfflinePlayer mutedPlayer = Bukkit.getOfflinePlayer(mutedUUID);
                 String name = mutedPlayer.getName();

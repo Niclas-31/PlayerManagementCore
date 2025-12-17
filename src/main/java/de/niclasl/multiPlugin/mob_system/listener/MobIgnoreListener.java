@@ -12,7 +12,7 @@ public class MobIgnoreListener implements Listener {
     public void onEntityTarget(EntityTargetEvent event) {
         if (event.getTarget() instanceof Player player) {
             if (MobManager.isOwner(event.getEntity(), player)) {
-                event.setCancelled(true); // greift seinen Spawner nicht an
+                event.setCancelled(true);
             }
         }
     }

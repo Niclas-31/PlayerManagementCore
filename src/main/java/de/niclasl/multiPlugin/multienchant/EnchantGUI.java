@@ -13,13 +13,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 
 public record EnchantGUI(MultiPlugin plugin) {
 
     public void open(Player p, OfflinePlayer target) {
-        Inventory inv = Bukkit.createInventory(new EnchantSelectionHolder(), 54, "§6Choose an Enchantment");
+        Inventory inv = Bukkit.createInventory(null, 54, "§6Choose an Enchantment");
 
         ItemStack glass = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
         for (int i : new int[]{46,47,48,50,51,52,53}) inv.setItem(i, glass);
@@ -29,17 +30,16 @@ public record EnchantGUI(MultiPlugin plugin) {
             ItemMeta meta = item.getItemMeta();
             assert meta != null;
 
-            meta.setDisplayName("§a" + ench.getKey().getKey());
+            meta.setDisplayName("§a" + ench.getKeyOrThrow().getKey());
             meta.setLore(Arrays.asList(
                     "§7Click to select level",
                     "§7MaxLevel: " + ench.getMaxLevel()
             ));
 
-            // speichere den echten Enchantment Key
             meta.getPersistentDataContainer().set(
                     new NamespacedKey(plugin, "ench_key"),
                     PersistentDataType.STRING,
-                    ench.getKey().getKey()
+                    ench.getKeyOrThrow().getKey()
             );
 
             item.setItemMeta(meta);
@@ -77,7 +77,7 @@ public record EnchantGUI(MultiPlugin plugin) {
 
     public static class EnchantSelectionHolder implements InventoryHolder {
         @Override
-            public Inventory getInventory() {
+            public @Nullable Inventory getInventory() {
                 return null;
             }
         }

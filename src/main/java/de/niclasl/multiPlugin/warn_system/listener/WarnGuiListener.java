@@ -49,8 +49,7 @@ public class WarnGuiListener implements Listener {
         int slot = e.getSlot();
 
         if (slot == 26) {
-            // Hole den Zielspieler (du brauchst eine Zuordnung: Wer betrachtet wen)
-            OfflinePlayer target = getTarget(player); // <- das musst du ggf. anpassen
+            OfflinePlayer target = getTarget(player);
             if (target != null) {
                 plugin.getWatchGuiManager().open1(player, (Player) target);
             } else {
@@ -59,7 +58,6 @@ public class WarnGuiListener implements Listener {
             }
         }
 
-        // Klick auf vorherige Seite Button (Slot 35)
         if (slot == 35) {
             if (page > 1) {
                 OfflinePlayer target = Bukkit.getOfflinePlayer(targetUUID);
@@ -68,7 +66,6 @@ public class WarnGuiListener implements Listener {
             return;
         }
 
-        // Klick auf Nächste Seite Button (Slot 44)
         if (slot == 44) {
             List<Warning> warnings = WarnManager.getWarnings(targetUUID);
             int warningsPerPage = GuiConstants.ALLOWED_SLOTS.length;
@@ -83,11 +80,9 @@ public class WarnGuiListener implements Listener {
         if (slot == 17) {
             WarnGui.toggleSort(player);
             OfflinePlayer target = Bukkit.getOfflinePlayer(UUID.fromString(player.getMetadata("warn_target").getFirst().asString()));
-            warnGui.open(player, target, 1); // GUI neu öffnen
+            warnGui.open(player, target, 1);
         }
 
-        // Klick auf Warnungen
-        // Prüfen, ob Slot in allowedSlots ist
         int indexInPage = -1;
         for (int i = 0; i < GuiConstants.ALLOWED_SLOTS.length; i++) {
             if (GuiConstants.ALLOWED_SLOTS[i] == slot) {
@@ -95,7 +90,7 @@ public class WarnGuiListener implements Listener {
                 break;
             }
         }
-        if (indexInPage == -1) return; // Kein gültiger Slot
+        if (indexInPage == -1) return;
 
         List<Warning> warnings = WarnManager.getWarnings(targetUUID);
 
@@ -107,7 +102,6 @@ public class WarnGuiListener implements Listener {
 
         Warning warning = warnings.get(warningIndex);
 
-        // Rechtsklick → permanent machen
         if (e.isRightClick()) {
             if (warning.isPermanent()) {
                 player.sendMessage("§7This warning is already §cpermanent§7.");
@@ -123,7 +117,6 @@ public class WarnGuiListener implements Listener {
             return;
         }
 
-        // Linksklick → löschen (nur wenn nicht permanent)
         if (e.isLeftClick()) {
             if (warning.isPermanent()) {
                 player.sendMessage("§cThis warning is permanent and cannot be deleted.");
@@ -141,7 +134,6 @@ public class WarnGuiListener implements Listener {
     private OfflinePlayer getTarget(Player viewer) {
         Inventory inv = viewer.getOpenInventory().getTopInventory();
 
-        // Slot 10 ist das NameTag-Item (laut StatsGui)
         ItemStack nameTag = inv.getItem(53);
         if (nameTag == null || !nameTag.hasItemMeta()) return null;
 
@@ -149,7 +141,7 @@ public class WarnGuiListener implements Listener {
         if (meta == null || !meta.hasDisplayName()) return null;
 
         String displayName = meta.getDisplayName();
-        // displayName hat Format: "§aSpielername", wir entfernen den §a-Code
+
         String playerName = ChatColor.stripColor(displayName);
 
         if (playerName.isEmpty()) return null;

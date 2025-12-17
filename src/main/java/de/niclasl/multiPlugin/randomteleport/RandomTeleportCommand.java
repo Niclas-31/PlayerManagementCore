@@ -6,6 +6,7 @@ import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.World.Environment;
+import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -20,14 +21,13 @@ public class RandomTeleportCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("§cOnly players can use this command.");
             return true;
         }
 
-        // --- Cooldown prüfen ---
-        long cooldownSeconds = 300; // 5 Minuten
+        long cooldownSeconds = 300;
         long now = System.currentTimeMillis();
 
         if (cooldowns.containsKey(player)) {
@@ -92,9 +92,9 @@ public class RandomTeleportCommand implements CommandExecutor, TabCompleter {
                                 player.teleport(finalLocation);
                                 player.sendMessage("§aYou have been successfully teleported.");
                                 player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
-                                cooldowns.put(player, System.currentTimeMillis()); // Cooldown setzen
+                                cooldowns.put(player, System.currentTimeMillis());
                             }
-                        }.runTaskLater(plugin, 100L); // 5 Sekunden Delay
+                        }.runTaskLater(plugin, 100L);
                     }
                 }.runTask(plugin);
             }
@@ -118,7 +118,7 @@ public class RandomTeleportCommand implements CommandExecutor, TabCompleter {
 
 
     @Override
-    public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
+    public List<String> onTabComplete(@NonNull CommandSender sender, @NonNull Command command, @NonNull String alias, String[] args) {
         return List.of();
     }
 }

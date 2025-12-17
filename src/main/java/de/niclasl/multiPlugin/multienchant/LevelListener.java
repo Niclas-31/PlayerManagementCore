@@ -25,7 +25,7 @@ public record LevelListener(MultiPlugin plugin) implements Listener {
         if (e.getClickedInventory() == null) return;
 
         String title = e.getView().getTitle();
-        if (!title.startsWith("§aSelect Level ")) return; // Prüfen, dass es LevelGUI ist
+        if (!title.startsWith("§aSelect Level ")) return;
         e.setCancelled(true);
 
         if (!viewer.hasMetadata("level_target") || !viewer.hasMetadata("level_page") || !viewer.hasMetadata("level_ench")) return;
@@ -46,24 +46,17 @@ public record LevelListener(MultiPlugin plugin) implements Listener {
         int totalPages = (int) Math.ceil(totalLevels / (double) itemsPerPage);
         if (totalPages == 0) totalPages = 1;
 
-        // Page korrigieren
         page = Math.min(Math.max(page, 1), totalPages);
 
-        // ==========================
-        // Navigation
-        // ==========================
-        if (slot == 45 && page > 1) { // Previous Page
+        if (slot == 45 && page > 1) {
             plugin.getLevelGUI().open(viewer, target, ench, page - 1);
             return;
         }
-        if (slot == 53 && page < totalPages) { // Next Page
+        if (slot == 53 && page < totalPages) {
             plugin.getLevelGUI().open(viewer, target, ench, page + 1);
             return;
         }
 
-        // ==========================
-        // Level auswählen
-        // ==========================
         ItemStack clicked = e.getCurrentItem();
         if (clicked == null || !clicked.hasItemMeta()) return;
         String name = ChatColor.stripColor(Objects.requireNonNull(clicked.getItemMeta()).getDisplayName());
@@ -71,14 +64,11 @@ public record LevelListener(MultiPlugin plugin) implements Listener {
         if (name.startsWith("Level ")) {
             int level = Integer.parseInt(name.replace("Level ", ""));
             viewer.setMetadata("chosen_level", new FixedMetadataValue(plugin, level));
-            int xpCost = viewer.isOp() ? 0 : getXpCost(level); // Funktion wie vorher
+            int xpCost = viewer.isOp() ? 0 : getXpCost(level);
             viewer.sendMessage("§aLevel §e" + level + "§a selected! §7(Cost: §e" + xpCost + " XP§7)");
             return;
         }
 
-        // ==========================
-        // Confirm
-        // ==========================
         if (name.equalsIgnoreCase("Confirm")) {
             if (!viewer.hasMetadata("chosen_level")) {
                 viewer.sendMessage("§cPlease select a level first!");
@@ -88,7 +78,6 @@ public record LevelListener(MultiPlugin plugin) implements Listener {
             int level = viewer.getMetadata("chosen_level").getFirst().asInt();
             int xpCost = viewer.isOp() ? 0 : getXpCost(level);
 
-            // Prüfen XP
             if (!viewer.isOp() && viewer.getLevel() < xpCost) {
                 viewer.sendMessage("§cYou need §e" + xpCost + " Levels §cto apply this enchantment!");
                 return;
@@ -99,7 +88,7 @@ public record LevelListener(MultiPlugin plugin) implements Listener {
             if (target.getPlayer() != null && target.getPlayer().isOnline()) {
                 assert ench != null;
                 target.getPlayer().getInventory().getItemInMainHand().addUnsafeEnchantment(ench, level);
-                viewer.sendMessage("§aApplied §e" + ench.getKey().getKey() + "§a level §e" + level + " §ato " + target.getName());
+                viewer.sendMessage("§aApplied §e" + ench.getKeyOrThrow().getKey() + "§a level §e" + level + " §ato " + target.getName());
             }
 
             viewer.closeInventory();
@@ -113,7 +102,7 @@ public record LevelListener(MultiPlugin plugin) implements Listener {
             case 3 -> 20;
             case 4 -> 40;
             case 5 -> 60;
-            default -> level * 15; // alles ab Level 6: Level * 15 XP
+            default -> level * 15;
         };
     }
 }

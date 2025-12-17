@@ -49,10 +49,8 @@ public class MobGuiListener implements Listener {
 
         int slot = e.getSlot();
 
-        // Schließen / Zurück
         if (slot == 26) {
-            // Hole den Zielspieler (du brauchst eine Zuordnung: Wer betrachtet wen)
-            OfflinePlayer target = getTarget(player); // <- das musst du ggf. anpassen
+            OfflinePlayer target = getTarget(player);
             if (target != null) {
                 plugin.getWatchGuiManager().open1(player, (Player) target);
             } else {
@@ -62,16 +60,13 @@ public class MobGuiListener implements Listener {
         }
 
         if (slot == 17) {
-            // Filterbuch
             int idx = MobGui.playerFilterIndex.getOrDefault(player.getUniqueId(), -1);
 
             if (e.isLeftClick()) {
-                // Von "Alle" auf A, oder durch A-Z, dann wieder "Alle"
                 if (idx == -1) idx = 0;
                 else if (idx == MobGui.ALPHABET.length - 1) idx = -1;
                 else idx++;
             } else if (e.isRightClick()) {
-                // Rückwärts: von "Alle" auf Z, sonst rückwärts
                 if (idx == -1) idx = MobGui.ALPHABET.length - 1;
                 else if (idx == 0) idx = -1;
                 else idx--;
@@ -85,9 +80,8 @@ public class MobGuiListener implements Listener {
 
         OfflinePlayer target = Bukkit.getOfflinePlayer(UUID.fromString(player.getMetadata("mob_target").getFirst().asString()));
 
-        // Hole gefilterte Mobs für den aktuellen Buchstaben
-        int filterIndex = MobGui.playerFilterIndex.getOrDefault(player.getUniqueId(), -1); // -1 = Alle
-        Character currentLetter = filterIndex >= 0 ? MobGui.ALPHABET[filterIndex] : null; // null = Alle
+        int filterIndex = MobGui.playerFilterIndex.getOrDefault(player.getUniqueId(), -1);
+        Character currentLetter = filterIndex >= 0 ? MobGui.ALPHABET[filterIndex] : null;
         List<MobSpawnRequest> requests = MobManager.getRequests(targetUUID);
         List<MobSpawnRequest> filteredRequests;
         if (currentLetter != null) {
@@ -95,23 +89,21 @@ public class MobGuiListener implements Listener {
                     .filter(r -> r.getEntityType().name().startsWith(String.valueOf(currentLetter)))
                     .toList();
         } else {
-            filteredRequests = requests; // Alle anzeigen
+            filteredRequests = requests;
         }
 
         int mobsPerPage = GuiConstants.ALLOWED_SLOTS.length;
         int totalPages = (int) Math.ceil(filteredRequests.size() / (double) mobsPerPage);
 
-        // Navigation
-        if (slot == 35 && page > 1) { // zurück
+        if (slot == 35 && page > 1) {
             plugin.getMobGui().open(player, target, page - 1);
             return;
         }
-        if (slot == 44 && page < totalPages) { // weiter
+        if (slot == 44 && page < totalPages) {
             plugin.getMobGui().open(player, target, page + 1);
             return;
         }
 
-        // Inhaltsslot prüfen
         int indexInPage = -1;
         for (int i = 0; i < GuiConstants.ALLOWED_SLOTS.length; i++) {
             if (GuiConstants.ALLOWED_SLOTS[i] == slot) {
@@ -133,9 +125,8 @@ public class MobGuiListener implements Listener {
 
         EntityType entityType = request.getEntityType();
 
-        // Peaceful Check
         if (player.getWorld().getDifficulty() == Difficulty.PEACEFUL
-                && (MobCategories.HOSTILE_MOBS.contains(entityType) || MobCategories.HOSTILE_EXCEPTIONS_IN_PEACEFUL.contains(entityType))) {
+                && (MobCategories.HOSTILE_MOBS.contains(entityType))) {
             player.sendMessage(ChatColor.RED + "The server is set to Peaceful. This mob cannot be spawned.");
             return;
         }
@@ -146,13 +137,10 @@ public class MobGuiListener implements Listener {
             player.sendMessage("§eEnter in chat how many §a" + entityType.name() + "§e should be spawned.");
         } else if (e.isLeftClick()) {
             Bukkit.getScheduler().runTask(plugin, () -> {
-                // Mob einmal spawnen
                 Entity entity = player.getWorld().spawnEntity(player.getLocation(), entityType);
 
-                // Spieler schützen
                 MobManager.registerSpawn(entity, player);
 
-                // Wenn Warden → neutral machen
                 if (entity instanceof Warden warden) {
                     warden.setAware(false);
                     warden.setTarget(null);
@@ -185,7 +173,6 @@ public class MobGuiListener implements Listener {
 
                     MobManager.registerSpawn(entity, player);
 
-                    // Wenn Warden → neutral machen
                     if (entity instanceof Warden warden) {
                         warden.setAware(false);
                         warden.setTarget(null);

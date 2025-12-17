@@ -18,7 +18,6 @@ public record VanishManager(MultiPlugin plugin) {
 
         Player player = Bukkit.getPlayer(uuid);
         if (player != null) {
-            // Sichtbarkeit für andere Spieler
             for (Player other : Bukkit.getOnlinePlayers()) {
                 if (vanish) {
                     if (!other.hasPermission("multiPlugin.vanish.see")) {
@@ -29,7 +28,6 @@ public record VanishManager(MultiPlugin plugin) {
                 }
             }
 
-            // Eigenschaften für den Spieler setzen (nur einmal!)
             player.setSilent(vanish);
             player.setCollidable(!vanish);
             player.setInvulnerable(vanish);

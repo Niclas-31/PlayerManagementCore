@@ -29,7 +29,6 @@ public record UsedItemsGui(MultiPlugin plugin) {
     public void open(Player viewer, OfflinePlayer target, int page) {
         List<Material> usedItems = new ArrayList<>();
 
-        // Alle Blöcke mit >0 Statistiken sammeln
         for (Material material : Material.values()) {
             try {
                 if (target.getStatistic(Statistic.USE_ITEM, material) > 0) {
@@ -40,7 +39,7 @@ public record UsedItemsGui(MultiPlugin plugin) {
         }
 
         usedItems.sort(Comparator.comparingInt((Material m) ->
-                -target.getStatistic(Statistic.USE_ITEM, m) // sortieren nach Häufigkeit (absteigend)
+                -target.getStatistic(Statistic.USE_ITEM, m)
         ));
 
         int usedItemsPerPage = allowedSlots.length;
@@ -50,7 +49,6 @@ public record UsedItemsGui(MultiPlugin plugin) {
 
         Inventory gui = Bukkit.createInventory(null, 54, "§9Used Items: " + target.getName() + " §7(" + page + "/" + totalPages + ")");
 
-        // Rand
         ItemStack glass = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
         for (int i : new int[]{8,17}) {
             gui.setItem(i, glass);
@@ -90,7 +88,6 @@ public record UsedItemsGui(MultiPlugin plugin) {
             gui.setItem(allowedSlots[slotIndex++], item);
         }
 
-        // Kopf-Icon
         int headSlot = 53;
         ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) skull.getItemMeta();
@@ -100,7 +97,6 @@ public record UsedItemsGui(MultiPlugin plugin) {
         skull.setItemMeta(meta);
         gui.setItem(headSlot, skull);
 
-        // Zurück-Button
         ItemStack back = new ItemStack(Material.BARRIER);
         ItemMeta backMeta = back.getItemMeta();
         if (backMeta != null) {

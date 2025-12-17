@@ -26,7 +26,6 @@ public record MinedBlocksGui(MultiPlugin plugin) {
     public void open(Player viewer, OfflinePlayer target, int page) {
         List<Material> minedBlocks = new ArrayList<>();
 
-        // Alle Blöcke mit >0 Statistiken sammeln
         for (Material material : Material.values()) {
             try {
                 if (target.getStatistic(Statistic.MINE_BLOCK, material) > 0) {
@@ -37,7 +36,7 @@ public record MinedBlocksGui(MultiPlugin plugin) {
         }
 
         minedBlocks.sort(Comparator.comparingInt((Material m) ->
-                -target.getStatistic(Statistic.MINE_BLOCK, m) // sortieren nach Häufigkeit (absteigend)
+                -target.getStatistic(Statistic.MINE_BLOCK, m)
         ));
 
         int blocksPerPage = allowedSlots.length;
@@ -47,7 +46,6 @@ public record MinedBlocksGui(MultiPlugin plugin) {
 
         Inventory gui = Bukkit.createInventory(null, 54, "§9Mined Blocks: " + target.getName() + " §7(" + page + "/" + totalPages + ")");
 
-        // Rand
         ItemStack glass = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
         for (int i : new int[]{8,17}) {
             gui.setItem(i, glass);
@@ -87,7 +85,6 @@ public record MinedBlocksGui(MultiPlugin plugin) {
             gui.setItem(allowedSlots[slotIndex++], item);
         }
 
-        // Kopf-Icon
         int headSlot = 53;
         ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) skull.getItemMeta();
@@ -97,7 +94,6 @@ public record MinedBlocksGui(MultiPlugin plugin) {
         skull.setItemMeta(meta);
         gui.setItem(headSlot, skull);
 
-        // Zurück-Button
         ItemStack back = new ItemStack(Material.BARRIER);
         ItemMeta backMeta = back.getItemMeta();
         if (backMeta != null) {

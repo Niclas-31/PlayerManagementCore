@@ -16,10 +16,9 @@ public class TeleportManager {
 
     private static File folder;
     private static MultiPlugin plugin;
-    private static final Map<String, Set<UUID>> invitations = new HashMap<>();
     private final Map<UUID, BukkitTask> pendingTeleports = new HashMap<>();
     private static final Map<String, File> dimensionFiles = new HashMap<>();
-    private static final Map<String, Set<UUID>> invitedPlayers = new HashMap<>(); // Dimension → Liste eingeladener Spieler
+    private static final Map<String, Set<UUID>> invitedPlayers = new HashMap<>();
 
     public TeleportManager(File dataFolder, MultiPlugin plugin) {
         TeleportManager.plugin = plugin;
@@ -70,9 +69,8 @@ public class TeleportManager {
                 World world = Bukkit.getWorld(worldName);
                 Location loc = (world != null)
                         ? world.getSpawnLocation()
-                        : Bukkit.getWorlds().get(0).getSpawnLocation();
+                        : Bukkit.getWorlds().getFirst().getSpawnLocation();
 
-                // Falls keine dimensiontypen übergeben wurde, automatisch bestimmen
                 String type = (dimensionType != null) ? dimensionType.toLowerCase() : "overworld";
 
                 if (world != null && (dimensionType == null || dimensionType.isBlank())) {
@@ -83,18 +81,16 @@ public class TeleportManager {
                     }
                 }
 
-                // Spezielle Koordinaten für End-Plattform
                 if (type.equals("end")) {
-                    loc = new Location(world, 100.5, 50, 0.5); // teleportiert auf die Mitte der Plattform
+                    loc = new Location(world, 100.5, 50, 0.5);
                 }
 
-                // Grunddaten speichern
                 config.set("x", loc.getX());
                 config.set("y", loc.getY());
                 config.set("z", loc.getZ());
                 config.set("world", worldName);
                 config.set("dimensionType", type);
-                config.set("private", false); // standardmäßig öffentlich
+                config.set("private", false);
 
                 config.save(file);
                 dimensionFiles.put(dimension + ".yml", file);
@@ -120,7 +116,6 @@ public class TeleportManager {
     }
 
     public static void createDimension(String dimension, String dimensionType, Player player) {
-        // Prüfe, ob Spieler Nether oder End erstellen will, und ob er Admin ist
         if ((dimensionType.equalsIgnoreCase("nether") || dimensionType.equalsIgnoreCase("end"))
                 && !player.hasPermission("multiplugin.teleport.dimension.setcoords")) {
             player.sendMessage(ChatColor.RED + "These dimension types are only allowed for admins.");
@@ -129,7 +124,6 @@ public class TeleportManager {
 
         File file = new File(folder, dimension + ".yml");
         if (file.exists()) {
-            // Datei existiert schon, lade und ggf. Typ korrigieren
             try {
                 YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
                 String storedType = config.getString("dimensionType");
@@ -144,9 +138,8 @@ public class TeleportManager {
             return;
         }
 
-        // Welt erstellen
         WorldCreator worldCreator = new WorldCreator(dimension);
-        worldCreator.environment(getEnvironmentFromType(dimensionType)); // Umgebung setzen
+        worldCreator.environment(getEnvironmentFromType(dimensionType));
         World world = worldCreator.createWorld();
         assert world != null;
         Location spawnLoc = world.getSpawnLocation();
@@ -184,7 +177,7 @@ public class TeleportManager {
         if (owner != null && owner.equals(player.getUniqueId().toString())) return true;
 
         if (isInvited(dimension, player.getUniqueId())) {
-            return true; // Spieler ist eingeladen → hat Zugriff
+            return true;
         }
 
         return player.hasPermission("dimension.access." + dimension);
@@ -263,7 +256,6 @@ public class TeleportManager {
             throw new RuntimeException(e);
         }
 
-        // 🔹 Direkt in SpawnManager hinzufügen
         switch (dimensionType.toLowerCase()) {
             case "nether" -> SpawnManager.getAllNetherSpawns().add(loc);
             case "overworld", "normal" -> SpawnManager.getAllOverworldSpawns().add(loc);
@@ -276,7 +268,7 @@ public class TeleportManager {
             case "overworld", "world" -> "world";
             case "nether", "world_nether" -> "world_nether";
             case "end", "world_the_end" -> "world_the_end";
-            default -> dimension;  // Eigene Welten behalten ihren Namen
+            default -> dimension;
         };
     }
 
@@ -303,7 +295,6 @@ public class TeleportManager {
     public static boolean deleteDimension(String dimension) {
         boolean deletedSomething = false;
 
-        // Lösche .yml-Datei
         File file = new File(folder, dimension + ".yml");
         if (file.exists()) {
             if (!file.delete()) return false;
@@ -311,14 +302,12 @@ public class TeleportManager {
             deletedSomething = true;
         }
 
-        // Entlade Welt
         World world = Bukkit.getWorld(dimension);
         if (world != null) {
             if (!Bukkit.unloadWorld(world, false)) return false;
             deletedSomething = true;
         }
 
-        // Lösche Weltordner
         File worldFolder = new File(Bukkit.getWorldContainer(), dimension);
         if (worldFolder.exists()) {
             deleteFolder(worldFolder);
@@ -348,7 +337,6 @@ public class TeleportManager {
 
         FileConfiguration config = YamlConfiguration.loadConfiguration(file);
 
-        // Standard-Welten
         Set<String> defaultWorlds = Set.of("world", "world_nether", "world_the_end");
         if (defaultWorlds.contains(dimension.toLowerCase())) {
             if (!player.isOp()) {
@@ -356,7 +344,6 @@ public class TeleportManager {
                 return;
             }
         } else {
-            // Eigene Welt → Owner prüfen
             String ownerUUID = config.getString("owner");
             if (ownerUUID == null || !ownerUUID.equals(player.getUniqueId().toString())) {
                 player.sendMessage(ChatColor.RED + "You are not the owner of world '" + dimension + "'.");
@@ -364,7 +351,6 @@ public class TeleportManager {
             }
         }
 
-        // Delay setzen
         config.set("delay", seconds);
 
         try {
@@ -382,7 +368,7 @@ public class TeleportManager {
         if (!file.exists()) return 5;
 
         FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-        return config.getInt("delay", 5); // Default: 5 Sekunden
+        return config.getInt("delay", 5);
     }
 
     public void teleportWithDelay(Player player, Location target, int delaySeconds, String dimension) {
@@ -465,7 +451,7 @@ public class TeleportManager {
         try {
             return UUID.fromString(ownerStr);
         } catch (IllegalArgumentException e) {
-            return null; // Ungültiges UUID-Format
+            return null;
         }
     }
 
@@ -478,23 +464,23 @@ public class TeleportManager {
     }
 
     public static boolean isInvited(String dimension, UUID playerUUID) {
-        Set<UUID> invited = invitations.get(dimension);
+        Set<UUID> invited = invitedPlayers.get(dimension);
         return invited != null && invited.contains(playerUUID);
     }
 
     public static boolean isOwner(Player player, String dimension) {
         File file = dimensionFiles.get(dimension + ".yml");
-        if (file == null || !file.exists()) return false;
+        if (file == null || !file.exists()) return true;
 
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
         String ownerUUID = config.getString("owner");
-        if (ownerUUID == null) return false;
+        if (ownerUUID == null) return true;
 
-        return player.getUniqueId().toString().equals(ownerUUID);
+        return !player.getUniqueId().toString().equals(ownerUUID);
     }
 
     public static void invite(Player owner, String dimension, Player target) {
-        if (!isOwner(owner, dimension)) {
+        if (isOwner(owner, dimension)) {
             owner.sendMessage("§cYou are not the owner of this world!");
             return;
         }

@@ -6,14 +6,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * API: Plugins können vor einem geplanten Plugin-Teleport diese Methode aufrufen,
- * damit der Teleport nicht geblockt wird:
- * <p>
- * PortalApi.registerPluginTeleport(player, "TeamWar");
- * <p>
- * Diese Registerung gilt nur für das nächste Teleport-Event des Spielers.
- */
 public final class PortalApi {
 
     private static final Map<UUID, String> nextBypass = new ConcurrentHashMap<>();
@@ -23,8 +15,14 @@ public final class PortalApi {
         nextBypass.put(player.getUniqueId(), pluginName);
     }
 
-    public static String pollNextBypass(Player player) {
+    public static String getNextBypass(Player player) {
         if (player == null) return null;
-        return nextBypass.remove(player.getUniqueId());
+        return nextBypass.get(player.getUniqueId());
+    }
+
+    public static void removePluginFromBypass(String pluginName) {
+        if (pluginName == null) return;
+
+        nextBypass.entrySet().removeIf(entry -> entry.getValue().equalsIgnoreCase(pluginName));
     }
 }

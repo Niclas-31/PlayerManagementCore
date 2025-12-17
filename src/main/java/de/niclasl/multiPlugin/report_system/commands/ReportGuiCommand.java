@@ -11,6 +11,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,18 +25,17 @@ public class ReportGuiCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("§cOnly players can use this command.");
             return true;
         }
 
-        if (!sender.hasPermission("multiplugin.report.history")) {
+        if (!sender.hasPermission("multiplugin.reporthistory")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }
 
-        // Argument-Prüfung
         if (args.length < 1) {
             player.sendMessage("§cUsage: /report-history <player> [page]");
             return true;
@@ -63,22 +63,22 @@ public class ReportGuiCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        // Seitenanzahl prüfen
         int maxPage = reportGui.getTotalPages(target);
         if (page > maxPage) {
             player.sendMessage("§cThis player has only " + maxPage + " page" + (maxPage == 1 ? "" : "s") + " of history.");
             return true;
         }
 
-        reportGui.open(player, target, page);
+        ReportGui.open(player, target, page);
         return true;
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(CommandSender sender, @NonNull Command command, @NonNull String alias, String[] args) {
         List<String> completions = new ArrayList<>();
 
-        // 1. Argument: Spielernamen
+        if (!sender.hasPermission("multiplugin.reporthistory")) return completions;
+
         if (args.length == 1) {
             String partial = args[0].toLowerCase();
 
@@ -90,7 +90,6 @@ public class ReportGuiCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        // 2. Argument: Seitenzahlen
         if (args.length == 2) {
             OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
             if (target.getName() != null && target.hasPlayedBefore()) {

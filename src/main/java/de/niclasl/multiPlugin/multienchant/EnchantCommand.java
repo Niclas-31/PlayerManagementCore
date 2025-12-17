@@ -9,6 +9,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.List;
 public record EnchantCommand(MultiPlugin plugin) implements CommandExecutor, TabCompleter {
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, String[] args) {
         if (!(sender instanceof Player p)) {
             sender.sendMessage("Only players can use this.");
             return true;
@@ -35,11 +36,10 @@ public record EnchantCommand(MultiPlugin plugin) implements CommandExecutor, Tab
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(@NonNull CommandSender sender, @NonNull Command command, @NonNull String alias, String[] args) {
         List<String> completions = new ArrayList<>();
 
         if (args.length == 1) {
-            // Spieler-Vorschläge (bereits vorhanden)
             String partial = args[0].toLowerCase();
             for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
                 String name = p.getName();

@@ -20,7 +20,6 @@ public record DimensionGui(MultiPlugin plugin) {
     public void open(Player player, OfflinePlayer target, int page) {
         List<String> dimensions = TeleportManager.getAllDimensions();
 
-        // Slots, die für Warnungen benutzt werden (48 Slots verteilt auf 6 Reihen, je 8 Slots, ohne die jeweils 9., 17., 26., 35., 44., 53. Slots)
         int[] allowedSlots = {
                 0,1,2,3,4,5,6,7,
                 9,10,11,12,13,14,15,16,
@@ -66,7 +65,6 @@ public record DimensionGui(MultiPlugin plugin) {
             Material mat = getMaterialForDimension(dim);
             String display = capitalize(dim);
 
-            // NEUES ItemStack pro Durchlauf!
             ItemStack item = new ItemStack(mat);
             ItemMeta meta = item.getItemMeta();
             if (meta != null) {
@@ -85,7 +83,6 @@ public record DimensionGui(MultiPlugin plugin) {
         back.setItemMeta(backMeta);
         inv.setItem(26, back);
 
-        // Navigationspfeile:
         if (page > 1) {
             ItemStack backArrow = new ItemStack(Material.ARROW);
             ItemMeta backArrowMeta = backArrow.getItemMeta();

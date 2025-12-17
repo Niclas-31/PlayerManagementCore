@@ -64,7 +64,7 @@ public class WarnManager {
         for (Warning warning : warnings) {
             Map<String, Object> map = new LinkedHashMap<>();
             map.put("id", warning.getId());
-            map.put("reason", warning.getReason()); // oder getReason(), je nach deiner Klasse
+            map.put("reason", warning.getReason());
             map.put("date", warning.getDate());
             map.put("by", warning.getFrom());
             map.put("permanent", warning.isPermanent());

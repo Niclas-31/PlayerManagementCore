@@ -17,7 +17,7 @@ public class PlaytimeListener implements Listener {
 
     private final PlaytimeManager playtimeManager;
     private final Map<UUID, BukkitRunnable> timers = new HashMap<>();
-    private final MultiPlugin plugin; // Ersetze das mit deinem Plugin-Haupttyp
+    private final MultiPlugin plugin;
 
     public PlaytimeListener(MultiPlugin plugin, PlaytimeManager playtimeManager) {
         this.plugin = plugin;
@@ -36,7 +36,7 @@ public class PlaytimeListener implements Listener {
             }
         };
 
-        runnable.runTaskTimer(plugin, 20L, 20L); // 1 Sekunde
+        runnable.runTaskTimer(plugin, 20L, 20L);
         timers.put(uuid, runnable);
     }
 
@@ -44,13 +44,11 @@ public class PlaytimeListener implements Listener {
     public void onQuit(PlayerQuitEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
 
-        // Timer stoppen
         BukkitRunnable runnable = timers.remove(uuid);
         if (runnable != null) {
             runnable.cancel();
         }
 
-        // Zeit speichern (optional, falls nötig)
-        playtimeManager.savePlayerConfig(uuid, playtimeManager.getPlayerConfig(uuid));
+        playtimeManager.savePlayerConfig(uuid, PlaytimeManager.getPlayerConfig(uuid));
     }
 }

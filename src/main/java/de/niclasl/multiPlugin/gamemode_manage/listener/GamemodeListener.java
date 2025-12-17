@@ -36,13 +36,11 @@ public record GamemodeListener(MultiPlugin plugin) implements Listener {
 
         ItemStack clicked = event.getCurrentItem();
 
-        // Zurück-Button (z. B. Slot 31)
         if (clicked.getType() == Material.BARRIER) {
             plugin.getWatchGuiManager().open1(viewer, target);
             return;
         }
 
-        // Gamemode-Wechsel
         GameMode newMode = switch (clicked.getType()) {
             case IRON_SWORD -> GameMode.SURVIVAL;
             case GRASS_BLOCK -> GameMode.CREATIVE;

@@ -21,11 +21,11 @@ public record PortalGui(MultiPlugin plugin) implements Listener {
     private static final String TITLE = "Portal Settings";
 
     public static void openFor(Player player) {
-        Inventory inv = Bukkit.createInventory(null, 9, TITLE);
+        Inventory inv = Bukkit.createInventory(null, 18, TITLE);
 
         int slot = 0;
         for (PortalType t : PortalType.values()) {
-            if (slot >= 9) break; // simple: max 9 entries (erweiterbar)
+            if (slot >= 11) break;
             boolean enabled = PortalConfigManager.isPortalEnabled(t);
             ItemStack item = new ItemStack(enabled ? Material.GREEN_WOOL : Material.RED_WOOL);
             ItemMeta meta = item.getItemMeta();

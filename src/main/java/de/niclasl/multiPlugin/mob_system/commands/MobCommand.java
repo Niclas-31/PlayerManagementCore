@@ -13,6 +13,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ public class MobCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("§cOnly players can use this command.");
             return true;
@@ -50,7 +51,7 @@ public class MobCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        int page = 1; // default
+        int page = 1;
         if (args.length == 2) {
             try {
                 page = Integer.parseInt(args[1]);
@@ -60,19 +61,16 @@ public class MobCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        // --- Bestimme die Anzahl der Seiten (basierend auf tatsächlichen Requests) ---
         List<MobSpawnRequest> requests = MobManager.getRequests(target.getUniqueId());
         int mobsPerPage = GuiConstants.ALLOWED_SLOTS.length;
         int totalPages = (int) Math.ceil(requests.size() / (double) mobsPerPage);
-        if (totalPages < 1) totalPages = 1; // fallback: mindestens Seite 1
+        if (totalPages < 1) totalPages = 1;
 
-        // --- Validierung: nur erlaubte Seiten zulassen ---
         if (page < 1 || page > totalPages) {
             player.sendMessage("§cPage not found. There are only §e" + totalPages + " §cPage(s).");
             return true;
         }
 
-        // --- Metadaten setzen & GUI öffnen ---
         player.setMetadata("mob_target", new FixedMetadataValue(plugin.getMobGui().plugin(), target.getUniqueId().toString()));
         player.setMetadata("mob_page", new FixedMetadataValue(plugin.getMobGui().plugin(), page));
         mobGui.open(player, target, page);
@@ -80,11 +78,10 @@ public class MobCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(@NonNull CommandSender sender, @NonNull Command command, @NonNull String alias, String[] args) {
         List<String> completions = new ArrayList<>();
 
         if (args.length == 1) {
-            // Spieler-Vorschläge (bereits vorhanden)
             String partial = args[0].toLowerCase();
             for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
                 String name = p.getName();
@@ -96,7 +93,6 @@ public class MobCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 2) {
-            // Wenn ein (exakter) Spielername vorhanden ist, schlage gültige Seiten vor
             String playerName = args[0];
             OfflinePlayer target = null;
             for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {

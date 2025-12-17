@@ -4,6 +4,10 @@ import de.niclasl.multiPlugin.armor.listener.DamageListener;
 import de.niclasl.multiPlugin.armor.manager.CombatManager;
 import de.niclasl.multiPlugin.armor.manager.RepairManager;
 import de.niclasl.multiPlugin.armor.task.RepairTask;
+import de.niclasl.multiPlugin.audit.AuditManager;
+import de.niclasl.multiPlugin.audit.command.AuditCommand;
+import de.niclasl.multiPlugin.audit.gui.AuditGui;
+import de.niclasl.multiPlugin.audit.listener.AuditGuiListener;
 import de.niclasl.multiPlugin.ban_system.commands.BanCommand;
 import de.niclasl.multiPlugin.ban_system.commands.BanHistoryCommand;
 import de.niclasl.multiPlugin.ban_system.commands.UnbanCommand;
@@ -34,11 +38,12 @@ import de.niclasl.multiPlugin.mob_system.listener.MobIgnoreListener;
 import de.niclasl.multiPlugin.mob_system.listener.PlayerJoinListener;
 import de.niclasl.multiPlugin.mob_system.manager.MobManager;
 import de.niclasl.multiPlugin.multienchant.*;
-import de.niclasl.multiPlugin.permission.commands.PermissionCommand;
 import de.niclasl.multiPlugin.playtime.listener.PlaytimeListener;
 import de.niclasl.multiPlugin.playtime.manager.PlaytimeManager;
+import de.niclasl.multiPlugin.portal.api.PortalApi;
 import de.niclasl.multiPlugin.portal.commands.PortalCommand;
 import de.niclasl.multiPlugin.portal.gui.PortalGui;
+import de.niclasl.multiPlugin.portal.listener.PortalListener;
 import de.niclasl.multiPlugin.portal.listener.TeleportBlockerListener;
 import de.niclasl.multiPlugin.portal.manager.PortalConfigManager;
 import de.niclasl.multiPlugin.randomteleport.RandomTeleportCommand;
@@ -79,6 +84,7 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -108,6 +114,8 @@ public class MultiPlugin extends JavaPlugin {
     private final UsedItemsGui usedItemsGui = new UsedItemsGui(this);
     private final CraftedItemsGui craftedItemsGui = new CraftedItemsGui(this);
     private final WatchGuiManager watchGuiManager = new WatchGuiManager(this);
+    private final AuditGui auditGui = new AuditGui(this);
+    private final AuditManager auditManager = new AuditManager();
 
     private final VanishManager vanishManager = new VanishManager(this);
     private final SpawnManager spawnManager = new SpawnManager(this);
@@ -142,7 +150,7 @@ public class MultiPlugin extends JavaPlugin {
 
         // 3. GUIs
         WarnGui warnGui = new WarnGui(this, warnManager);
-        ReportGui reportGui = new ReportGui(this, reportManager);
+        ReportGui reportGui = new ReportGui(this);
         BanHistoryGui banHistoryGui = new BanHistoryGui(this);
         PlayerEffectsGui playerEffectsGui = new PlayerEffectsGui(this);
 
@@ -215,9 +223,10 @@ public class MultiPlugin extends JavaPlugin {
         Objects.requireNonNull(getCommand("portal")).setExecutor(new PortalCommand(this));
         Objects.requireNonNull(getCommand("portal")).setTabCompleter(new PortalCommand(this));
 
-        Objects.requireNonNull(getCommand("permission")).setExecutor(new PermissionCommand());
-        Objects.requireNonNull(getCommand("permission")).setTabCompleter(new PermissionCommand());
         Objects.requireNonNull(getCommand("enchant-gui")).setExecutor(new EnchantCommand(this));
+
+        Objects.requireNonNull(getCommand("audit")).setExecutor(new AuditCommand(this));
+        Objects.requireNonNull(getCommand("audit")).setTabCompleter(new AuditCommand(this));
 
         // 5. Listener registrieren
         getServer().getPluginManager().registerEvents(new BanHistoryGuiListener(banHistoryManager, this), this);
@@ -245,6 +254,8 @@ public class MultiPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PortalGui(this), this);
         getServer().getPluginManager().registerEvents(new EnchantListener(this), this);
         getServer().getPluginManager().registerEvents(new LevelListener(this), this);
+        getServer().getPluginManager().registerEvents(new PortalListener(), this);
+        getServer().getPluginManager().registerEvents(new AuditGuiListener(this), this);
 
         // Combat-System jede Sekunde aufräumen
         Bukkit.getScheduler().runTaskTimer(
@@ -259,13 +270,33 @@ public class MultiPlugin extends JavaPlugin {
         portalConfigManager.init();
 
         RepairManager.init(getDataFolder());
+
+        AuditManager.init(getDataFolder());
+
         portalConfigManager.init();
+        registerWhitelistPlugins();
 
         spawnManager.loadAllSpawns();
 
         // Task starter
         RepairTask.startAutoRepair(this, 20, 10.0, 5);
+    }
 
+    private void registerWhitelistPlugins() {
+        List<String> whitelist = PortalConfigManager.getWhitelist();
+
+        for (String pluginName : whitelist) {
+            org.bukkit.plugin.Plugin plugin = Bukkit.getPluginManager().getPlugin(pluginName);
+            if (plugin != null) {
+                // Wir benutzen die API-Map, um alle Spieler zu erlauben
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    PortalApi.registerPluginTeleport(player, pluginName);
+                }
+                getLogger().info("Whitelist plugin registered: " + pluginName);
+            } else {
+                getLogger().warning("Whitelist plugin not found: " + pluginName);
+            }
+        }
     }
 
     @Override
@@ -477,11 +508,20 @@ public class MultiPlugin extends JavaPlugin {
         return watchGuiManager;
     }
 
+    public AuditGui getAuditGui() {
+        return auditGui;
+    }
+
+
     public VanishManager getVanishManager() {
         return vanishManager;
     }
 
     public PortalConfigManager getPortalConfigManager() {
         return portalConfigManager;
+    }
+
+    public AuditManager getAuditManager() {
+        return auditManager;
     }
 }

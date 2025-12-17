@@ -1,5 +1,8 @@
 package de.niclasl.multiPlugin.report_system.commands;
 
+import de.niclasl.multiPlugin.audit.AuditManager;
+import de.niclasl.multiPlugin.audit.model.AuditAction;
+import de.niclasl.multiPlugin.audit.model.AuditType;
 import de.niclasl.multiPlugin.report_system.manager.ReportManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -8,6 +11,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -22,7 +26,7 @@ public class ReportCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("Only players can create reports.");
             return true;
@@ -52,13 +56,10 @@ public class ReportCommand implements CommandExecutor, TabCompleter {
         String reason = String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length));
         String time = new java.text.SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(new Date());
 
-        // Report speichern
         reportManager.addReport(target.getUniqueId(), reason, sender.getName(), time, "OPEN", false);
 
-        // Feedback an den Spieler
         player.sendMessage(ChatColor.GREEN + "Your report against §e" + target.getName() + " §ahas been sent.");
 
-        // Mods benachrichtigen
         Bukkit.getOnlinePlayers().stream()
                 .filter(p -> p.hasPermission("report.notify"))
                 .forEach(p -> p.sendMessage(ChatColor.RED + "[Report] "
@@ -66,11 +67,19 @@ public class ReportCommand implements CommandExecutor, TabCompleter {
                         + " has " + target.getName()
                         + " reported: " + ChatColor.GRAY + reason));
 
+        AuditManager.log(
+                target,
+                AuditType.REPORT,
+                AuditAction.ADD,
+                player,
+                reason
+        );
+
         return true;
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(@NonNull CommandSender sender, @NonNull Command command, @NonNull String alias, String[] args) {
         List<String> completions = new ArrayList<>();
         if (args.length == 1) {
             Bukkit.getOnlinePlayers().forEach(p -> {

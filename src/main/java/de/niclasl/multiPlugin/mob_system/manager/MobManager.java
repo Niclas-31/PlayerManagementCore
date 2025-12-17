@@ -31,17 +31,15 @@ public class MobManager {
 
     public void checkAndCreateDefaultIfAbsent(UUID target) {
         File file = getFile(target);
-        if (file.exists()) return; // Datei existiert bereits → nichts tun
+        if (file.exists()) return;
 
         List<MobSpawnRequest> defaultSpawns = new ArrayList<>();
 
         Set<EntityType> allRelevantMobs = EnumSet.noneOf(EntityType.class);
-        allRelevantMobs.addAll(MobCategories.UNUSED_MOBS);
         allRelevantMobs.addAll(MobCategories.HOSTILE_MOBS);
+        allRelevantMobs.addAll(MobCategories.BOSS_MOBS);
         allRelevantMobs.addAll(MobCategories.NEUTRAL_MOBS);
         allRelevantMobs.addAll(MobCategories.PASSIVE_MOBS);
-        allRelevantMobs.addAll(MobCategories.CAN_IN_PEACEFUL);
-        allRelevantMobs.addAll(MobCategories.HOSTILE_EXCEPTIONS_IN_PEACEFUL);
 
         for (EntityType type : allRelevantMobs) {
             defaultSpawns.add(new MobSpawnRequest(type));
@@ -61,7 +59,6 @@ public class MobManager {
 
         List<MobSpawnRequest> loaded = loadSpawns(target);
 
-        // Wenn etwas schieflief oder keines gültigen Mobs drin sind → neu erzeugen
         if (loaded.isEmpty()) {
             List<MobSpawnRequest> defaults = createDefaultMobList();
             saveSpawns(target, defaults);
@@ -88,10 +85,10 @@ public class MobManager {
                     EntityType entityType = EntityType.valueOf(typeName);
                     spawns.add(new MobSpawnRequest(entityType));
                 } catch (IllegalArgumentException e) {
-                    Bukkit.getLogger().warning("Ungültiger EntityType in Datei: " + typeName);
+                    Bukkit.getLogger().warning("Invalid EntityType in file: " + typeName);
                 }
             } else {
-                Bukkit.getLogger().warning("Fehlender oder ungültiger 'type' Eintrag in spawns-Datei: " + raw);
+                Bukkit.getLogger().warning("Missing or invalid 'type' entry in spawns file: " + raw);
             }
         }
 
@@ -133,13 +130,13 @@ public class MobManager {
     public static List<MobSpawnRequest> createDefaultMobList() {
         Set<EntityType> allRelevantMobs = EnumSet.noneOf(EntityType.class);
         allRelevantMobs.addAll(MobCategories.HOSTILE_MOBS);
+        allRelevantMobs.addAll(MobCategories.BOSS_MOBS);
         allRelevantMobs.addAll(MobCategories.NEUTRAL_MOBS);
         allRelevantMobs.addAll(MobCategories.PASSIVE_MOBS);
-        allRelevantMobs.addAll(MobCategories.CAN_IN_PEACEFUL);
 
         return allRelevantMobs.stream()
                 .map(MobSpawnRequest::new)
-                .toList(); // Java 16+; falls du Java 8 nutzt: collect(Collectors.toList())
+                .toList();
     }
 
     public static void registerSpawn(Entity mob, Player owner) {

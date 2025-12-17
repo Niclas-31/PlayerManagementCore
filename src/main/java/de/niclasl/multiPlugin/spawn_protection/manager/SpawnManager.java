@@ -51,7 +51,6 @@ public record SpawnManager(MultiPlugin plugin) {
                 }
             }
 
-            // Finde die passende Welt mit passendem Environment
             World world = Bukkit.getWorlds().stream()
                     .filter(w -> w.getEnvironment() == env)
                     .findFirst()
@@ -64,7 +63,6 @@ public record SpawnManager(MultiPlugin plugin) {
 
             Location loc = new Location(world, x, y, z);
 
-            // Direkt in die passende Liste einfügen
             switch (env) {
                 case NETHER -> netherSpawns.add(loc);
                 case NORMAL -> overworldSpawns.add(loc);

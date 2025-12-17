@@ -40,7 +40,6 @@ public class PlayerMonitorListener implements Listener {
         Player player = (Player) event.getWhoClicked();
         int slot = event.getSlot();
 
-        // Zielspieler über Spielerkopf ermitteln
         Player target = null;
         for (ItemStack item : event.getInventory().getContents()) {
             if (item != null && item.getType() == Material.PLAYER_HEAD && item.hasItemMeta()) {
@@ -55,7 +54,6 @@ public class PlayerMonitorListener implements Listener {
             return;
         }
 
-        // Alle anderen Items weiter wie gewohnt behandeln:
         Material clickedType = event.getCurrentItem().getType();
         String clickedName = event.getCurrentItem().getItemMeta() != null
                 ? ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()) : "";
@@ -111,7 +109,7 @@ public class PlayerMonitorListener implements Listener {
                     target.sendMessage("§cYour airplane mode has been disabled!");
                 } else {
                     target.setAllowFlight(true);
-                    target.setFlying(true); // optional direkt starten
+                    target.setFlying(true);
                     target.sendMessage("§aYour airplane mode has been activated!");
                 }
             }
@@ -126,6 +124,7 @@ public class PlayerMonitorListener implements Listener {
             }
             case POTION -> playerEffectsGui.open(player, target);
             case EXPERIENCE_BOTTLE -> plugin.getEnchantGUI().open(player, target);
+            case NOTE_BLOCK -> plugin.getAuditGui().open(player, target, 1);
             case ARROW -> {
                 if (slot == 53) {
                     plugin.getWatchGuiManager().open2(player, target);

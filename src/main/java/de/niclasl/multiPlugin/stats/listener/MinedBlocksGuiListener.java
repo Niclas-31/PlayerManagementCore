@@ -25,7 +25,6 @@ public record MinedBlocksGuiListener(MultiPlugin plugin) implements Listener {
 
         event.setCancelled(true);
 
-        // Metadaten prüfen
         if (!player.hasMetadata("block_target") || !player.hasMetadata("block_page")) return;
 
         UUID targetUUID = UUID.fromString(player.getMetadata("block_target").getFirst().asString());
@@ -43,12 +42,11 @@ public record MinedBlocksGuiListener(MultiPlugin plugin) implements Listener {
             }
         }
 
-        int blocksPerPage = GuiConstants.ALLOWED_SLOTS.length; // oder hardcoded: 45
+        int blocksPerPage = GuiConstants.ALLOWED_SLOTS.length;
         int totalPages = (int) Math.ceil(totalMinedBlocks / (double) blocksPerPage);
         if (totalPages == 0) totalPages = 1;
 
-        // Button: Zurück zur Übersicht
-        if (slot == 26) { // zurück zur Übersicht
+        if (slot == 26) {
             OfflinePlayer target = getTarget(player);
             if (target instanceof Player onlineTarget)
                 plugin.getEnchantGUI().open(player, onlineTarget);
@@ -59,14 +57,12 @@ public record MinedBlocksGuiListener(MultiPlugin plugin) implements Listener {
             return;
         }
 
-        // Button: Vorherige Seite
         if (slot == 35 && page > 1) {
             OfflinePlayer target = Bukkit.getOfflinePlayer(targetUUID);
             plugin.getMinedBlocksGui().open(player, target, page - 1);
             return;
         }
 
-        // Button: Nächste Seite
         if (slot == 44 && page < totalPages) {
             OfflinePlayer target = Bukkit.getOfflinePlayer(targetUUID);
             plugin.getMinedBlocksGui().open(player, target, page + 1);
@@ -75,7 +71,7 @@ public record MinedBlocksGuiListener(MultiPlugin plugin) implements Listener {
 
     private OfflinePlayer getTarget(Player viewer) {
         Inventory inv = viewer.getOpenInventory().getTopInventory();
-        ItemStack nameTag = inv.getItem(53); // oder anderer Slot
+        ItemStack nameTag = inv.getItem(53);
         if (nameTag == null || !nameTag.hasItemMeta()) return null;
         ItemMeta meta = nameTag.getItemMeta();
         if (meta == null || !meta.hasDisplayName()) return null;

@@ -1,7 +1,6 @@
 package de.niclasl.multiPlugin.stats.listener;
 
 import de.niclasl.multiPlugin.MultiPlugin;
-import de.niclasl.multiPlugin.manage_player.gui.WatchGuiManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -28,8 +27,7 @@ public record StatsGuiListener(MultiPlugin plugin) implements Listener {
 
         if (slot == 45) {
             if (viewer.hasPermission("manage.player")) {
-                // Hole den Zielspieler (du brauchst eine Zuordnung: Wer betrachtet wen)
-                OfflinePlayer target = getTarget(viewer); // <- das musst du ggf. anpassen
+                OfflinePlayer target = getTarget(viewer);
                 if (target != null) {
                     plugin.getWatchGuiManager().open1(viewer, (Player) target);
                 } else {
@@ -66,7 +64,6 @@ public record StatsGuiListener(MultiPlugin plugin) implements Listener {
     private OfflinePlayer getTarget(Player viewer) {
         Inventory inv = viewer.getOpenInventory().getTopInventory();
 
-        // Slot 10 ist das NameTag-Item (laut StatsGui)
         ItemStack nameTag = inv.getItem(49);
         if (nameTag == null || !nameTag.hasItemMeta()) return null;
 
@@ -74,7 +71,7 @@ public record StatsGuiListener(MultiPlugin plugin) implements Listener {
         if (meta == null || !meta.hasDisplayName()) return null;
 
         String displayName = meta.getDisplayName();
-        // displayName hat Format: "§aSpielername", wir entfernen den §a-Code
+
         String playerName = ChatColor.stripColor(displayName);
 
         if (playerName.isEmpty()) return null;

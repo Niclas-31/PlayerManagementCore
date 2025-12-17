@@ -26,7 +26,6 @@ public record CraftedItemsGui(MultiPlugin plugin) {
     public void open(Player viewer, OfflinePlayer target, int page) {
         List<Material> craftedItems = new ArrayList<>();
 
-        // Alle Blöcke mit >0 Statistiken sammeln
         for (Material material : Material.values()) {
             try {
                 if (target.getStatistic(Statistic.CRAFT_ITEM, material) > 0) {
@@ -37,7 +36,7 @@ public record CraftedItemsGui(MultiPlugin plugin) {
         }
 
         craftedItems.sort(Comparator.comparingInt((Material m) ->
-                -target.getStatistic(Statistic.CRAFT_ITEM, m) // sortieren nach Häufigkeit (absteigend)
+                -target.getStatistic(Statistic.CRAFT_ITEM, m)
         ));
 
         int craftedItemsPerPage = allowedSlots.length;
@@ -87,7 +86,6 @@ public record CraftedItemsGui(MultiPlugin plugin) {
             gui.setItem(allowedSlots[slotIndex++], item);
         }
 
-        // Kopf-Icon
         int headSlot = 53;
         ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) skull.getItemMeta();
@@ -97,7 +95,6 @@ public record CraftedItemsGui(MultiPlugin plugin) {
         skull.setItemMeta(meta);
         gui.setItem(headSlot, skull);
 
-        // Zurück-Button
         ItemStack back = new ItemStack(Material.BARRIER);
         ItemMeta backMeta = back.getItemMeta();
         if (backMeta != null) {

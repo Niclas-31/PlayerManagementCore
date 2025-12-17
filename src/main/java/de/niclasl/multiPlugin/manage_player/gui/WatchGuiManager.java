@@ -18,7 +18,6 @@ public record WatchGuiManager(MultiPlugin plugin) {
     public void open1(Player viewer, Player target) {
         Inventory managePlayer1 = Bukkit.createInventory(null, 54, "§8Manage: " + target.getName() + " (1/2)");
 
-        // Rand
         ItemStack glass = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
         for (int i : new int[]{1, 2, 3, 4, 5, 6, 7, 9, 17, 18, 26, 27, 35, 36, 44, 45, 46, 47, 48, 50, 51, 52}) {
             managePlayer1.setItem(i, glass);
@@ -160,11 +159,10 @@ public record WatchGuiManager(MultiPlugin plugin) {
             @Override
             public void run() {
                 if (!viewer.getOpenInventory().getTitle().contains("§8Manage: " + target.getName() + " (1/2)")) {
-                    cancel(); // GUI ist zu
+                    cancel();
                     return;
                 }
 
-                // Status-Item aktualisieren
                 boolean isOnline = target.isOnline();
                 Material statusMat = isOnline ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE;
                 String statusName = isOnline ? "§aOnline" : "§cOffline";
@@ -176,7 +174,6 @@ public record WatchGuiManager(MultiPlugin plugin) {
                 statusItem.setItemMeta(statusMeta);
                 viewer.getOpenInventory().getTopInventory().setItem(8, statusItem);
 
-                // Welt- und Positions-Block aktualisieren
                 if (isOnline) {
                     ItemStack worldInfo = new ItemStack(Material.GRASS_BLOCK);
                     ItemMeta meta = worldInfo.getItemMeta();
@@ -191,8 +188,8 @@ public record WatchGuiManager(MultiPlugin plugin) {
                     viewer.getOpenInventory().getTopInventory().setItem(0, worldInfo);
                 }
 
-                // Vanish-Status (immer)
-                boolean isVanished = plugin.getVanishManager().isVanished(target.getUniqueId()); // oder dein eigenes System
+
+                boolean isVanished = plugin.getVanishManager().isVanished(target.getUniqueId());
                 Material vanishMat = isVanished ? Material.LIME_CONCRETE : Material.RED_CONCRETE;
                 String vanishName = "§7Vanish: " + (isVanished ? "§aOn" : "§cOFF");
 
@@ -204,7 +201,7 @@ public record WatchGuiManager(MultiPlugin plugin) {
                 vanishItem.setItemMeta(vanishMeta);
                 viewer.getOpenInventory().getTopInventory().setItem(37, vanishItem);
             }
-        }.runTaskTimer(plugin, 0, 10); // Alle 0,5 Sekunden
+        }.runTaskTimer(plugin, 0, 10);
     }
 
     public void open2(Player viewer, Player target) {
@@ -231,6 +228,13 @@ public record WatchGuiManager(MultiPlugin plugin) {
         enchant.setItemMeta(enchantMeta);
         managePlayer2.setItem(12, enchant);
 
+        ItemStack audit = new ItemStack(Material.NOTE_BLOCK);
+        ItemMeta auditMeta = audit.getItemMeta();
+        assert auditMeta != null;
+        auditMeta.setDisplayName(ChatColor.GOLD + "See the Audit from " + target.getName());
+        audit.setItemMeta(auditMeta);
+        managePlayer2.setItem(14, audit);
+
         ItemStack back = new ItemStack(Material.ARROW);
         ItemMeta backMeta = back.getItemMeta();
         assert backMeta != null;
@@ -247,11 +251,10 @@ public record WatchGuiManager(MultiPlugin plugin) {
             @Override
             public void run() {
                 if (!viewer.getOpenInventory().getTitle().contains("§8Manage: " + target.getName() + " (2/2)")) {
-                    cancel(); // GUI ist zu
+                    cancel();
                     return;
                 }
 
-                // Status-Item aktualisieren
                 boolean isOnline = target.isOnline();
                 Material statusMat = isOnline ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE;
                 String statusName = isOnline ? "§aOnline" : "§cOffline";
@@ -263,7 +266,6 @@ public record WatchGuiManager(MultiPlugin plugin) {
                 statusItem.setItemMeta(statusMeta);
                 viewer.getOpenInventory().getTopInventory().setItem(8, statusItem);
 
-                // Welt- und Positions-Block aktualisieren
                 if (isOnline) {
                     ItemStack worldInfo = new ItemStack(Material.GRASS_BLOCK);
                     ItemMeta meta = worldInfo.getItemMeta();
@@ -278,7 +280,7 @@ public record WatchGuiManager(MultiPlugin plugin) {
                     viewer.getOpenInventory().getTopInventory().setItem(0, worldInfo);
                 }
             }
-        }.runTaskTimer(plugin, 0, 10); // Alle 0,5 Sekunden
+        }.runTaskTimer(plugin, 0, 10);
     }
 
     private static ItemStack createItem(Material material, String name, String... lore) {

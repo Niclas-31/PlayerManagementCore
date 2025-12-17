@@ -41,7 +41,6 @@ public class ProtectionActionbarTask extends BukkitRunnable {
             case NORMAL -> spawns = SpawnManager.getAllOverworldSpawns();
             case THE_END -> spawns = SpawnManager.getAllEndSpawns();
             default -> {
-                // Keine Spawns in anderen Welten
                 player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(""));
                 return;
             }

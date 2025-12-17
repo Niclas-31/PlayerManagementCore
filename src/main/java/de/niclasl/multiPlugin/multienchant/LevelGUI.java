@@ -22,11 +22,10 @@ public record LevelGUI(MultiPlugin plugin) {
         int totalPages = (int) Math.ceil((double) maxLevel / itemsPerPage);
         if (totalPages == 0) totalPages = 1;
 
-        // Page korrigieren (1-basiert)
         page = Math.min(Math.max(page, 1), totalPages);
 
         Inventory inv = Bukkit.createInventory(new LevelHolder(target, ench, page), 54,
-                "§aSelect Level (" + ench.getKey().getKey() + ") §7(" + page + "/" + totalPages + ")");
+                "§aSelect Level (" + ench.getKeyOrThrow().getKey() + ") §7(" + page + "/" + totalPages + ")");
 
         int startLevel = (page - 1) * itemsPerPage + 1;
         int endLevel = Math.min(startLevel + itemsPerPage - 1, maxLevel);
@@ -42,7 +41,6 @@ public record LevelGUI(MultiPlugin plugin) {
             inv.setItem(slotIndex, item);
         }
 
-        // Player Head
         ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
         assert skullMeta != null;
@@ -51,7 +49,6 @@ public record LevelGUI(MultiPlugin plugin) {
         skull.setItemMeta(skullMeta);
         inv.setItem(48, skull);
 
-        // Confirm Button
         ItemStack confirm = new ItemStack(Material.EMERALD_BLOCK);
         ItemMeta confirmMeta = confirm.getItemMeta();
         assert confirmMeta != null;
@@ -59,7 +56,6 @@ public record LevelGUI(MultiPlugin plugin) {
         confirm.setItemMeta(confirmMeta);
         inv.setItem(49, confirm);
 
-        // Previous Page
         if (page > 1) {
             ItemStack back = new ItemStack(Material.ARROW);
             ItemMeta backMeta = back.getItemMeta();
@@ -69,7 +65,6 @@ public record LevelGUI(MultiPlugin plugin) {
             inv.setItem(45, back);
         }
 
-        // Next Page
         if (page < totalPages) {
             ItemStack next = new ItemStack(Material.ARROW);
             ItemMeta nextMeta = next.getItemMeta();
@@ -81,10 +76,9 @@ public record LevelGUI(MultiPlugin plugin) {
 
         viewer.openInventory(inv);
 
-        // Metadata für Listener
         viewer.setMetadata("level_target", new FixedMetadataValue(plugin, target.getUniqueId().toString()));
         viewer.setMetadata("level_page", new FixedMetadataValue(plugin, page));
-        viewer.setMetadata("level_ench", new FixedMetadataValue(plugin, ench.getKey().getKey()));
+        viewer.setMetadata("level_ench", new FixedMetadataValue(plugin, ench.getKeyOrThrow().getKey()));
     }
 
     public record LevelHolder(OfflinePlayer target, Enchantment ench, int page) implements InventoryHolder {
