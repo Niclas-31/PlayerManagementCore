@@ -8,18 +8,14 @@ import java.util.UUID;
 
 public class CombatManager {
 
-    // speichert: Spieler → letzte Zeit des Schadens
     private static final Map<UUID, Long> combatMap = new HashMap<>();
 
-    // Wie lange bleibt man im Kampf? (Millisekunden)
-    private static final long COMBAT_TIME = 5000; // = 5 Sekunden
+    private static final long COMBAT_TIME = 5000;
 
-    /** Spieler in Kampf setzen */
     public static void tagCombat(Player player) {
         combatMap.put(player.getUniqueId(), System.currentTimeMillis());
     }
 
-    /** Prüfen, ob Spieler im Kampf ist */
     public static boolean isInCombat(Player player) {
         Long lastHit = combatMap.get(player.getUniqueId());
         if (lastHit == null) return false;
@@ -27,7 +23,6 @@ public class CombatManager {
         return (System.currentTimeMillis() - lastHit) < COMBAT_TIME;
     }
 
-    /** Spieler aus Combat entfernen (wenn Zeit vorbei) */
     public static void cleanup() {
         long now = System.currentTimeMillis();
 

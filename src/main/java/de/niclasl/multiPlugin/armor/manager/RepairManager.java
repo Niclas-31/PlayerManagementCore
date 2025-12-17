@@ -17,7 +17,6 @@ public class RepairManager {
     private static File file;
     private static FileConfiguration config;
 
-    // Muss im onEnable() aufgerufen werden!
     public static void init(File dataFolder) {
         file = new File(dataFolder, "repair-users.yml");
 
@@ -31,7 +30,6 @@ public class RepairManager {
 
         config = YamlConfiguration.loadConfiguration(file);
 
-        // gespeicherte UUIDs laden
         if (config.contains("repairing")) {
             for (String uuidStr : config.getStringList("repairing")) {
                 repairingPlayers.add(UUID.fromString(uuidStr));

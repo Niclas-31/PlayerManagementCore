@@ -35,20 +35,16 @@ public class PlayerEffectsListener implements Listener {
         if (event.getCurrentItem() == null) return;
         ItemStack clicked = event.getCurrentItem();
 
-        // Prüfen ob es unser GUI ist
         if (event.getView().getTitle().startsWith("§8Effects of")) {
-            event.setCancelled(true); // Kein Herausnehmen erlauben
+            event.setCancelled(true);
 
-            // Target UUID aus Metadata ziehen
             if (!viewer.hasMetadata("effect_target")) return;
             UUID targetUUID = UUID.fromString(viewer.getMetadata("effect_target").getFirst().asString());
             Player target1 = Bukkit.getPlayer(targetUUID);
             if (target1 == null) return;
 
-            // Klick auf Barrier → zurück
             if (clicked.getType() == Material.BARRIER) {
-                // Hole den Zielspieler (du brauchst eine Zuordnung: Wer betrachtet wen)
-                OfflinePlayer target = getTarget(viewer); // <- das musst du ggf. anpassen
+                OfflinePlayer target = getTarget(viewer);
                 if (target != null) {
                     plugin.getWatchGuiManager().open2(viewer, (Player) target);
                 } else {
@@ -57,17 +53,14 @@ public class PlayerEffectsListener implements Listener {
                 }
             }
 
-            // Klick auf Book → neues Effekt-GUI öffnen
             if (clicked.getType() == Material.BOOK) {
                 viewer.closeInventory();
-                plugin.getAddEffectGui().open(viewer, target1); // <-- musst du bauen
+                plugin.getAddEffectGui().open(viewer, target1);
                 return;
             }
 
-            // Klick auf Potion → Effekt bearbeiten
             if (clicked.getType() == Material.POTION) {
                 String displayName = Objects.requireNonNull(clicked.getItemMeta()).getDisplayName().replace("§d", "");
-                // DisplayName wie "Night Vision" → "NIGHT_VISION"
                 String effectName = displayName.toUpperCase().replace(" ", "_");
                 PotionEffectType type = PotionEffectType.getByName(effectName);
                 if (type == null) {
@@ -77,11 +70,9 @@ public class PlayerEffectsListener implements Listener {
 
                 ClickType click = event.getClick();
                 if (click == ClickType.LEFT) {
-                    // Effekt entfernen
                     target1.removePotionEffect(type);
                     viewer.sendMessage("§cRemoved effect " + displayName + " from " + target1.getName() + ".");
                 } else if (click == ClickType.RIGHT) {
-                    // Effekt verlängern (30 Sekunden = 30 * 20 Ticks)
                     PotionEffect old = target1.getPotionEffect(type);
                     int amplifier = old != null ? old.getAmplifier() : 0;
                     int newDuration = (old != null ? old.getDuration() : 0) + (30 * 20);
@@ -89,7 +80,6 @@ public class PlayerEffectsListener implements Listener {
                     viewer.sendMessage("§aEffect " + displayName + " extended for 30 seconds.");
                 }
 
-                // GUI neu öffnen für Aktualisierung
                 playerEffectsGui.open(viewer, target1);
             }
         }

@@ -12,7 +12,6 @@ public class DamageListener implements Listener {
     public void onDamage(EntityDamageEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
 
-        // Spieler wurde verletzt → Kampfzeit resetten
         CombatManager.tagCombat(player);
     }
 }

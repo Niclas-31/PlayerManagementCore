@@ -32,7 +32,6 @@ public record PlayerEffectsGui(MultiPlugin plugin) {
             slot++;
         }
 
-        // Add effect Button
         ItemStack add = new ItemStack(Material.BOOK);
         ItemMeta addMeta = add.getItemMeta();
         assert addMeta != null;
@@ -40,7 +39,6 @@ public record PlayerEffectsGui(MultiPlugin plugin) {
         add.setItemMeta(addMeta);
         inv.setItem(45, add);
 
-        // Back Button
         ItemStack back = new ItemStack(Material.BARRIER);
         ItemMeta backMeta = back.getItemMeta();
         assert backMeta != null;
@@ -48,7 +46,6 @@ public record PlayerEffectsGui(MultiPlugin plugin) {
         back.setItemMeta(backMeta);
         inv.setItem(49, back);
 
-        // Spieler-Head mit Info
         ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
         assert skullMeta != null;
@@ -60,7 +57,6 @@ public record PlayerEffectsGui(MultiPlugin plugin) {
 
         viewer.openInventory(inv);
 
-        // Metadata speichern, um zu wissen, auf welchen Spieler die GUI sich bezieht
         viewer.setMetadata("effect_target", new FixedMetadataValue(plugin, target.getUniqueId().toString()));
     }
 
@@ -69,7 +65,6 @@ public record PlayerEffectsGui(MultiPlugin plugin) {
         PotionMeta meta = (PotionMeta) potion.getItemMeta();
         assert meta != null;
 
-        // Turtle Master erkennen: Slowness IV + Resistance III
         if (effect.getType().equals(PotionEffectType.SLOWNESS) && effect.getAmplifier() == 3) {
             meta.addCustomEffect(new PotionEffect(PotionEffectType.SLOWNESS, effect.getDuration(), 3, false, true, true), true);
             meta.addCustomEffect(new PotionEffect(PotionEffectType.RESISTANCE, effect.getDuration(), 2, false, true, true), true);
@@ -78,7 +73,6 @@ public record PlayerEffectsGui(MultiPlugin plugin) {
             // Normale Potion als CustomEffect
             meta.addCustomEffect(new PotionEffect(effect.getType(), effect.getDuration(), effect.getAmplifier(), false, true, true), true);
 
-            // Name formatieren
             String displayName = effect.getType().getName();
             if (displayName.contains(":")) displayName = displayName.split(":")[1];
             displayName = Arrays.stream(displayName.split("_"))

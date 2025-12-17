@@ -1,5 +1,8 @@
 package de.niclasl.multiPlugin.ban_system.commands;
 
+import de.niclasl.multiPlugin.audit.AuditManager;
+import de.niclasl.multiPlugin.audit.model.AuditAction;
+import de.niclasl.multiPlugin.audit.model.AuditType;
 import de.niclasl.multiPlugin.ban_system.manager.BanHistoryManager;
 import de.niclasl.multiPlugin.ban_system.manager.ReasonManager;
 import org.bukkit.BanList;
@@ -10,6 +13,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.NonNull;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -29,7 +33,12 @@ public class BanCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, String[] args) {
+
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("§cOnly players can use this command.");
+            return true;
+        }
 
         if (!sender.hasPermission("multiplugin.ban")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
@@ -75,14 +84,12 @@ public class BanCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        // Ban setzen (Minecraft intern)
         Bukkit.getBanList(BanList.Type.NAME).addBan(target.getName(), reason, banUntil, sender.getName());
 
         // Nachricht an Sender
         sender.sendMessage("§a" + target.getName() + " was banned for: §e" + reason +
                 (banUntil != null ? " §7(until: " + banUntil + ")" : " §7(permanently)"));
 
-        // Spieler kicken, wenn online
         Player onlineTarget = Bukkit.getPlayer(target.getUniqueId());
         if (onlineTarget != null && onlineTarget.isOnline()) {
             String kickMessage = "§cYou have been banned!\n"
@@ -91,14 +98,17 @@ public class BanCommand implements CommandExecutor, TabCompleter {
             onlineTarget.kickPlayer(kickMessage);
         }
 
-        // In eigene Ban-History eintragen
         banHistoryManager.addBan(target.getUniqueId(), reason, sender.getName(), durationArg, null, null);
+        AuditManager.log(
+                target,
+                AuditType.BAN,
+                AuditAction.ADD,
+                player,
+                reason
+        );
         return true;
     }
 
-    /**
-     * Parsed Strings wie 1h30m oder 2d in ein Duration-Objekt
-     */
     public static Duration parseDuration(String input) {
         Pattern pattern = Pattern.compile("(\\d+)([smhdwMy])");
         Matcher matcher = pattern.matcher(input);
@@ -126,14 +136,13 @@ public class BanCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
+    public List<String> onTabComplete(CommandSender sender, @NonNull Command command, @NonNull String alias, String @NonNull [] args) {
         List<String> completions = new ArrayList<>();
 
         if (!sender.hasPermission("multiplugin.ban")) return completions;
 
         switch (args.length) {
             case 1 -> {
-                // Alle online Spieler
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     if (player.getName().toLowerCase().startsWith(args[0].toLowerCase())) {
                         completions.add(player.getName());
@@ -141,7 +150,6 @@ public class BanCommand implements CommandExecutor, TabCompleter {
                 }
             }
             case 2 -> {
-                // Dauer oder perm
                 List<String> durations = Arrays.asList("perm", "1s", "1m", "1h", "1d", "1w", "1M", "1y");
                 for (String d : durations) {
                     if (d.toLowerCase().startsWith(args[1].toLowerCase())) {
@@ -150,7 +158,6 @@ public class BanCommand implements CommandExecutor, TabCompleter {
                 }
             }
             case 3 -> {
-                // Gründe aus ReasonManager
                 for (String reason : reasonManager.getBanReasons()) {
                     if (reason.toLowerCase().startsWith(args[2].toLowerCase())) {
                         completions.add(reason);
@@ -158,7 +165,6 @@ public class BanCommand implements CommandExecutor, TabCompleter {
                 }
             }
             default -> {
-                // Falls du willst, dass auch mehrteilige Gründe vorgeschlagen werden:
                 if (args.length > 3) {
                     String current = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
                     for (String reason : reasonManager.getBanReasons()) {

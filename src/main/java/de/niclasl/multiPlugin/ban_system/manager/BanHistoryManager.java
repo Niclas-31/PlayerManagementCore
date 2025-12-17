@@ -119,7 +119,7 @@ public class BanHistoryManager {
 
         for (int i = history.size() - 1; i >= 0; i--) {
             BanRecord record = history.get(i);
-            if (record.getUnbanDate() == null) { // noch nicht entbannt
+            if (record.getUnbanDate() == null) {
                 record.setUnbanDate(now);
                 record.setUnbanBy(unbanBy);
                 break;

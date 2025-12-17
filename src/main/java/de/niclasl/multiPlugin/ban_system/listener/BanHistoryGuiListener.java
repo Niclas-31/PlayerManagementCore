@@ -47,8 +47,7 @@ public class BanHistoryGuiListener implements Listener {
         int slot = e.getSlot();
 
         if (slot == 26) {
-            // Hole den Zielspieler (du brauchst eine Zuordnung: Wer betrachtet wen)
-            OfflinePlayer target = getTarget(player); // <- das musst du ggf. anpassen
+            OfflinePlayer target = getTarget(player);
             if (target != null) {
                 plugin.getWatchGuiManager().open1(player, (Player) target);
             } else {
@@ -57,7 +56,6 @@ public class BanHistoryGuiListener implements Listener {
             }
         }
 
-        // Klick auf vorherige Seite Button (Slot 35)
         if (slot == 35) {
             if (page > 1) {
                 OfflinePlayer target = Bukkit.getOfflinePlayer(targetUUID);
@@ -66,7 +64,6 @@ public class BanHistoryGuiListener implements Listener {
             return;
         }
 
-        // Klick auf Nächste Seite Button (Slot 44)
         if (slot == 44) {
             List<BanRecord> bans = BanHistoryManager.getBanHistory(targetUUID);
             int warningsPerPage = GuiConstants.ALLOWED_SLOTS.length;
@@ -81,11 +78,9 @@ public class BanHistoryGuiListener implements Listener {
         if (slot == 17) {
             BanHistoryGui.toggleSort(player);
             OfflinePlayer target = Bukkit.getOfflinePlayer(UUID.fromString(player.getMetadata("ban_target").getFirst().asString()));
-            BanHistoryGui.open(player, target, 1); // GUI neu öffnen
+            BanHistoryGui.open(player, target, 1);
         }
 
-        // Klick auf Warnungen
-        // Prüfen, ob Slot in allowedSlots ist
         int indexInPage = -1;
         for (int i = 0; i < GuiConstants.ALLOWED_SLOTS.length; i++) {
             if (GuiConstants.ALLOWED_SLOTS[i] == slot) {
@@ -93,7 +88,7 @@ public class BanHistoryGuiListener implements Listener {
                 break;
             }
         }
-        if (indexInPage == -1) return; // Kein gültiger Slot
+        if (indexInPage == -1) return;
 
         List<BanRecord> bans = BanHistoryManager.getBanHistory(targetUUID);
 
@@ -105,7 +100,6 @@ public class BanHistoryGuiListener implements Listener {
 
         BanRecord ban = bans.get(banIndex);
 
-        // Rechtsklick → permanent machen
         if (e.isRightClick()) {
             if (ban.isPermanent()) {
                 player.sendMessage("§7This warning is already §cpermanent§7.");
@@ -121,7 +115,6 @@ public class BanHistoryGuiListener implements Listener {
             return;
         }
 
-        // Linksklick → löschen (nur wenn nicht permanent)
         if (e.isLeftClick()) {
             if (ban.isPermanent()) {
                 player.sendMessage("§cThis ban is permanent and cannot be deleted.");
@@ -139,7 +132,6 @@ public class BanHistoryGuiListener implements Listener {
     private OfflinePlayer getTarget(Player viewer) {
         Inventory inv = viewer.getOpenInventory().getTopInventory();
 
-        // Slot 10 ist das NameTag-Item (laut StatsGui)
         ItemStack nameTag = inv.getItem(53);
         if (nameTag == null || !nameTag.hasItemMeta()) return null;
 
@@ -147,7 +139,7 @@ public class BanHistoryGuiListener implements Listener {
         if (meta == null || !meta.hasDisplayName()) return null;
 
         String displayName = meta.getDisplayName();
-        // displayName hat Format: "§aSpielername", wir entfernen den §a-Code
+
         String playerName = ChatColor.stripColor(displayName);
 
         if (playerName.isEmpty()) return null;

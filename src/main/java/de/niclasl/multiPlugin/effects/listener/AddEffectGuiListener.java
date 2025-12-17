@@ -28,12 +28,12 @@ public class AddEffectGuiListener implements Listener {
     static {
         for (PotionEffectType type : PotionEffectType.values()) {
             if (type == null) continue;
-            String key = type.getName(); // interner Key, z.B. "minecraft:night_vision"
-            if (key.contains(":")) key = key.split(":")[1]; // "night_vision"
-            // Freundlicher Name
+            String key = type.getName();
+            if (key.contains(":")) key = key.split(":")[1];
+
             String displayName = Arrays.stream(key.split("_"))
                     .map(s -> s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase())
-                    .collect(Collectors.joining(" ")); // "Night Vision"
+                    .collect(Collectors.joining(" "));
             EFFECT_MAP.put(displayName, type);
         }
     }
@@ -48,10 +48,9 @@ public class AddEffectGuiListener implements Listener {
         Inventory inv = event.getClickedInventory();
         if (inv == null) return;
 
-        // Prüfen, ob es unser AddEffectGui ist
         if (!event.getView().getTitle().startsWith("§8Add Effect to")) return;
 
-        event.setCancelled(true); // Kein normales Herausnehmen
+        event.setCancelled(true);
 
         ItemStack clicked = event.getCurrentItem();
         if (clicked == null || clicked.getType() == Material.AIR) return;
@@ -59,12 +58,10 @@ public class AddEffectGuiListener implements Listener {
         ItemMeta meta = clicked.getItemMeta();
         if (meta == null || !meta.hasDisplayName()) return;
 
-        // Zielspieler holen (aus Metadata gesetzt in PlayerEffectsGui oder AddEffectGui)
         if (!viewer.hasMetadata("effect_target")) return;
         String uuidStr = viewer.getMetadata("effect_target").getFirst().asString();
         Player target = Bukkit.getPlayer(java.util.UUID.fromString(uuidStr));
 
-        // Slot für Zurück / Barrier
         if (clicked.getType() == Material.BARRIER) {
             OfflinePlayer offlineTarget = getTarget(viewer);
             if (offlineTarget instanceof Player t) {
@@ -76,18 +73,15 @@ public class AddEffectGuiListener implements Listener {
         }
 
         if (clicked.getType() == Material.POTION) {
-            // Slot für Add-Button oder andere Non-Effekt Items ignorieren
             if (clicked.getType() != Material.POTION) return;
 
-            // Effekt auswählen
-            String effectName = ChatColor.stripColor(meta.getDisplayName()); // "Night Vision"
+            String effectName = ChatColor.stripColor(meta.getDisplayName());
             PotionEffectType type = EFFECT_MAP.get(effectName);
             if (type == null) {
                 viewer.sendMessage("§cUnknown effect: " + effectName);
                 return;
             }
 
-            // Beispiel: Standardwerte 30s Dauer, Stärke 1
             PotionEffect effect = new PotionEffect(type, 20 * 30, 0);
             assert target != null;
             target.addPotionEffect(effect);
@@ -95,7 +89,6 @@ public class AddEffectGuiListener implements Listener {
             viewer.sendMessage("§aAdded effect " + effectName + " to " + target.getName());
             viewer.closeInventory();
 
-            // Zurück ins PlayerEffectsGui öffnen
             playerEffectsGui.open(viewer, target);
         }
     }

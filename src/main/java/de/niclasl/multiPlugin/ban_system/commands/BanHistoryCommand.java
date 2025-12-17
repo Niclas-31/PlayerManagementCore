@@ -8,6 +8,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,13 +22,14 @@ public class BanHistoryCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, String[] args) {
+
         if (!(sender instanceof Player player)) {
             sender.sendMessage("§cOnly players can use this command.");
             return true;
         }
 
-        if (!sender.hasPermission("multiplugin.ban.history")) {
+        if (!sender.hasPermission("multiplugin.banhistory")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }
@@ -65,18 +67,17 @@ public class BanHistoryCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        banHistoryGui.open(player, target, page);
+        BanHistoryGui.open(player, target, page);
         return true;
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(CommandSender sender, @NonNull Command command, @NonNull String alias, String[] args) {
         List<String> completions = new ArrayList<>();
 
-        if (!sender.hasPermission("multiplugin.ban.history")) return completions;
+        if (!sender.hasPermission("multiplugin.banhistory")) return completions;
 
         if (args.length == 1) {
-            // Vorschlag aller bekannten Spieler
             for (Player p : Bukkit.getOnlinePlayers()) {
                 if (p.getName().toLowerCase().startsWith(args[0].toLowerCase())) {
                     completions.add(p.getName());

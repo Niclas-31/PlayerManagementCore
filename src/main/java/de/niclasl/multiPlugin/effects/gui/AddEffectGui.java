@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 
 public record AddEffectGui(MultiPlugin plugin) {
 
-    // Whitelist: Nur Effekte, die als Potion im Creative-Tab existieren
     private static final Set<PotionEffectType> CREATIVE_POTIONS = Set.of(
             PotionEffectType.NIGHT_VISION,
             PotionEffectType.INVISIBILITY,
@@ -55,7 +54,6 @@ public record AddEffectGui(MultiPlugin plugin) {
             inv.setItem(slot++, potion);
         }
 
-        // Back Button
         ItemStack back = new ItemStack(Material.BARRIER);
         ItemMeta backMeta = back.getItemMeta();
         assert backMeta != null;
@@ -63,7 +61,6 @@ public record AddEffectGui(MultiPlugin plugin) {
         back.setItemMeta(backMeta);
         inv.setItem(49, back);
 
-        // Spieler-Head
         ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
         assert skullMeta != null;
@@ -82,7 +79,6 @@ public record AddEffectGui(MultiPlugin plugin) {
         PotionMeta meta = (PotionMeta) potion.getItemMeta();
         assert meta != null;
 
-        // Turtle Master erkennen: Slowness
         if (type.equals(PotionEffectType.SLOWNESS)) {
             meta.setDisplayName("§dTurtle Master");
             meta.addCustomEffect(new PotionEffect(PotionEffectType.SLOWNESS, 400, 3, false, true, true), true);
@@ -94,7 +90,7 @@ public record AddEffectGui(MultiPlugin plugin) {
                     "§7Click to add effect"
             ));
         } else {
-            meta.addCustomEffect(new PotionEffect(type, 600, 0, false, true, true), true); // 30s, Level 1
+            meta.addCustomEffect(new PotionEffect(type, 600, 0, false, true, true), true);
             String displayName = type.getName();
             if (displayName.contains(":")) displayName = displayName.split(":")[1];
             displayName = Arrays.stream(displayName.split("_"))

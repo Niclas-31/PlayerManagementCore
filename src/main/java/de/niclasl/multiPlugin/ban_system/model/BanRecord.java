@@ -12,8 +12,8 @@ public class BanRecord {
     private final String date;
     private String duration;
     private boolean permanent;
-    private String unbanDate;  // kann null sein
-    private String unbanBy;    // kann null sein
+    private String unbanDate;
+    private String unbanBy;
 
     public BanRecord(String id, String reason, String by, String date, String duration, boolean permanent, String unbanDate, String unbanBy) {
         this.id = id;
@@ -25,8 +25,6 @@ public class BanRecord {
         this.unbanDate = unbanDate;
         this.unbanBy = unbanBy;
     }
-
-    // Getter und Setter für alle Felder
 
     public String getId() {
         return id;
@@ -79,11 +77,9 @@ public class BanRecord {
         if (this.date == null || this.duration == null || this.duration.isEmpty()) return null;
 
         try {
-            // Datum des Bans parsen
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
             LocalDateTime banTime = LocalDateTime.parse(this.date, formatter);
 
-            // Dauer parsen
             Pattern pattern = Pattern.compile("(\\d+)([smhd])");
             Matcher matcher = pattern.matcher(duration);
 

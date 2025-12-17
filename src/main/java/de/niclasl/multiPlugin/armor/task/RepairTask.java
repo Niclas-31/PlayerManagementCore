@@ -15,6 +15,6 @@ public class RepairTask {
                     ArmorUtils.autoRepairArmor(player, thresholdPercent, repairAmount);
                 }
             }
-        }, 0L, intervalTicks); // intervalTicks = wie oft in Ticks (20 Ticks = 1 Sekunde)
+        }, 0L, intervalTicks);
     }
 }

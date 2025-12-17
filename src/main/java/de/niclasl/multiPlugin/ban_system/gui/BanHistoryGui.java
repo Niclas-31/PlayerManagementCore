@@ -117,7 +117,6 @@ public class BanHistoryGui {
             inv.setItem(slot, paper);
         }
 
-        // Spieler-Kopf (Slot 53)
         ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
         assert skullMeta != null;
@@ -134,7 +133,6 @@ public class BanHistoryGui {
         back.setItemMeta(backMeta);
         inv.setItem(26, back);
 
-        // Navigationspfeile
         if (page > 1) {
             ItemStack backArrow = new ItemStack(Material.ARROW);
             ItemMeta backArrowMeta = backArrow.getItemMeta();

@@ -22,13 +22,10 @@ public record LoginListener(BanHistoryManager banHistoryManager) implements List
 
         for (BanRecord record : history) {
 
-            // Wenn Bann nicht permanent und schon abgelaufen → Unban setzen
             if (!record.isPermanent() && record.isExpired() && record.getUnbanDate() == null) {
 
-                // Berechnetes Expected-Unban-Datum holen
                 String expectedUnban = record.calculateExpectedUnbanDate();
 
-                // Falls das null ist → aktuelles Datum als Fallback
                 if (expectedUnban == null) {
                     expectedUnban = LocalDateTime.now().toString();
                 }
@@ -36,7 +33,6 @@ public record LoginListener(BanHistoryManager banHistoryManager) implements List
                 record.setUnbanDate(expectedUnban);
                 record.setUnbanBy("System");
 
-                // Speichern
                 banHistoryManager.saveBanHistory(uuid, history);
                 break;
             }
