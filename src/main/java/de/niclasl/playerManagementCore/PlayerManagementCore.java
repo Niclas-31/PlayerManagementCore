@@ -307,7 +307,7 @@ public class PlayerManagementCore extends JavaPlugin {
                 reasonsFile.createNewFile();
 
                 reasonsConfig = new YamlConfiguration();
-                defaultReasons = new ArrayList<>(List.of("Beleidigung", "Spam", "Hacking", "Bugusing", "Werbung"));
+                defaultReasons = new ArrayList<>(List.of("Beleidigung", "Spam", "Hacking", "Bugusing", "Werbung", ""));
                 reasonsConfig.set("reasons", defaultReasons);
                 reasonsConfig.save(reasonsFile);
 
