@@ -49,7 +49,7 @@ public record MinedBlocksGuiListener(PlayerManagementCore plugin) implements Lis
         if (slot == 26) {
             OfflinePlayer target = getTarget(player);
             if (target instanceof Player onlineTarget)
-                plugin.getEnchantGUI().open(player, onlineTarget);
+                plugin.getStatsGui().open(player, onlineTarget);
             else {
                 player.sendMessage("§cTarget player not found.");
                 player.closeInventory();
