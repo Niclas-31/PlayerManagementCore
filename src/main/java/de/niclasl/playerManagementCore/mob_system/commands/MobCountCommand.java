@@ -26,7 +26,7 @@ public class MobCountCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (!sender.hasPermission("playerManagementCore.mobcount")) {
+        if (!sender.hasPermission("mobcount")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }

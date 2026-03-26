@@ -2,5 +2,255 @@ name: PlayerManagementCore
 version: '4.1.4'
 main: de.niclasl.playerManagementCore.PlayerManagementCore
 api-version: '1.21'
-load: STARTUP
 authors: [ Niclas ]
+softdepend: [Vault, Teamwar]
+
+commands:
+  manage:
+    description: Manage players.
+    permission: manage
+    permission-message: You don't have permission to use this command!
+
+  vanish:
+    description: Toggle invisibility.
+    permission: vanish
+    permission-message: You don't have permission to use this command!
+
+  ban:
+    description: Ban players.
+    permission: ban
+    permission-message: You don't have permission to use this command!
+
+  unban:
+    description: Unban a player.
+    permission: unban
+    permission-message: You don't have permission to use this command!
+
+  ban-history:
+    description: Shows a player's ban history.
+    usage: /ban-history <player> [page]
+    permission: banhistory
+    permission-message: You don't have permission to use this command!
+
+  teleport-dimension:
+    description: Teleport or set teleport locations in dimensions.
+    usage: /teleport-dimension <set|dimension> <dimension>
+    permission: teleport.dimension
+
+  dimension:
+    usage: /dimension setprivat <world_name> <true|false>
+    description: Manage custom worlds
+    permission: dimension
+
+  gamemode-gui:
+    description: Open Gamemode GUI.
+    usage: /gamemode-gui
+    permission: gamemode
+    permission-message: You don't have permission to use this command!
+
+  mute:
+    description: Mute players.
+    usage: /mute <player> <duration> <reason>
+    permission: mute
+    permission-message: You don't have permission to use this command!
+
+  unmute:
+    description: Unmute players.
+    usage: /unmute <player>
+    permission: unmute
+    permission-message: You don't have permission to use this command!
+
+  warn:
+    description: Warn a player.
+    usage: /warn <player> <reason>
+    permission: warn
+    permission-message: You don't have permission to use this command!
+
+  warn-history:
+    description: Show a player's warn history.
+    usage: /warn-history <player> [page]
+    permission: warnhistory
+    permission-message: You don't have permission to use this command!
+
+  unwarn:
+    description: Remove a warning from a player.
+    usage: /unwarn <player> <Warn-ID>
+    permission: unwarn
+    permission-message: You don't have permission to use this command!
+
+  report:
+    description: Report a player.
+    usage: /report <player> <reason>
+    permission: report
+    permission-message: You don't have permission to use this command!
+
+  report-history:
+    usage: /report-history <player> [page]
+    description: Open report history.
+    permission: reporthistory
+    permission-message: You don't have permission to use this command!
+
+  mob:
+    description: Open mob GUI for a target player.
+    usage: /mob <player>
+    permission: mob
+    permission-message: You don't have permission to use this command!
+
+  mobcount:
+    description: Count mobs in a world.
+    usage: /mobcount <player>
+    permission: mobcount
+    permission-message: You don't have permission to use this command!
+
+  stats:
+    description: Opens the statistics GUI.
+    usage: /stats
+    permission: stats
+
+  minedblocks:
+    description: Opens the GUI with mined blocks.
+    usage: /minedblocks
+    permission: minedblocks
+
+  useditems:
+    description: Opens the GUI with used items.
+    usage: /useditems
+    permission: useditems
+
+  crafteditems:
+    description: Opens the GUI with crafted items.
+    usage: /crafteditems
+    permission: crafteditems
+
+  randomteleport:
+    description: Teleports you to a random location.
+    usage: /randomteleport
+    permission: rtp
+    aliases: [rtp]
+
+  portal:
+    description: Enable or disable portals.
+    permission: portal
+    permission-message: You don't have permission to use this command!
+
+  enchant-gui:
+    description: Öffnet das Enchant-Menü
+    usage: /enchant-gui
+    permission: enchant
+
+  audit:
+    usage: /audit <player>
+    permission: audit
+
+  protection:
+    usage: /protection <enable/disable>
+    permission: protection
+
+permissions:
+  manage:
+    description: Zugriff auf den Manage-Befehl
+    default: op
+
+  vanish:
+    description: Spieler unsichtbar machen
+    default: op
+
+  ban:
+    description: Spieler bannen
+    default: op
+
+  unban:
+    description: Spieler entbannen
+    default: op
+
+  banhistory:
+    description: Ban-Historie ansehen
+    default: op
+
+  mute:
+    description: Spieler stummschalten
+    default: op
+
+  unmute:
+    description: Spieler entstummen
+    default: op
+
+  warn:
+    description: Spieler verwarnen
+    default: op
+
+  unwarn:
+    description: Verwarnung entfernen
+    default: op
+
+  warnhistory:
+    description: Verwarnungshistorie ansehen
+    default: op
+
+  teleport.dimension:
+    description: Zugriffsrecht für Dimensionsteleport
+    default: true
+
+  teleport.dimension.setcoords:
+    description: Erlaubt Setzen der Teleport-Koordinaten
+    default: op
+
+  teleport.dimension.create:
+    description: Erlaubt Erstellen eigener Dimensionen
+    default: true
+
+  teleport.dimension.delete:
+    description: Erlaubt Löschen von Dimensionen
+    default: op
+
+  teleport.dimension.invite:
+    default: true
+
+  teleport.dimension.setdelay:
+    default: true
+
+  dimension:
+    default: true
+
+  gamemode:
+    description: Zugriff auf das Gamemode-GUI
+    default: op
+
+  stats:
+    default: true
+
+  minedblocks:
+    default: true
+
+  useditems:
+    default: true
+
+  crafteditems:
+    default: true
+
+  report:
+    default: true
+
+  reporthistory:
+    default: op
+
+  mob:
+    default: op
+
+  mobcount:
+    default: op
+
+  rtp:
+    default: true
+
+  portal:
+    default: op
+
+  enchant:
+    default: true
+
+  audit:
+    default: op
+
+  protection:
+    default: op

@@ -22,8 +22,8 @@ public class GamemodeCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (!player.hasPermission("playerManagementCore.gamemode.gui")) {
-            player.sendMessage("§cYou do not have permission to access this GUI.");
+        if (!player.hasPermission("gamemode")) {
+            player.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }
 

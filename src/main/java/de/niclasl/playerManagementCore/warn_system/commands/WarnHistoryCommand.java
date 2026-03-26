@@ -27,7 +27,7 @@ public class WarnHistoryCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, @NonNull Command command, @NonNull String label, String @NonNull [] args) {
 
-        if (!sender.hasPermission("playerManagementCore.warnhistory")) {
+        if (!sender.hasPermission("warnhistory")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }

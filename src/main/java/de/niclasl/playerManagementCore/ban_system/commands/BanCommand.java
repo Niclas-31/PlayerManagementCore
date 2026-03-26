@@ -40,7 +40,7 @@ public class BanCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (!sender.hasPermission("playerManagementCore.ban")) {
+        if (!sender.hasPermission("ban")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
         }
 

@@ -23,6 +23,11 @@ public class DimensionCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        if (sender.hasPermission("dimension")) {
+            sender.sendMessage("§cYou don't have permission to use this command!");
+            return true;
+        }
+
         if (args.length != 3 || !args[0].equalsIgnoreCase("setprivate")) {
             player.sendMessage(ChatColor.RED + "Usage: /dimension setprivate <world_name> <true/false>");
             return true;

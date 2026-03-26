@@ -25,7 +25,7 @@ public class UsedItemsCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (!sender.hasPermission("playerManagementCore.useditems")) {
+        if (!sender.hasPermission("useditems")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }

@@ -16,12 +16,12 @@ import org.jspecify.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReportGuiCommand implements CommandExecutor, TabCompleter {
+public class ReportHistoryCommand implements CommandExecutor, TabCompleter {
 
     private static ReportGui reportGui;
 
-    public ReportGuiCommand(ReportGui reportGui) {
-        ReportGuiCommand.reportGui = reportGui;
+    public ReportHistoryCommand(ReportGui reportGui) {
+        ReportHistoryCommand.reportGui = reportGui;
     }
 
     @Override
@@ -31,7 +31,7 @@ public class ReportGuiCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (!sender.hasPermission("playerManagementCore.reporthistory")) {
+        if (!sender.hasPermission("reporthistory")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }

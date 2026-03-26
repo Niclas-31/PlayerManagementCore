@@ -24,7 +24,7 @@ public class UnmuteCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, @NonNull Command command, @NonNull String label, String @NonNull [] args) {
 
-        if (!sender.hasPermission("playerManagementCore.unmute")) {
+        if (!sender.hasPermission("unmute")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }

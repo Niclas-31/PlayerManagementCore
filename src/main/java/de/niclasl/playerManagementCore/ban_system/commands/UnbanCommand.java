@@ -35,7 +35,7 @@ public class UnbanCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (!sender.hasPermission("playerManagementCore.unban")) {
+        if (!sender.hasPermission("unban")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }

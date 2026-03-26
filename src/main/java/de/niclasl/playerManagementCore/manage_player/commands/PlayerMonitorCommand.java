@@ -23,7 +23,7 @@ public record PlayerMonitorCommand(PlayerManagementCore plugin) implements Comma
             return true;
         }
 
-        if (!sender.hasPermission("playerManagementCore.manage")) {
+        if (!sender.hasPermission("manage")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }

@@ -50,7 +50,7 @@ import de.niclasl.playerManagementCore.portal.listener.TeleportBlockerListener;
 import de.niclasl.playerManagementCore.portal.manager.PortalConfigManager;
 import de.niclasl.playerManagementCore.randomteleport.RandomTeleportCommand;
 import de.niclasl.playerManagementCore.report_system.commands.ReportCommand;
-import de.niclasl.playerManagementCore.report_system.commands.ReportGuiCommand;
+import de.niclasl.playerManagementCore.report_system.commands.ReportHistoryCommand;
 import de.niclasl.playerManagementCore.report_system.gui.ReportGui;
 import de.niclasl.playerManagementCore.report_system.listener.ReportListener;
 import de.niclasl.playerManagementCore.report_system.manager.ReportManager;
@@ -201,8 +201,8 @@ public class PlayerManagementCore extends JavaPlugin {
         Objects.requireNonNull(getCommand("report")).setExecutor(new ReportCommand(reportManager));
         Objects.requireNonNull(getCommand("report")).setTabCompleter(new ReportCommand(reportManager));
 
-        Objects.requireNonNull(getCommand("report-history")).setExecutor(new ReportGuiCommand(reportGui));
-        Objects.requireNonNull(getCommand("report-history")).setTabCompleter(new ReportGuiCommand(reportGui));
+        Objects.requireNonNull(getCommand("report-history")).setExecutor(new ReportHistoryCommand(reportGui));
+        Objects.requireNonNull(getCommand("report-history")).setTabCompleter(new ReportHistoryCommand(reportGui));
 
         Objects.requireNonNull(getCommand("mob")).setExecutor(new MobCommand(mobGui, this));
         Objects.requireNonNull(getCommand("mob")).setTabCompleter(new MobCommand(mobGui, this));

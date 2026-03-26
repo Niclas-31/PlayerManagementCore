@@ -20,8 +20,8 @@ public class SpawnProtectionCommand implements TabExecutor {
 
     @Override
     public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
-        if (!sender.hasPermission("playerManagementCore.protection")) {
-            sender.sendMessage("§cNo permission!");
+        if (!sender.hasPermission("protection")) {
+            sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }
 

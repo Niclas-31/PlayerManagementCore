@@ -25,7 +25,7 @@ public class StatsCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (!sender.hasPermission("playerManagementCore.stats")) {
+        if (!sender.hasPermission("stats")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }

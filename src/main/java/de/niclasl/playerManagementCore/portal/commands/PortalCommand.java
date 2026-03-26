@@ -21,8 +21,8 @@ public record PortalCommand(PlayerManagementCore plugin) implements CommandExecu
     @Override
     public boolean onCommand(CommandSender sender, @NonNull Command command, @NonNull String label, String[] args) {
 
-        if (!sender.hasPermission("playerManagementCore.portal.manage")) {
-            sender.sendMessage(ChatColor.RED + "You don't have permission.");
+        if (!sender.hasPermission("portal")) {
+            sender.sendMessage(ChatColor.RED + "§cYou don't have permission to use this command!");
             return true;
         }
 

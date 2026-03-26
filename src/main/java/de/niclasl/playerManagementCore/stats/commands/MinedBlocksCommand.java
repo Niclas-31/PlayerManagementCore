@@ -25,7 +25,7 @@ public class MinedBlocksCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (!sender.hasPermission("playerManagementCore.minedblocks")) {
+        if (!sender.hasPermission("minedblocks")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }

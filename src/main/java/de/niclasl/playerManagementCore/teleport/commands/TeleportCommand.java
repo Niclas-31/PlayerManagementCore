@@ -36,13 +36,18 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        if (sender.hasPermission("teleport.dimension")) {
+            sender.sendMessage("§cYou don't have permission to use this command!");
+            return true;
+        }
+
         if (args.length == 0) {
             plugin.getDimensionGui().open(player, player, 1);
             return true;
         }
 
         if (args[0].equalsIgnoreCase("set")) {
-            if (!player.hasPermission("playerManagementCore.teleport.dimension.setcoords")) {
+            if (!player.hasPermission("teleport.dimension.setcoords")) {
                 player.sendMessage(ChatColor.RED + "You don't have permission to set teleport locations.");
                 return true;
             }
@@ -70,7 +75,7 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args[0].equalsIgnoreCase("create")) {
-            if (!player.hasPermission("playerManagementCore.teleport.dimension.create")) {
+            if (!player.hasPermission("teleport.dimension.create")) {
                 player.sendMessage(ChatColor.RED + "You don't have permission to create a dimension.");
                 return true;
             }
@@ -94,7 +99,7 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args[0].equalsIgnoreCase("delete")) {
-            if (!player.hasPermission("playerManagementCore.teleport.dimension.delete")) {
+            if (!player.hasPermission("teleport.dimension.delete")) {
                 player.sendMessage(ChatColor.RED + "You don't have permission to delete dimensions.");
                 return true;
             }
@@ -114,6 +119,11 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args[0].equalsIgnoreCase("invite")) {
+            if (sender.hasPermission("teleport.dimension.invite")) {
+                sender.sendMessage("§cYou don't have permission to use this command!");
+                return true;
+            }
+
             if (args.length < 3) {
                 player.sendMessage(ChatColor.RED + "Usage: /teleport-dimension invite <world> <player>");
                 return true;
@@ -143,6 +153,11 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args[0].equalsIgnoreCase("setdelay")) {
+            if (sender.hasPermission("teleport.dimension.setdelay")) {
+                sender.sendMessage("§cYou don't have permission to use this command!");
+                return true;
+            }
+
             if (args.length < 3) {
                 player.sendMessage(ChatColor.RED + "Usage: /teleport-dimension setdelay <world> <seconds>");
                 return true;
@@ -191,14 +206,9 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
 
         if (owner != null && !owner.equals(player.toString())) {
             if (!TeleportManager.hasAccess(player, dimension) &&
-                    !player.hasPermission("playerManagementCore.teleport.dimension.private." + dimension)) {
+                    !player.hasPermission("teleport.dimension.private." + dimension)) {
 
                 player.sendMessage(ChatColor.RED + "You don't have permission to teleport to this private dimension.");
-                return true;
-            }
-        } else {
-            if (!player.hasPermission("playerManagementCore.teleport.dimension")) {
-                player.sendMessage(ChatColor.RED + "You don't have permission to teleport.");
                 return true;
             }
         }

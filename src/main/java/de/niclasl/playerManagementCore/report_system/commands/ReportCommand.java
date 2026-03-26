@@ -32,7 +32,7 @@ public class ReportCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (!sender.hasPermission("playerManagementCore.report")) {
+        if (!sender.hasPermission("report")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }

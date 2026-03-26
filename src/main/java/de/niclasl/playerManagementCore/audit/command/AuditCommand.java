@@ -21,7 +21,7 @@ public record AuditCommand(PlayerManagementCore plugin) implements CommandExecut
     @Override
     public boolean onCommand(CommandSender sender, @NonNull Command command, @NonNull String label, String @NonNull [] args) {
 
-        if (!sender.hasPermission("playerManagementCore.audit")) {
+        if (!sender.hasPermission("audit")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }

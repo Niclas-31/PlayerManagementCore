@@ -34,7 +34,7 @@ public class UnwarnCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (!sender.hasPermission("playerManagementCore.unwarn")) {
+        if (!sender.hasPermission("unwarn")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
         }
 

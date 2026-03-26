@@ -44,7 +44,7 @@ public class WarnCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (!sender.hasPermission("playerManagementCore.warn")) {
+        if (!sender.hasPermission("warn")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }

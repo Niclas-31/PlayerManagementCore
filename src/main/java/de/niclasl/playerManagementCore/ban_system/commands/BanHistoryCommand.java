@@ -29,7 +29,7 @@ public class BanHistoryCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (!sender.hasPermission("playerManagementCore.banhistory")) {
+        if (!sender.hasPermission("banhistory")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }

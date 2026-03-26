@@ -27,7 +27,7 @@ public class VanishCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (!sender.hasPermission("playerManagementCore.vanish")) {
+        if (!sender.hasPermission("vanish")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
         }
 

@@ -25,7 +25,7 @@ public class CraftedItemsCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (!sender.hasPermission("playerManagementCore.crafteditems")) {
+        if (!sender.hasPermission("crafteditems")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }
