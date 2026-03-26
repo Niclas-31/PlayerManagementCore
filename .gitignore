@@ -1,1 +1,13 @@
+# IntelliJ IDEA
 .idea/
+*.iml
+*.xml
+
+# Optional: temporäre Dateien
+*.log
+*.tmp
+*.bak
+
+# OS-spezifische Dateien
+.DS_Store
+Thumbs.db
