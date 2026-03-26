@@ -1,0 +1,81 @@
+package de.niclasl.playerManagementCore.stats.listener;
+
+import de.niclasl.playerManagementCore.PlayerManagementCore;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+public record StatsGuiListener(PlayerManagementCore plugin) implements Listener {
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        Player viewer = (Player) event.getWhoClicked();
+
+        String title = event.getView().getTitle();
+        if (!title.startsWith("§8Stats: §7")) return;
+
+        event.setCancelled(true);
+
+        int slot = event.getRawSlot();
+
+        if (slot == 45) {
+            if (viewer.hasPermission("manage.player")) {
+                OfflinePlayer target = getTarget(viewer);
+                if (target != null) {
+                    plugin.getWatchGuiManager().open1(viewer, (Player) target);
+                } else {
+                    viewer.sendMessage("§cError: Target player not found.");
+                    viewer.closeInventory();
+                }
+            } else {
+                viewer.closeInventory();
+            }
+        }
+
+        if (slot == 25) {
+            OfflinePlayer target = getTarget(viewer);
+
+            assert target != null;
+            plugin.getMinedBlocksGui().open(viewer, target, 1);
+        }
+
+        if (slot == 28) {
+            OfflinePlayer target = getTarget(viewer);
+
+            assert target != null;
+            plugin.getUsedItemsGui().open(viewer, target, 1);
+        }
+
+        if (slot == 37) {
+            OfflinePlayer target = getTarget(viewer);
+
+            assert target != null;
+            plugin.getCraftedItemsGui().open(viewer, target, 1);
+        }
+    }
+
+    private OfflinePlayer getTarget(Player viewer) {
+        Inventory inv = viewer.getOpenInventory().getTopInventory();
+
+        ItemStack nameTag = inv.getItem(49);
+        if (nameTag == null || !nameTag.hasItemMeta()) return null;
+
+        ItemMeta meta = nameTag.getItemMeta();
+        if (meta == null || !meta.hasDisplayName()) return null;
+
+        String displayName = meta.getDisplayName();
+
+        String playerName = ChatColor.stripColor(displayName);
+
+        if (playerName.isEmpty()) return null;
+
+        return Bukkit.getOfflinePlayer(playerName);
+    }
+}

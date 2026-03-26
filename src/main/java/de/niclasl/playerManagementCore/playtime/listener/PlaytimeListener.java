@@ -1,0 +1,54 @@
+package de.niclasl.playerManagementCore.playtime.listener;
+
+import de.niclasl.playerManagementCore.PlayerManagementCore;
+import de.niclasl.playerManagementCore.playtime.manager.PlaytimeManager;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+public class PlaytimeListener implements Listener {
+
+    private final PlaytimeManager playtimeManager;
+    private final Map<UUID, BukkitRunnable> timers = new HashMap<>();
+    private final PlayerManagementCore plugin;
+
+    public PlaytimeListener(PlayerManagementCore plugin, PlaytimeManager playtimeManager) {
+        this.plugin = plugin;
+        this.playtimeManager = playtimeManager;
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        UUID uuid = player.getUniqueId();
+
+        BukkitRunnable runnable = new BukkitRunnable() {
+            @Override
+            public void run() {
+                playtimeManager.addSeconds(uuid, 1);
+            }
+        };
+
+        runnable.runTaskTimer(plugin, 20L, 20L);
+        timers.put(uuid, runnable);
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        UUID uuid = event.getPlayer().getUniqueId();
+
+        BukkitRunnable runnable = timers.remove(uuid);
+        if (runnable != null) {
+            runnable.cancel();
+        }
+
+        playtimeManager.savePlayerConfig(uuid, PlaytimeManager.getPlayerConfig(uuid));
+    }
+}

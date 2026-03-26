@@ -1,0 +1,20 @@
+package de.niclasl.playerManagementCore.armor.task;
+
+import de.niclasl.playerManagementCore.armor.ArmorUtils;
+import de.niclasl.playerManagementCore.armor.manager.RepairManager;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
+
+public class RepairTask {
+
+    public static void startAutoRepair(JavaPlugin plugin, int intervalTicks, double thresholdPercent, int repairAmount) {
+        Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (RepairManager.isRepairEnabled(player)) {
+                    ArmorUtils.autoRepairArmor(player, thresholdPercent, repairAmount);
+                }
+            }
+        }, 0L, intervalTicks);
+    }
+}

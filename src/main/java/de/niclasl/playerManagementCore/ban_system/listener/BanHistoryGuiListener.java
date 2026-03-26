@@ -1,0 +1,149 @@
+package de.niclasl.playerManagementCore.ban_system.listener;
+
+import de.niclasl.playerManagementCore.GuiConstants;
+import de.niclasl.playerManagementCore.PlayerManagementCore;
+import de.niclasl.playerManagementCore.ban_system.gui.BanHistoryGui;
+import de.niclasl.playerManagementCore.ban_system.manager.BanHistoryManager;
+import de.niclasl.playerManagementCore.ban_system.model.BanRecord;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.List;
+import java.util.UUID;
+
+public class BanHistoryGuiListener implements Listener {
+
+    private static BanHistoryManager banHistoryManager;
+    private final PlayerManagementCore plugin;
+
+    public BanHistoryGuiListener(BanHistoryManager banHistoryManager, PlayerManagementCore plugin) {
+        BanHistoryGuiListener.banHistoryManager = banHistoryManager;
+        this.plugin = plugin;
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent e) {
+        if (!(e.getWhoClicked() instanceof Player player)) return;
+        if (e.getClickedInventory() == null) return;
+
+        String title = e.getView().getTitle();
+        if (!title.startsWith("§8Bans from ")) return;
+
+        e.setCancelled(true);
+
+        if (!player.hasMetadata("ban_target") || !player.hasMetadata("ban_page")) return;
+
+        UUID targetUUID = UUID.fromString(player.getMetadata("ban_target").getFirst().asString());
+        int page = player.getMetadata("ban_page").getFirst().asInt();
+
+        int slot = e.getSlot();
+
+        if (slot == 26) {
+            OfflinePlayer target = getTarget(player);
+            if (target != null) {
+                plugin.getWatchGuiManager().open1(player, (Player) target);
+            } else {
+                player.sendMessage("§cError: Target player not found.");
+                player.closeInventory();
+            }
+        }
+
+        if (slot == 35) {
+            if (page > 1) {
+                OfflinePlayer target = Bukkit.getOfflinePlayer(targetUUID);
+                BanHistoryGui.open(player, target, page - 1);
+            }
+            return;
+        }
+
+        if (slot == 44) {
+            List<BanRecord> bans = BanHistoryManager.getBanHistory(targetUUID);
+            int warningsPerPage = GuiConstants.ALLOWED_SLOTS.length;
+            int totalPages = (int) Math.ceil(bans.size() / (double) warningsPerPage);
+            if (page < totalPages) {
+                OfflinePlayer target = Bukkit.getOfflinePlayer(targetUUID);
+                BanHistoryGui.open(player, target, page + 1);
+            }
+            return;
+        }
+
+        if (slot == 17) {
+            BanHistoryGui.toggleSort(player);
+            OfflinePlayer target = Bukkit.getOfflinePlayer(UUID.fromString(player.getMetadata("ban_target").getFirst().asString()));
+            BanHistoryGui.open(player, target, 1);
+        }
+
+        int indexInPage = -1;
+        for (int i = 0; i < GuiConstants.ALLOWED_SLOTS.length; i++) {
+            if (GuiConstants.ALLOWED_SLOTS[i] == slot) {
+                indexInPage = i;
+                break;
+            }
+        }
+        if (indexInPage == -1) return;
+
+        List<BanRecord> bans = BanHistoryManager.getBanHistory(targetUUID);
+
+        int banIndex = (page - 1) * GuiConstants.ALLOWED_SLOTS.length + indexInPage;
+        if (banIndex < 0 || banIndex >= bans.size()) {
+            player.sendMessage("§cInvalid ban slot.");
+            return;
+        }
+
+        BanRecord ban = bans.get(banIndex);
+
+        if (e.isRightClick()) {
+            if (ban.isPermanent()) {
+                player.sendMessage("§7This warning is already §cpermanent§7.");
+                return;
+            }
+
+            ban.setPermanent(true);
+            banHistoryManager.saveBanHistory(targetUUID, bans);
+
+            player.sendMessage("§aBan #" + (banIndex + 1) + " has been made permanent.");
+            OfflinePlayer target = Bukkit.getOfflinePlayer(targetUUID);
+            BanHistoryGui.open(player, target, page);
+            return;
+        }
+
+        if (e.isLeftClick()) {
+            if (ban.isPermanent()) {
+                player.sendMessage("§cThis ban is permanent and cannot be deleted.");
+                return;
+            }
+
+            banHistoryManager.removeBanHistory(targetUUID, banIndex);
+
+            player.sendMessage("§aBan #" + (banIndex + 1) + " has been deleted.");
+            OfflinePlayer target = Bukkit.getOfflinePlayer(targetUUID);
+            BanHistoryGui.open(player, target, page);
+        }
+    }
+
+    private OfflinePlayer getTarget(Player viewer) {
+        Inventory inv = viewer.getOpenInventory().getTopInventory();
+
+        ItemStack nameTag = inv.getItem(53);
+        if (nameTag == null || !nameTag.hasItemMeta()) return null;
+
+        ItemMeta meta = nameTag.getItemMeta();
+        if (meta == null || !meta.hasDisplayName()) return null;
+
+        String displayName = meta.getDisplayName();
+
+        String playerName = ChatColor.stripColor(displayName);
+
+        if (playerName.isEmpty()) return null;
+
+        return Bukkit.getOfflinePlayer(playerName);
+    }
+}

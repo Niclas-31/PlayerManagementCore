@@ -1,0 +1,6 @@
+name: PlayerManagementCore
+version: '4.1.4'
+main: de.niclasl.playerManagementCore.PlayerManagementCore
+api-version: '1.21'
+load: STARTUP
+authors: [ Niclas ]
