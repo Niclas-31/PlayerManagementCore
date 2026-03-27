@@ -54,7 +54,6 @@ public class TeleportBlockerListener implements Listener {
         return switch (event.getCause()) {
             case NETHER_PORTAL -> PortalType.NETHER_PORTAL;
             case END_PORTAL -> PortalType.END_PORTAL;
-            case END_GATEWAY -> PortalType.END_GATEWAY;
             default -> PortalType.UNKNOWN;
         };
     }

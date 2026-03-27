@@ -34,7 +34,6 @@ public record PortalConfigManager(PlayerManagementCore plugin) {
 
                 cfg.set("portals.NETHER_PORTAL", true);
                 cfg.set("portals.END_PORTAL", true);
-                cfg.set("portals.END_GATEWAY", true);
                 cfg.set("portals.ENDER_PEARL", true);
                 cfg.set("portals.CHORUS_FRUIT", true);
                 cfg.set("portals.EXIT_BED", true);
