@@ -23,7 +23,7 @@ public record EnchantCommand(PlayerManagementCore plugin) implements CommandExec
             return true;
         }
 
-        if (sender.hasPermission("enchant")) {
+        if (!sender.hasPermission("enchant")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }

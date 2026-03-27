@@ -36,7 +36,7 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (sender.hasPermission("teleport.dimension")) {
+        if (!sender.hasPermission("teleport.dimension")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }
@@ -119,8 +119,8 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args[0].equalsIgnoreCase("invite")) {
-            if (sender.hasPermission("teleport.dimension.invite")) {
-                sender.sendMessage("§cYou don't have permission to use this command!");
+            if (!player.hasPermission("teleport.dimension.invite")) {
+                player.sendMessage("§cYou don't have permission to use this command!");
                 return true;
             }
 
@@ -153,8 +153,8 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args[0].equalsIgnoreCase("setdelay")) {
-            if (sender.hasPermission("teleport.dimension.setdelay")) {
-                sender.sendMessage("§cYou don't have permission to use this command!");
+            if (!player.hasPermission("teleport.dimension.setdelay")) {
+                player.sendMessage("§cYou don't have permission to use this command!");
                 return true;
             }
 

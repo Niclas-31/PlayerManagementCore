@@ -32,7 +32,7 @@ public class RandomTeleportCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (sender.hasPermission("rtp")) {
+        if (!sender.hasPermission("rtp")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }

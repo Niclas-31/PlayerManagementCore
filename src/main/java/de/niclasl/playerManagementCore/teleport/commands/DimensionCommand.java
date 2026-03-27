@@ -23,7 +23,7 @@ public class DimensionCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (sender.hasPermission("dimension")) {
+        if (!sender.hasPermission("dimension")) {
             sender.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }
