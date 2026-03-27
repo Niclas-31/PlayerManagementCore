@@ -36,9 +36,6 @@ public record PortalConfigManager(PlayerManagementCore plugin) {
                 cfg.set("portals.END_PORTAL", true);
                 cfg.set("portals.ENDER_PEARL", true);
                 cfg.set("portals.CHORUS_FRUIT", true);
-                cfg.set("portals.EXIT_BED", true);
-                cfg.set("portals.DISMOUNT", true);
-                cfg.set("portals.SPECTATE", true);
                 cfg.set("portals.PLUGIN", true);
                 cfg.set("portals.COMMAND", true);
                 cfg.set("portals.UNKNOWN", true);

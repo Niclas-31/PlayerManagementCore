@@ -61,10 +61,7 @@ public class TeleportBlockerListener implements Listener {
     private PortalType mapTeleportEvent(PlayerTeleportEvent event) {
         return switch (event.getCause()) {
             case CHORUS_FRUIT -> PortalType.CHORUS_FRUIT;
-            case DISMOUNT -> PortalType.DISMOUNT;
             case ENDER_PEARL -> PortalType.ENDER_PEARL;
-            case EXIT_BED -> PortalType.EXIT_BED;
-            case SPECTATE -> PortalType.SPECTATE;
             case PLUGIN -> PortalType.PLUGIN;
             case COMMAND -> PortalType.COMMAND;
             default -> PortalType.UNKNOWN;

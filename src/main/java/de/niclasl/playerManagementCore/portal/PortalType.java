@@ -5,9 +5,6 @@ public enum PortalType {
     END_PORTAL,
     CHORUS_FRUIT,
     ENDER_PEARL,
-    EXIT_BED,
-    DISMOUNT,
-    SPECTATE,
     PLUGIN,
     COMMAND,
     UNKNOWN
