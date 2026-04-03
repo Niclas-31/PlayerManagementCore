@@ -49,9 +49,9 @@ public class DimensionGuiListener implements Listener {
 
         if (slot == 26) {
             if (player.hasPermission("manage.player")) {
-                OfflinePlayer target = getTarget(player);
+                Player target = getTarget(player);
                 if (target != null) {
-                    plugin.getWatchGuiManager().open1(player, (Player) target);
+                    plugin.getWatchGuiManager().open1(player, target);
                 } else {
                     player.sendMessage("§cError: Target player not found.");
                     player.closeInventory();
@@ -118,12 +118,12 @@ public class DimensionGuiListener implements Listener {
             }
         }
 
+        Player target = getTarget(player);
 
-        teleportManager.teleportWithDelay(player, targetLoc, TeleportManager.getTeleportDelay(dimension), dimension);
+        assert target != null;
+        teleportManager.teleportWithDelay(target, targetLoc, TeleportManager.getTeleportDelay(dimension), dimension);
         if (PortalConfigManager.isPortalEnabled(PortalType.PLUGIN)) {
-            OfflinePlayer target = getTarget(player);
             String reason = "Teleport to " + dimension;
-            assert target != null;
             AuditManager.log(
                     target,
                     AuditType.TELEPORT,
@@ -135,7 +135,7 @@ public class DimensionGuiListener implements Listener {
         player.closeInventory();
     }
 
-    private OfflinePlayer getTarget(Player viewer) {
+    private Player getTarget(Player viewer) {
         Inventory inv = viewer.getOpenInventory().getTopInventory();
 
         ItemStack nameTag = inv.getItem(53);
@@ -150,6 +150,6 @@ public class DimensionGuiListener implements Listener {
 
         if (playerName.isEmpty()) return null;
 
-        return Bukkit.getOfflinePlayer(playerName);
+        return Bukkit.getPlayer(playerName);
     }
 }

@@ -1,11 +1,6 @@
 package de.niclasl.playerManagementCore.teleport.commands;
 
 import de.niclasl.playerManagementCore.PlayerManagementCore;
-import de.niclasl.playerManagementCore.audit.AuditManager;
-import de.niclasl.playerManagementCore.audit.model.AuditAction;
-import de.niclasl.playerManagementCore.audit.model.AuditType;
-import de.niclasl.playerManagementCore.portal.PortalType;
-import de.niclasl.playerManagementCore.portal.manager.PortalConfigManager;
 import de.niclasl.playerManagementCore.teleport.manager.TeleportManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -17,7 +12,9 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class TeleportCommand implements CommandExecutor, TabCompleter {
 
@@ -189,42 +186,6 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        String dimension = args[0].toLowerCase();
-
-        if (!TeleportManager.dimensionExists(dimension)) {
-            player.sendMessage(ChatColor.RED + "Unknown dimension. Use /teleport-dimension to see all.");
-            return true;
-        }
-
-        Location targetLoc = TeleportManager.getLocation(dimension);
-        if (targetLoc == null) {
-            player.sendMessage(ChatColor.RED + "No location set for dimension §6'" + dimension + "'§c.");
-            return true;
-        }
-
-        UUID owner = TeleportManager.getOwner(dimension);
-
-        if (owner != null && !owner.equals(player.toString())) {
-            if (!TeleportManager.hasAccess(player, dimension) &&
-                    !player.hasPermission("teleport.dimension.private." + dimension)) {
-
-                player.sendMessage(ChatColor.RED + "You don't have permission to teleport to this private dimension.");
-                return true;
-            }
-        }
-
-        teleportManager.teleportWithDelay(player, targetLoc, TeleportManager.getTeleportDelay(dimension), dimension);
-
-        if (PortalConfigManager.isPortalEnabled(PortalType.PLUGIN)) {
-            String reason = "Teleport to " + dimension;
-            AuditManager.log(
-                    player,
-                    AuditType.TELEPORT,
-                    AuditAction.EXECUTE,
-                    player,
-                    reason
-            );
-        }
         return true;
     }
 
@@ -233,7 +194,6 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
         List<String> completions = new ArrayList<>();
         if (args.length == 1) {
             completions.addAll(Arrays.asList("set", "create", "delete", "invite", "setdelay"));
-            completions.addAll(TeleportManager.getAllDimensions());
         } else if (args.length == 2) {
             if (args[0].equalsIgnoreCase("invite") || args[0].equalsIgnoreCase("delete") || args[0].equalsIgnoreCase("setdelay") || args[0].equalsIgnoreCase("set")) {
                 completions.addAll(TeleportManager.getAllDimensions());
