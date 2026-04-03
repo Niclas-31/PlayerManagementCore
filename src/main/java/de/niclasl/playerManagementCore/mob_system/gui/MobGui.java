@@ -4,7 +4,6 @@ import de.niclasl.playerManagementCore.mob_system.manager.MobManager;
 import de.niclasl.playerManagementCore.mob_system.model.MobSpawnRequest;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -25,7 +24,7 @@ public record MobGui(PlayerManagementCore plugin) {
 
     public static HashMap<UUID, Integer> playerFilterIndex = new HashMap<>();
 
-    public void open(Player viewer, OfflinePlayer target, int page) {
+    public void open(Player viewer, Player target, int page) {
 
         int filterIndex = playerFilterIndex.getOrDefault(viewer.getUniqueId(), -1);
         Character filterChar = (filterIndex == -1 ? null : ALPHABET[filterIndex]);
@@ -53,7 +52,7 @@ public record MobGui(PlayerManagementCore plugin) {
         int mobsPerPage = allowedSlots.length;
         int totalPages = (int) Math.ceil(allMobs.size() / (double) mobsPerPage);
         if (totalPages == 0) totalPages = 1;
-        page = Math.min(Math.max(page, 1), totalPages);
+        page = Math.clamp(page, 1, totalPages);
 
         Inventory inv = Bukkit.createInventory(
                 null,

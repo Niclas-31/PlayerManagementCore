@@ -45,7 +45,8 @@ public class MobCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
+        Player target = Bukkit.getPlayer(args[0]);
+        assert target != null;
         if (!target.hasPlayedBefore() && !target.isOnline()) {
             player.sendMessage("§cPlayer not found.");
             return true;

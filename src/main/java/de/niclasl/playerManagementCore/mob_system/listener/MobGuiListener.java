@@ -73,12 +73,13 @@ public class MobGuiListener implements Listener {
             }
 
             MobGui.playerFilterIndex.put(player.getUniqueId(), idx);
-            OfflinePlayer target = Bukkit.getOfflinePlayer(UUID.fromString(player.getMetadata("mob_target").getFirst().asString()));
+            Player target = Bukkit.getPlayer(UUID.fromString(player.getMetadata("mob_target").getFirst().asString()));
+            assert target != null;
             plugin.getMobGui().open(player, target, 1);
             return;
         }
 
-        OfflinePlayer target = Bukkit.getOfflinePlayer(UUID.fromString(player.getMetadata("mob_target").getFirst().asString()));
+        Player target = Bukkit.getPlayer(UUID.fromString(player.getMetadata("mob_target").getFirst().asString()));
 
         int filterIndex = MobGui.playerFilterIndex.getOrDefault(player.getUniqueId(), -1);
         Character currentLetter = filterIndex >= 0 ? MobGui.ALPHABET[filterIndex] : null;
@@ -96,10 +97,12 @@ public class MobGuiListener implements Listener {
         int totalPages = (int) Math.ceil(filteredRequests.size() / (double) mobsPerPage);
 
         if (slot == 35 && page > 1) {
+            assert target != null;
             plugin.getMobGui().open(player, target, page - 1);
             return;
         }
         if (slot == 44 && page < totalPages) {
+            assert target != null;
             plugin.getMobGui().open(player, target, page + 1);
             return;
         }
@@ -137,9 +140,10 @@ public class MobGuiListener implements Listener {
             player.sendMessage("§eEnter in chat how many §a" + entityType.name() + "§e should be spawned.");
         } else if (e.isLeftClick()) {
             Bukkit.getScheduler().runTask(plugin, () -> {
-                Entity entity = player.getWorld().spawnEntity(player.getLocation(), entityType);
+                assert target != null;
+                Entity entity = target.getWorld().spawnEntity(target.getLocation(), entityType);
 
-                MobManager.registerSpawn(entity, player);
+                MobManager.registerSpawn(entity, target);
 
                 if (entity instanceof Warden warden) {
                     warden.setAware(false);
@@ -154,6 +158,7 @@ public class MobGuiListener implements Listener {
     @EventHandler
     public void onChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
+        Player target = Bukkit.getPlayer(UUID.fromString(player.getMetadata("mob_target").getFirst().asString()));
         MobSpawnRequest request = MobManager.getPendingSpawn(player.getUniqueId());
         if (request == null) return;
 
@@ -169,7 +174,8 @@ public class MobGuiListener implements Listener {
             Bukkit.getScheduler().runTask(plugin, () -> {
 
                 for (int i = 0; i < amount; i++) {
-                    Entity entity = player.getWorld().spawnEntity(player.getLocation(), request.getEntityType());
+                    assert target != null;
+                    Entity entity = target.getWorld().spawnEntity(target.getLocation(), request.getEntityType());
 
                     MobManager.registerSpawn(entity, player);
 
@@ -194,6 +200,6 @@ public class MobGuiListener implements Listener {
         if (nameTag == null || !nameTag.hasItemMeta()) return null;
         ItemMeta meta = nameTag.getItemMeta();
         if (meta == null || !meta.hasDisplayName()) return null;
-        return Bukkit.getOfflinePlayer(ChatColor.stripColor(meta.getDisplayName()));
+        return Bukkit.getPlayer(ChatColor.stripColor(meta.getDisplayName()));
     }
 }
