@@ -71,7 +71,6 @@ import de.niclasl.playerManagementCore.stats.listener.CraftedItemsGuiListener;
 import de.niclasl.playerManagementCore.stats.listener.MinedBlocksGuiListener;
 import de.niclasl.playerManagementCore.stats.listener.StatsGuiListener;
 import de.niclasl.playerManagementCore.stats.listener.UsedItemsGuiListener;
-import de.niclasl.playerManagementCore.teleport.commands.DimensionCommand;
 import de.niclasl.playerManagementCore.teleport.commands.TeleportCommand;
 import de.niclasl.playerManagementCore.teleport.gui.DimensionGui;
 import de.niclasl.playerManagementCore.teleport.listener.DimensionGuiListener;
@@ -174,11 +173,8 @@ public class PlayerManagementCore extends JavaPlugin {
         Objects.requireNonNull(getCommand("ban-history")).setExecutor(new BanHistoryCommand(banHistoryGui));
         Objects.requireNonNull(getCommand("ban-history")).setTabCompleter(new BanHistoryCommand(banHistoryGui));
 
-        Objects.requireNonNull(getCommand("teleport-dimension")).setExecutor(new TeleportCommand(teleportManager, this));
-        Objects.requireNonNull(getCommand("teleport-dimension")).setTabCompleter(new TeleportCommand(teleportManager, this));
-
-        Objects.requireNonNull(getCommand("dimension")).setExecutor(new DimensionCommand());
-        Objects.requireNonNull(getCommand("dimension")).setTabCompleter(new DimensionCommand());
+        Objects.requireNonNull(getCommand("dimension")).setExecutor(new TeleportCommand(teleportManager, this));
+        Objects.requireNonNull(getCommand("dimension")).setTabCompleter(new TeleportCommand(teleportManager, this));
 
         Objects.requireNonNull(getCommand("gamemode-gui")).setExecutor(new GamemodeCommand());
         Objects.requireNonNull(getCommand("gamemode-gui")).setTabCompleter(new GamemodeCommand());

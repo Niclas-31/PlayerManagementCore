@@ -18,7 +18,7 @@ public class TeleportManager {
     private static PlayerManagementCore plugin;
     private final Map<UUID, BukkitTask> pendingTeleports = new HashMap<>();
     private static final Map<String, File> dimensionFiles = new HashMap<>();
-    private static final Map<String, Set<UUID>> invitedPlayers = new HashMap<>();
+    private static final Map<String, YamlConfiguration> cachedConfigs = new HashMap<>();
 
     public TeleportManager(File dataFolder, PlayerManagementCore plugin) {
         TeleportManager.plugin = plugin;
@@ -64,7 +64,7 @@ public class TeleportManager {
         if (!file.exists()) {
             try {
                 file.createNewFile();
-                YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+                YamlConfiguration config = getConfig(dimension);
 
                 World world = Bukkit.getWorld(worldName);
                 Location loc = (world != null)
@@ -90,7 +90,9 @@ public class TeleportManager {
                 config.set("z", loc.getZ());
                 config.set("world", worldName);
                 config.set("dimensionType", type);
+                config.set("owner", "SERVER");
                 config.set("private", false);
+                config.set("delay", 5);
 
                 config.save(file);
                 dimensionFiles.put(dimension + ".yml", file);
@@ -127,13 +129,13 @@ public class TeleportManager {
         File file = new File(folder, dimension + ".yml");
         if (file.exists()) {
             try {
-                YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+                YamlConfiguration config = getConfig(dimension);
                 String storedType = config.getString("dimensionType");
                 if (storedType == null || !storedType.equalsIgnoreCase(dimensionType)) {
                     config.set("dimensionType", dimensionType.toLowerCase());
                     config.save(file);
                 }
-                dimensionFiles.put(dimension + ".yml", file);
+                dimensionFiles.put(dimension.toLowerCase(), file);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -148,7 +150,7 @@ public class TeleportManager {
 
         try {
             file.createNewFile();
-            YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+            YamlConfiguration config = getConfig(dimension);
             config.set("x", spawnLoc.getX());
             config.set("y", spawnLoc.getY());
             config.set("z", spawnLoc.getZ());
@@ -171,7 +173,7 @@ public class TeleportManager {
         File file = dimensionFiles.get(dimension + ".yml");
         if (file == null || !file.exists()) return;
 
-        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        YamlConfiguration config = getConfig(dimension);
         String owner = config.getString("owner");
 
         if (owner == null || !owner.equals(player.getUniqueId().toString())) {
@@ -188,11 +190,19 @@ public class TeleportManager {
         }
     }
 
+    public boolean isPrivate(String dimension) {
+        File file = dimensionFiles.get(dimension + ".yml");
+        if (file == null || !file.exists()) return false;
+
+        YamlConfiguration config = getConfig(dimension);
+        return config.getBoolean("private", false);
+    }
+
     public static Location getLocation(String dimension) {
         File file = dimensionFiles.get(dimension + ".yml");
         if (file == null || !file.exists()) return null;
 
-        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        YamlConfiguration config = getConfig(dimension);
         String worldName = config.getString("world");
         if (worldName == null) return null;
 
@@ -221,7 +231,7 @@ public class TeleportManager {
         File file = dimensionFiles.get(dimension + ".yml");
         if (file == null || !file.exists()) return;
 
-        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        YamlConfiguration config = getConfig(dimension);
 
         config.set("x", loc.getX());
         config.set("y", loc.getY());
@@ -319,7 +329,7 @@ public class TeleportManager {
             return;
         }
 
-        FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+        FileConfiguration config = getConfig(dimension);
 
         Set<String> defaultWorlds = Set.of("world", "world_nether", "world_the_end");
         if (defaultWorlds.contains(dimension.toLowerCase())) {
@@ -351,7 +361,7 @@ public class TeleportManager {
         File file = new File(folder, dimension + ".yml");
         if (!file.exists()) return 5;
 
-        FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+        FileConfiguration config = getConfig(dimension);
         return config.getInt("delay", 5);
     }
 
@@ -414,7 +424,7 @@ public class TeleportManager {
         File file = dimensionFiles.get(dimension + ".yml");
         if (file == null || !file.exists()) return;
 
-        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        YamlConfiguration config = getConfig(dimension);
         config.set("owner", ownerUUID.toString());
 
         try {
@@ -428,7 +438,7 @@ public class TeleportManager {
         File file = dimensionFiles.get(dimension + ".yml");
         if (file == null || !file.exists()) return null;
 
-        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        YamlConfiguration config = getConfig(dimension);
         String ownerStr = config.getString("owner");
         if (ownerStr == null) return null;
 
@@ -443,20 +453,25 @@ public class TeleportManager {
         File file = dimensionFiles.get(dimension + ".yml");
         if (file == null || !file.exists()) return null;
 
-        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        YamlConfiguration config = getConfig(dimension);
         return config.getString("dimensionType");
     }
 
     public static boolean isInvited(String dimension, UUID playerUUID) {
-        Set<UUID> invited = invitedPlayers.get(dimension);
-        return invited != null && invited.contains(playerUUID);
+        File file = dimensionFiles.get(dimension + ".yml");
+        if (file == null || !file.exists()) return false;
+
+        YamlConfiguration config = getConfig(dimension);
+        List<String> invited = config.getStringList("invited");
+
+        return invited.contains(playerUUID.toString());
     }
 
     public static boolean isOwner(Player player, String dimension) {
         File file = dimensionFiles.get(dimension + ".yml");
         if (file == null || !file.exists()) return true;
 
-        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        YamlConfiguration config = getConfig(dimension);
         String ownerUUID = config.getString("owner");
         if (ownerUUID == null) return true;
 
@@ -464,12 +479,93 @@ public class TeleportManager {
     }
 
     public static void invite(Player owner, String dimension, Player target) {
-        if (isOwner(owner, dimension)) {
-            owner.sendMessage("§cYou are not the owner of this world!");
+        if (!isOwner(owner, dimension)) {
+            owner.sendMessage("§cYou are not the owner of this world.");
             return;
         }
-        invitedPlayers.computeIfAbsent(dimension, k -> new HashSet<>()).add(target.getUniqueId());
-        owner.sendMessage("§aYou invited " + target.getName() + " to " + dimension);
-        target.sendMessage("§aYou have been invited to world " + dimension + " by " + owner.getName());
+
+        File file = dimensionFiles.get(dimension + ".yml");
+        if (file == null || !file.exists()) return;
+
+        YamlConfiguration config = getConfig(dimension);
+
+        List<String> invited = config.getStringList("invited");
+        List<String> denied = config.getStringList("denied");
+
+        String uuid = target.getUniqueId().toString();
+
+        denied.remove(uuid);
+        if (!invited.contains(uuid)) invited.add(uuid);
+
+        config.set("invited", invited);
+        config.set("denied", denied);
+
+        save(file, config);
+
+        owner.sendMessage("§aPlayer §e" + target.getName() + " §ahas been invited to §6" + dimension);
+    }
+
+    public static void uninvite(Player owner, String dimension, Player target) {
+        if (!isOwner(owner, dimension)) {
+            owner.sendMessage("§cYou are not the owner of this world.");
+            return;
+        }
+
+        File file = dimensionFiles.get(dimension + ".yml");
+        if (file == null || !file.exists()) return;
+
+        YamlConfiguration config = getConfig(dimension);
+
+        List<String> invited = config.getStringList("invited");
+
+        invited.remove(target.getUniqueId().toString());
+
+        config.set("invited", invited);
+        save(file, config);
+
+        owner.sendMessage("§cPlayer §e" + target.getName() + " §cis no longer invited.");
+    }
+
+    public static void deny(Player owner, String dimension, Player target) {
+        if (!isOwner(owner, dimension)) {
+            owner.sendMessage("§cYou are not the owner of this world.");
+            return;
+        }
+
+        File file = dimensionFiles.get(dimension + ".yml");
+        if (file == null || !file.exists()) return;
+
+        YamlConfiguration config = getConfig(dimension);
+
+        List<String> invited = config.getStringList("invited");
+        List<String> denied = config.getStringList("denied");
+
+        String uuid = target.getUniqueId().toString();
+
+        invited.remove(uuid);
+        if (!denied.contains(uuid)) denied.add(uuid);
+
+        config.set("invited", invited);
+        config.set("denied", denied);
+
+        save(file, config);
+
+        owner.sendMessage("§cPlayer §e" + target.getName() + " §chas been denied access.");
+    }
+
+    private static void save(File file, YamlConfiguration config) {
+        try {
+            config.save(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static YamlConfiguration getConfig(String dimension) {
+        return cachedConfigs.computeIfAbsent(dimension, dim -> {
+            File file = dimensionFiles.get(dim + ".yml");
+            if (file == null || !file.exists()) return null;
+            return YamlConfiguration.loadConfiguration(file);
+        });
     }
 }

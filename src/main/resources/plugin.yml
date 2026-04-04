@@ -28,103 +28,81 @@ commands:
 
   ban-history:
     description: Shows a player's ban history.
-    usage: /ban-history <player> [page]
     permission: banhistory
     permission-message: You don't have permission to use this command!
 
-  teleport-dimension:
-    description: Teleport or set teleport locations in dimensions.
-    usage: /teleport-dimension <set|dimension> <dimension>
-    permission: teleport.dimension
-
   dimension:
-    usage: /dimension setprivat <world_name> <true|false>
-    description: Manage custom worlds
+    description: Teleport or set teleport locations in dimensions.
     permission: dimension
 
   gamemode-gui:
     description: Open Gamemode GUI.
-    usage: /gamemode-gui
     permission: gamemode
     permission-message: You don't have permission to use this command!
 
   mute:
     description: Mute players.
-    usage: /mute <player> <duration> <reason>
     permission: mute
     permission-message: You don't have permission to use this command!
 
   unmute:
     description: Unmute players.
-    usage: /unmute <player>
     permission: unmute
     permission-message: You don't have permission to use this command!
 
   warn:
     description: Warn a player.
-    usage: /warn <player> <reason>
     permission: warn
     permission-message: You don't have permission to use this command!
 
   warn-history:
     description: Show a player's warn history.
-    usage: /warn-history <player> [page]
     permission: warnhistory
     permission-message: You don't have permission to use this command!
 
   unwarn:
     description: Remove a warning from a player.
-    usage: /unwarn <player> <Warn-ID>
     permission: unwarn
     permission-message: You don't have permission to use this command!
 
   report:
     description: Report a player.
-    usage: /report <player> <reason>
     permission: report
     permission-message: You don't have permission to use this command!
 
   report-history:
-    usage: /report-history <player> [page]
     description: Open report history.
     permission: reporthistory
     permission-message: You don't have permission to use this command!
 
   mob:
     description: Open mob GUI for a target player.
-    usage: /mob <player>
     permission: mob
     permission-message: You don't have permission to use this command!
 
   mobcount:
     description: Count mobs in a world.
-    usage: /mobcount <player>
     permission: mobcount
     permission-message: You don't have permission to use this command!
 
   stats:
     description: Opens the statistics GUI.
-    usage: /stats
     permission: stats
 
   minedblocks:
     description: Opens the GUI with mined blocks.
-    usage: /minedblocks
     permission: minedblocks
 
   useditems:
     description: Opens the GUI with used items.
-    usage: /useditems
     permission: useditems
 
   crafteditems:
     description: Opens the GUI with crafted items.
-    usage: /crafteditems
     permission: crafteditems
 
   randomteleport:
     description: Teleports you to a random location.
-    usage: /randomteleport
     permission: rtp
     aliases: [rtp]
 
@@ -135,15 +113,12 @@ commands:
 
   enchant-gui:
     description: Öffnet das Enchant-Menü
-    usage: /enchant-gui
     permission: enchant
 
   audit:
-    usage: /audit <player>
     permission: audit
 
   protection:
-    usage: /protection <enable/disable>
     permission: protection
 
 permissions:
@@ -187,33 +162,42 @@ permissions:
     description: Verwarnungshistorie ansehen
     default: op
 
-  teleport.dimension:
+  dimension:
     description: Zugriffsrecht für Dimensionsteleport
     default: true
 
-  teleport.dimension.gui:
+  dimension.gui:
     description: Zugriff auf das Teleport Dimension Gui
     default: true
 
-  teleport.dimension.setcoords:
+  dimension.setcoords:
     description: Erlaubt Setzen der Teleport-Koordinaten
     default: op
 
-  teleport.dimension.create:
+  dimension.create:
     description: Erlaubt Erstellen eigener Dimensionen
     default: true
 
-  teleport.dimension.delete:
+  dimension.delete:
     description: Erlaubt Löschen von Dimensionen
     default: op
 
-  teleport.dimension.invite:
+  dimension.invite:
     default: true
 
-  teleport.dimension.setdelay:
+  dimension.uninvite:
     default: true
 
-  dimension:
+  dimension.deny:
+    default: true
+
+  dimension.info:
+    default: true
+
+  dimension.setdelay:
+    default: true
+
+  dimension.setprivate:
     default: true
 
   gamemode:

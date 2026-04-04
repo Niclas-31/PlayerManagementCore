@@ -15,6 +15,7 @@ import org.jspecify.annotations.NonNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public class TeleportCommand implements CommandExecutor, TabCompleter {
 
@@ -33,19 +34,23 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (!player.hasPermission("teleport.dimension")) {
+        if (!player.hasPermission("dimension")) {
             player.sendMessage("§cYou don't have permission to use this command!");
             return true;
         }
 
         if (args.length < 2) {
             player.sendMessage(ChatColor.RED + "Usage: ");
-            player.sendMessage(ChatColor.RED + "/teleport-dimension gui <player>");
-            player.sendMessage(ChatColor.RED + "/teleport-dimension set <dimension-name>");
-            player.sendMessage(ChatColor.RED + "/teleport-dimension create <dimension-name> <dimension-type>");
-            player.sendMessage(ChatColor.RED + "/teleport-dimension delete <dimension-name>");
-            player.sendMessage(ChatColor.RED + "/teleport-dimension invite <world> <player>");
-            player.sendMessage(ChatColor.RED + "/teleport-dimension setdelay <world> <seconds>");
+            player.sendMessage(ChatColor.RED + "/dimension gui <player>");
+            player.sendMessage(ChatColor.RED + "/dimension set <dimension-name>");
+            player.sendMessage(ChatColor.RED + "/dimension create <dimension-name> <dimension-type>");
+            player.sendMessage(ChatColor.RED + "/dimension delete <dimension-name>");
+            player.sendMessage(ChatColor.RED + "/dimension invite <world> <player>");
+            player.sendMessage(ChatColor.RED + "/dimension uninvite <player>");
+            player.sendMessage(ChatColor.RED + "/dimension deny <player>");
+            player.sendMessage(ChatColor.RED + "/dimension info <dimension-name>");
+            player.sendMessage(ChatColor.RED + "/dimension setdelay <dimension-name> <seconds>");
+            player.sendMessage(ChatColor.RED + "/dimension setprivate <dimension-name> <true/false>");
             return true;
         }
 
@@ -54,7 +59,7 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
         switch (subCommand) {
 
             case "gui" -> {
-                if (!player.hasPermission("teleport.dimension.gui")) {
+                if (!player.hasPermission("dimension.gui")) {
                     player.sendMessage("§cYou don't have permission to use this command!");
                     return true;
                 }
@@ -72,7 +77,7 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
             }
 
             case "set" -> {
-                if (!player.hasPermission("teleport.dimension.setcoords")) {
+                if (!player.hasPermission("dimension.setcoords")) {
                     player.sendMessage(ChatColor.RED + "You don't have permission to set teleport locations.");
                     return true;
                 }
@@ -94,7 +99,7 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
             }
 
             case "create" -> {
-                if (!player.hasPermission("teleport.dimension.create")) {
+                if (!player.hasPermission("dimension.create")) {
                     player.sendMessage(ChatColor.RED + "You don't have permission to create a dimension.");
                     return true;
                 }
@@ -114,7 +119,7 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
             }
 
             case "delete" -> {
-                if (!player.hasPermission("teleport.dimension.delete")) {
+                if (!player.hasPermission("dimension.delete")) {
                     player.sendMessage(ChatColor.RED + "You don't have permission to delete dimensions.");
                     return true;
                 }
@@ -129,7 +134,7 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
             }
 
             case "invite" -> {
-                if (!player.hasPermission("teleport.dimension.invite")) {
+                if (!player.hasPermission("dimension.invite")) {
                     player.sendMessage("§cYou don't have permission to use this command!");
                     return true;
                 }
@@ -159,8 +164,86 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
+            case "uninvite" -> {
+                if (!player.hasPermission("dimension.uninvite")) {
+                    player.sendMessage(ChatColor.RED + "You don't have permission to use this command!");
+                    return true;
+                }
+
+                String dimension = args[1];
+                Player target = Bukkit.getPlayer(args[2]);
+
+                if (target == null) {
+                    player.sendMessage("§cTarget player not found.");
+                    return true;
+                } else {
+                    target.getName();
+                }
+
+                if (!TeleportManager.dimensionExists(dimension)) {
+                    player.sendMessage(ChatColor.RED + "World '" + dimension + "' does not exist.");
+                    return true;
+                }
+
+                if (!TeleportManager.isOwner(player, dimension)) {
+                    player.sendMessage(ChatColor.RED + "You are not the owner of world '" + dimension + "'.");
+                    return true;
+                }
+
+                TeleportManager.uninvite(player, dimension, target);
+                player.sendMessage("§aPlayer §e" + target.getName() + " §ahas been uninvited to §6" + dimension);
+                return true;
+            }
+
+            case "deny" -> {
+                if (!player.hasPermission("dimension.deny")) {
+                    player.sendMessage(ChatColor.RED + "You don't have permission to use this command!");
+                    return true;
+                }
+
+                String dimension = args[1];
+                Player target = Bukkit.getPlayer(args[2]);
+
+                if (target == null) {
+                    player.sendMessage("§cTarget player not found.");
+                    return true;
+                } else {
+                    target.getName();
+                }
+
+                if (!TeleportManager.dimensionExists(dimension)) {
+                    player.sendMessage(ChatColor.RED + "World '" + dimension + "' does not exist.");
+                    return true;
+                }
+
+                if (!TeleportManager.isOwner(player, dimension)) {
+                    player.sendMessage(ChatColor.RED + "You are not the owner of world '" + dimension + "'.");
+                    return true;
+                }
+
+                TeleportManager.deny(player, dimension, target);
+                player.sendMessage("§aPlayer §e" + target.getName() + " §ahas been deny to §6" + dimension);
+                return true;
+            }
+
+            case "info" -> {
+                if (!player.hasPermission("dimension.info")) {
+                    player.sendMessage(ChatColor.RED + "You don't have permission to use this command!");
+                    return true;
+                }
+
+                String dimension = args[1];
+
+                player.sendMessage("Info: ");
+                player.sendMessage("Dimension: " + dimension);
+                player.sendMessage("Owner: " + TeleportManager.isOwner(player, dimension));
+                player.sendMessage("Dimension Type: " + teleportManager.getDimensionType(dimension));
+                player.sendMessage("Private: " + teleportManager.isPrivate(dimension));
+                return true;
+            }
+
             case "setdelay" -> {
-                if (!player.hasPermission("teleport.dimension.setdelay")) {
+                if (!player.hasPermission("dimension.setdelay")) {
                     player.sendMessage("§cYou don't have permission to use this command!");
                     return true;
                 }
@@ -190,8 +273,43 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
+            case "setprivate" -> {
+                if (!player.hasPermission("dimension.setprivate")) {
+                    sender.sendMessage("§cYou don't have permission to use this command!");
+                    return true;
+                }
+
+                String dimension = args[1];
+                String flag = args[2].toLowerCase();
+
+                if (!TeleportManager.dimensionExists(dimension)) {
+                    player.sendMessage(ChatColor.RED + "This world does not exist.");
+                    return true;
+                }
+
+                UUID owner = TeleportManager.getOwner(dimension);
+                if (owner == null) {
+                    player.sendMessage(ChatColor.RED + "This world has no owner defined.");
+                    return true;
+                }
+
+                boolean makePrivate;
+                if (flag.equals("true")) {
+                    makePrivate = true;
+                } else if (flag.equals("false")) {
+                    makePrivate = false;
+                } else {
+                    player.sendMessage(ChatColor.RED + "Please specify 'true' or 'false'.");
+                    return true;
+                }
+
+                TeleportManager.setPrivate(player, dimension, makePrivate);
+                player.sendMessage(ChatColor.GREEN + "World " + dimension + " is now set to " + (makePrivate ? "private." : "public."));
+                return true;
+            }
+
             default -> {
-                player.sendMessage(ChatColor.RED + "Unknown subcommand. Available: gui, set, create, delete, invite, setdelay");
+                player.sendMessage(ChatColor.RED + "Unknown subcommand. Available: gui, set, create, delete, invite, uninvite, deny, info, setdelay, setprivate");
                 return true;
             }
         }
@@ -201,14 +319,16 @@ public class TeleportCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(@NonNull CommandSender sender, @NonNull Command command, @NonNull String alias, String[] args) {
         List<String> completions = new ArrayList<>();
         if (args.length == 1) {
-            completions.addAll(Arrays.asList("gui", "set", "create", "delete", "invite", "setdelay"));
+            completions.addAll(Arrays.asList("gui", "set", "create", "delete", "invite", "uninvite", "deny", "info", "setdelay", "setprivate"));
         } else if (args.length == 2) {
-            if (args[0].equalsIgnoreCase("invite") || args[0].equalsIgnoreCase("delete") || args[0].equalsIgnoreCase("setdelay") || args[0].equalsIgnoreCase("set")) {
+            if (args[0].equalsIgnoreCase("info") || args[0].equalsIgnoreCase("invite") || args[0].equalsIgnoreCase("delete") || args[0].equalsIgnoreCase("setdelay") || args[0].equalsIgnoreCase("set")) {
                 completions.addAll(TeleportManager.getAllDimensions());
-            } else if (args[0].equalsIgnoreCase("gui")) {
+            } else if (args[0].equalsIgnoreCase("gui") || args[0].equalsIgnoreCase("uninvite") || args[0].equalsIgnoreCase("deny")) {
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     completions.add(p.getName());
                 }
+            } else if (args[0].equalsIgnoreCase("setprivate")) {
+                completions.addAll(Arrays.asList("true", "false"));
             }
         } else if (args.length == 3) {
             if (args[0].equalsIgnoreCase("invite")) {
