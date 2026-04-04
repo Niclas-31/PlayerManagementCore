@@ -33,7 +33,7 @@ public record DimensionGui(PlayerManagementCore plugin) {
         int totalPages = (int) Math.ceil(dimensions.size() / (double) dimensionsPerPage);
         if(totalPages == 0) totalPages = 1;
 
-        page = Math.max(1, Math.min(page, totalPages));
+        page = Math.clamp(page, 1, totalPages);
         Inventory inv = Bukkit.createInventory(null, 54, "§8Teleport to Dimension §7(" + page + "/" + totalPages + ")");
 
         ItemStack glass = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");

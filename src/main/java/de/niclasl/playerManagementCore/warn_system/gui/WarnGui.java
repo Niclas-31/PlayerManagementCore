@@ -50,7 +50,7 @@ public class WarnGui {
         int warningsPerPage = allowedSlots.length;
         int totalPages = (int) Math.ceil(warnings.size() / (double) warningsPerPage);
         if (totalPages == 0) totalPages = 1;
-        page = Math.min(Math.max(page, 1), totalPages);
+        page = Math.clamp(page, 1, totalPages);
 
         Inventory inv = Bukkit.createInventory(null, 54, "§8Warnings from " + target.getName() + " §7(" + page + "/" + totalPages + ")");
 

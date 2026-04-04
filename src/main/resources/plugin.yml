@@ -191,6 +191,10 @@ permissions:
     description: Zugriffsrecht für Dimensionsteleport
     default: true
 
+  teleport.dimension.gui:
+    description: Zugriff auf das Teleport Dimension Gui
+    default: true
+
   teleport.dimension.setcoords:
     description: Erlaubt Setzen der Teleport-Koordinaten
     default: op

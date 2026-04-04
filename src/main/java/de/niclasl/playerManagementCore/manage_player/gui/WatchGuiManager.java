@@ -4,6 +4,7 @@ import de.niclasl.playerManagementCore.PlayerManagementCore;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -15,7 +16,7 @@ import java.util.*;
 
 public record WatchGuiManager(PlayerManagementCore plugin) {
 
-    public void open1(Player viewer, Player target) {
+    public void open1(Player viewer, OfflinePlayer target) {
         Inventory managePlayer1 = Bukkit.createInventory(null, 54, "§8Manage: " + target.getName() + " (1/2)");
 
         ItemStack glass = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
@@ -174,20 +175,23 @@ public record WatchGuiManager(PlayerManagementCore plugin) {
                 statusItem.setItemMeta(statusMeta);
                 viewer.getOpenInventory().getTopInventory().setItem(8, statusItem);
 
-                if (isOnline) {
+                if (isOnline && target.getPlayer() != null) {
+                    Player onlineTarget = target.getPlayer();
+
                     ItemStack worldInfo = new ItemStack(Material.GRASS_BLOCK);
                     ItemMeta meta = worldInfo.getItemMeta();
                     assert meta != null;
-                    meta.setDisplayName("§aWorld: " + target.getWorld().getName());
+
+                    meta.setDisplayName("§aWorld: " + onlineTarget.getWorld().getName());
                     meta.setLore(List.of(
-                            "§7X: " + target.getLocation().getBlockX(),
-                            "§7Y: " + target.getLocation().getBlockY(),
-                            "§7Z: " + target.getLocation().getBlockZ()
+                            "§7X: " + onlineTarget.getLocation().getBlockX(),
+                            "§7Y: " + onlineTarget.getLocation().getBlockY(),
+                            "§7Z: " + onlineTarget.getLocation().getBlockZ()
                     ));
+
                     worldInfo.setItemMeta(meta);
                     viewer.getOpenInventory().getTopInventory().setItem(0, worldInfo);
                 }
-
 
                 boolean isVanished = plugin.getVanishManager().isVanished(target.getUniqueId());
                 Material vanishMat = isVanished ? Material.LIME_CONCRETE : Material.RED_CONCRETE;
@@ -204,7 +208,7 @@ public record WatchGuiManager(PlayerManagementCore plugin) {
         }.runTaskTimer(plugin, 0, 10);
     }
 
-    public void open2(Player viewer, Player target) {
+    public void open2(Player viewer, OfflinePlayer target) {
         Inventory managePlayer2 = Bukkit.createInventory(null, 54, "§8Manage: " + target.getName() + " (2/2)");
 
         ItemStack glass = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
@@ -265,16 +269,20 @@ public record WatchGuiManager(PlayerManagementCore plugin) {
                 statusItem.setItemMeta(statusMeta);
                 viewer.getOpenInventory().getTopInventory().setItem(8, statusItem);
 
-                if (isOnline) {
+                if (isOnline && target.getPlayer() != null) {
+                    Player onlineTarget = target.getPlayer();
+
                     ItemStack worldInfo = new ItemStack(Material.GRASS_BLOCK);
                     ItemMeta meta = worldInfo.getItemMeta();
                     assert meta != null;
-                    meta.setDisplayName("§aWorld: " + target.getWorld().getName());
+
+                    meta.setDisplayName("§aWorld: " + onlineTarget.getWorld().getName());
                     meta.setLore(List.of(
-                            "§7X: " + target.getLocation().getBlockX(),
-                            "§7Y: " + target.getLocation().getBlockY(),
-                            "§7Z: " + target.getLocation().getBlockZ()
+                            "§7X: " + onlineTarget.getLocation().getBlockX(),
+                            "§7Y: " + onlineTarget.getLocation().getBlockY(),
+                            "§7Z: " + onlineTarget.getLocation().getBlockZ()
                     ));
+
                     worldInfo.setItemMeta(meta);
                     viewer.getOpenInventory().getTopInventory().setItem(0, worldInfo);
                 }
@@ -292,7 +300,7 @@ public record WatchGuiManager(PlayerManagementCore plugin) {
         return item;
     }
 
-    private static ItemStack createPlayerHead(Player target) {
+    private static ItemStack createPlayerHead(OfflinePlayer target) {
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
         ItemMeta meta = head.getItemMeta();
         if (meta instanceof SkullMeta skullMeta) {

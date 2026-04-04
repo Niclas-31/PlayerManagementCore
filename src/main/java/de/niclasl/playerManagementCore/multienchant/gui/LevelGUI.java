@@ -17,12 +17,12 @@ import org.bukkit.metadata.FixedMetadataValue;
 public record LevelGUI(PlayerManagementCore plugin) {
 
     public void open(Player viewer, OfflinePlayer target, Enchantment ench, int page) {
-        int maxLevel = viewer.isOp() ? 255 : ench.getMaxLevel();
+        int maxLevel = target.isOp() ? 255 : ench.getMaxLevel();
         int itemsPerPage = GuiConstants.ALLOWED_SLOTS_1.length;
         int totalPages = (int) Math.ceil((double) maxLevel / itemsPerPage);
         if (totalPages == 0) totalPages = 1;
 
-        page = Math.min(Math.max(page, 1), totalPages);
+        page = Math.clamp(page, 1, totalPages);
 
         Inventory inv = Bukkit.createInventory(new LevelHolder(target, ench, page), 54,
                 "§aSelect Level (" + ench.getKeyOrThrow().getKey() + ") §7(" + page + "/" + totalPages + ")");

@@ -40,12 +40,14 @@ public class PlayerMonitorListener implements Listener {
         Player player = (Player) event.getWhoClicked();
         int slot = event.getSlot();
 
-        Player target = null;
+        OfflinePlayer target = null;
+
         for (ItemStack item : event.getInventory().getContents()) {
             if (item != null && item.getType() == Material.PLAYER_HEAD && item.hasItemMeta()) {
                 String name = ChatColor.stripColor(Objects.requireNonNull(item.getItemMeta()).getDisplayName());
-                target = Bukkit.getPlayerExact(name);
-                if (target != null) break;
+
+                target = Bukkit.getOfflinePlayer(name);
+                break;
             }
         }
 
@@ -54,20 +56,46 @@ public class PlayerMonitorListener implements Listener {
             return;
         }
 
+        Player online = target.getPlayer();
+
         Material clickedType = event.getCurrentItem().getType();
         String clickedName = event.getCurrentItem().getItemMeta() != null
                 ? ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()) : "";
 
         switch (clickedType) {
-            case ENDER_EYE -> player.openInventory(target.getInventory());
-            case ENDER_CHEST -> player.openInventory(target.getEnderChest());
+            case ENDER_EYE -> {
+                if (online == null) {
+                    player.sendMessage("§cTarget player not online.");
+                    return;
+                }
+
+                player.openInventory(online.getInventory());
+            }
+            case ENDER_CHEST -> {
+                if (online == null) {
+                    player.sendMessage("§cTarget player not online.");
+                    return;
+                }
+
+                player.openInventory(online.getEnderChest());
+            }
             case IRON_SWORD -> {
-                target.setHealth(0);
+                if (online == null) {
+                    player.sendMessage("§cTarget player not online.");
+                    return;
+                }
+
+                online.setHealth(0);
                 player.sendMessage("§cKill: §e" + target.getName());
                 player.closeInventory();
             }
             case RED_DYE -> {
-                target.setHealth(20);
+                if (online == null) {
+                    player.sendMessage("§cTarget player not online.");
+                    return;
+                }
+
+                online.setHealth(20);
                 player.sendMessage("§aHeal: §e" + target.getName());
                 player.closeInventory();
             }
@@ -80,51 +108,141 @@ public class PlayerMonitorListener implements Listener {
                 }
                 player.closeInventory();
             }
-            case ENCHANTED_BOOK -> warnGui.open(player, target, 1);
-            case ENDER_PEARL -> plugin.getDimensionGui().open(player, target, 1);
-            case BOOK -> BanHistoryGui.open(player, target, 1);
+            case ENCHANTED_BOOK -> {
+                if (online == null) {
+                    player.sendMessage("§cTarget player not online.");
+                    return;
+                }
+
+                warnGui.open(player, target, 1);
+            }
+            case ENDER_PEARL -> {
+                if (online == null) {
+                    player.sendMessage("§cTarget player not online.");
+                    return;
+                }
+
+                plugin.getDimensionGui().open(player, target, 1);
+            }
+            case BOOK -> {
+                if (online == null) {
+                    player.sendMessage("§cTarget player not online.");
+                    return;
+                }
+
+                BanHistoryGui.open(player, target, 1);
+            }
             case RED_CONCRETE, LIME_CONCRETE -> {
+                if (online == null) {
+                    player.sendMessage("§cTarget player not online.");
+                    return;
+                }
+
                 if (clickedName.contains("Vanish")) {
                     boolean isVanished = plugin.getVanishManager().isVanished(target.getUniqueId());
                     plugin.getVanishManager().setVanish(target.getUniqueId(), !isVanished);
                     player.sendMessage("§7Vanish for §e" + target.getName() + " §7is now " + (!isVanished ? "§aenabled" : "§cdisabled") + "§7.");
                 }
             }
-            case COMPASS -> plugin.getStatsGui().open(player, target);
-            case COMMAND_BLOCK -> GamemodeGui.open(player, target);
-            case KNOWLEDGE_BOOK -> ReportGui.open(player, target, 1);
-            case SPAWNER -> plugin.getMobGui().open(player, target, 1);
+            case COMPASS -> {
+                if (online == null) {
+                    player.sendMessage("§cTarget player not online.");
+                    return;
+                }
+
+                plugin.getStatsGui().open(player, target);
+            }
+            case COMMAND_BLOCK -> {
+                if (online == null) {
+                    player.sendMessage("§cTarget player not online.");
+                    return;
+                }
+
+                GamemodeGui.open(player, online);
+            }
+            case KNOWLEDGE_BOOK -> {
+                if (online == null) {
+                    player.sendMessage("§cTarget player not online.");
+                    return;
+                }
+
+                ReportGui.open(player, target, 1);
+            }
+            case SPAWNER -> {
+                if (online == null) {
+                    player.sendMessage("§cTarget player not online.");
+                    return;
+                }
+
+                plugin.getMobGui().open(player, online, 1);
+            }
             case BEDROCK -> {
+                if (online == null) {
+                    player.sendMessage("§cTarget player not online.");
+                    return;
+                }
+
                 if (target.isOp()) {
                     player.sendMessage(ChatColor.RED + "You cannot kick an admin.");
                 } else {
-                    target.kickPlayer(ChatColor.RED + "You have been kicked from the server.");
+                    online.kickPlayer(ChatColor.RED + "You have been kicked from the server.");
                     player.closeInventory();
                 }
             }
             case FEATHER -> {
-                if (target.getAllowFlight()) {
-                    target.setAllowFlight(false);
-                    target.setFlying(false);
-                    target.sendMessage("§cYour airplane mode has been disabled!");
+                if (online == null) {
+                    player.sendMessage("§cTarget player not online.");
+                    return;
+                }
+
+                if (online.getAllowFlight()) {
+                    online.setAllowFlight(false);
+                    online.setFlying(false);
+                    online.sendMessage("§cYour airplane mode has been disabled!");
                 } else {
-                    target.setAllowFlight(true);
-                    target.setFlying(true);
-                    target.sendMessage("§aYour airplane mode has been activated!");
+                    online.setAllowFlight(true);
+                    online.setFlying(true);
+                    online.sendMessage("§aYour airplane mode has been activated!");
                 }
             }
             case DIAMOND_CHESTPLATE -> {
+                if (online == null) {
+                    player.sendMessage("§cTarget player not online.");
+                    return;
+                }
+
                 if (clickedName.contains("Repair Items")) {
-                    boolean isRepairing = RepairManager.isRepairEnabled(target);
-                    RepairManager.setRepairEnabled(target, !isRepairing);
+                    boolean isRepairing = RepairManager.isRepairEnabled(online);
+                    RepairManager.setRepairEnabled(online, !isRepairing);
 
                     player.sendMessage("§7Repair Mode for §e" + target.getName() + " §7is now "
                             + (!isRepairing ? "§aenabled" : "§cdisabled") + "§7.");
                 }
             }
-            case POTION -> playerEffectsGui.open(player, target);
-            case EXPERIENCE_BOTTLE -> plugin.getEnchantGUI().open(player, target);
-            case NOTE_BLOCK -> plugin.getAuditGui().open(player, target, 1);
+            case POTION -> {
+                if (online == null) {
+                    player.sendMessage("§cTarget player not online.");
+                    return;
+                }
+
+                playerEffectsGui.open(player, online);
+            }
+            case EXPERIENCE_BOTTLE -> {
+                if (online == null) {
+                    player.sendMessage("§cTarget player not online.");
+                    return;
+                }
+
+                plugin.getEnchantGUI().open(player, target);
+            }
+            case NOTE_BLOCK -> {
+                if (online == null) {
+                    player.sendMessage("§cTarget player not online.");
+                    return;
+                }
+
+                plugin.getAuditGui().open(player, target, 1);
+            }
             case ARROW -> {
                 if (slot == 53) {
                     plugin.getWatchGuiManager().open2(player, target);

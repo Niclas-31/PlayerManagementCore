@@ -167,24 +167,6 @@ public class TeleportManager {
         }
     }
 
-    public static boolean hasAccess(Player player, String dimension) {
-        File file = dimensionFiles.get(dimension + ".yml");
-        if (file == null || !file.exists()) return false;
-
-        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-        boolean isPrivate = config.getBoolean("private", false);
-        if (!isPrivate) return true;
-
-        String owner = config.getString("owner");
-        if (owner != null && owner.equals(player.getUniqueId().toString())) return true;
-
-        if (isInvited(dimension, player.getUniqueId())) {
-            return true;
-        }
-
-        return player.hasPermission("dimension.access." + dimension);
-    }
-
     public static void setPrivate(Player player, String dimension, boolean makePrivate) {
         File file = dimensionFiles.get(dimension + ".yml");
         if (file == null || !file.exists()) return;
@@ -478,7 +460,7 @@ public class TeleportManager {
         String ownerUUID = config.getString("owner");
         if (ownerUUID == null) return true;
 
-        return !player.getUniqueId().toString().equals(ownerUUID);
+        return player.getUniqueId().toString().equals(ownerUUID);
     }
 
     public static void invite(Player owner, String dimension, Player target) {

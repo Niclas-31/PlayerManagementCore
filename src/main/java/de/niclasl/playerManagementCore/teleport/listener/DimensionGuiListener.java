@@ -107,12 +107,12 @@ public class DimensionGuiListener implements Listener {
         UUID owner = TeleportManager.getOwner(dimension);
 
         if (owner != null && !owner.equals(player.getUniqueId())) {
-            if (!player.hasPermission("teleport.dimension." + dimension)) {
+            if (!TeleportManager.isInvited(dimension, targetUUID)) {
                 player.sendMessage(ChatColor.RED + "You don't have permission to teleport to this private dimension.");
                 return;
             }
         } else {
-            if (!player.hasPermission("teleport.player")) {
+            if (!player.hasPermission("teleport.dimension")) {
                 player.sendMessage(ChatColor.RED + "You don't have permission to teleport.");
                 return;
             }

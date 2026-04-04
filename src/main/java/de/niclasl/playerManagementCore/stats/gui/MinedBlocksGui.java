@@ -42,7 +42,7 @@ public record MinedBlocksGui(PlayerManagementCore plugin) {
         int blocksPerPage = allowedSlots.length;
         int totalPages = (int) Math.ceil(minedBlocks.size() / (double) blocksPerPage);
         if (totalPages == 0) totalPages = 1;
-        page = Math.min(Math.max(page, 1), totalPages);
+        page = Math.clamp(page, 1, totalPages);
 
         Inventory gui = Bukkit.createInventory(null, 54, "§9Mined Blocks: " + target.getName() + " §7(" + page + "/" + totalPages + ")");
 
