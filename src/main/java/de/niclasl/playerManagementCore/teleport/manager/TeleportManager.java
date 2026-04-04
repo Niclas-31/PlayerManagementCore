@@ -553,19 +553,28 @@ public class TeleportManager {
         owner.sendMessage("§cPlayer §e" + target.getName() + " §chas been denied access.");
     }
 
+    private static YamlConfiguration getConfig(String dimension) {
+        return cachedConfigs.computeIfAbsent(dimension, dim -> {
+            File file = dimensionFiles.get(dim + ".yml");
+
+            if (file == null) {
+                file = new File(folder, dim + ".yml");
+                if (file.exists()) {
+                    dimensionFiles.put(dim + ".yml", file);
+                } else {
+                    return new YamlConfiguration();
+                }
+            }
+
+            return YamlConfiguration.loadConfiguration(file);
+        });
+    }
+
     private static void save(File file, YamlConfiguration config) {
         try {
             config.save(file);
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private static YamlConfiguration getConfig(String dimension) {
-        return cachedConfigs.computeIfAbsent(dimension, dim -> {
-            File file = dimensionFiles.get(dim + ".yml");
-            if (file == null || !file.exists()) return null;
-            return YamlConfiguration.loadConfiguration(file);
-        });
     }
 }
