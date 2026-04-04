@@ -53,49 +53,60 @@ public class RandomTeleportCommand implements CommandExecutor, TabCompleter {
         World world = player.getWorld();
         Environment env = world.getEnvironment();
 
-        int maxRange;
-        int minRange;
-
-        if (env == Environment.NETHER) {
-            maxRange = 625;
-            minRange = 62;
-        } else {
-            maxRange = 5000;
-            minRange = 500;
-        }
+        final int[] minRange = {(env == Environment.NETHER) ? 62 : 500};
 
         player.sendMessage("§7Search for a safe teleportation destination…");
+
         new BukkitRunnable() {
             @Override
             public void run() {
-                Location foundLocation = null;
 
-                for (int i = 0; i < 20; i++) {
-                    int x = ThreadLocalRandom.current().nextInt(-maxRange, maxRange);
-                    int z = ThreadLocalRandom.current().nextInt(-maxRange, maxRange);
-
-                    if (Math.abs(x) < minRange && Math.abs(z) < minRange) continue;
-
-                    int y = env == Environment.NETHER
-                            ? findSafeNetherY(world, x, z)
-                            : world.getHighestBlockYAt(x, z);
-
-                    if (y == -1) continue;
-
-                    foundLocation = new Location(world, x + 0.5, y + 1, z + 0.5);
-                    break;
-                }
-
-                if (foundLocation == null) {
-                    player.sendMessage("§cNo safe place to teleport could be found.");
-                    return;
-                }
-
-                Location finalLocation = foundLocation;
                 new BukkitRunnable() {
                     @Override
                     public void run() {
+
+                        Location foundLocation = null;
+
+                        WorldBorder border = world.getWorldBorder();
+                        Location center = border.getCenter();
+                        double size = border.getSize() / 2.0;
+
+                        double margin = 10;
+
+                        double minX = center.getX() - size + margin;
+                        double maxX = center.getX() + size - margin;
+                        double minZ = center.getZ() - size + margin;
+                        double maxZ = center.getZ() + size - margin;
+
+                        minRange[0] = (int) Math.min(minRange[0], size - 50);
+
+                        for (int i = 0; i < 20; i++) {
+                            int x = (int) ThreadLocalRandom.current().nextDouble(minX, maxX);
+                            int z = (int) ThreadLocalRandom.current().nextDouble(minZ, maxZ);
+
+                            if (Math.abs(x) < minRange[0] && Math.abs(z) < minRange[0]) continue;
+
+                            if (!border.isInside(new Location(world, x, 100, z))) continue;
+
+                            int y = env == Environment.NETHER
+                                    ? findSafeNetherY(world, x, z)
+                                    : world.getHighestBlockYAt(x, z);
+
+                            if (y == -1) continue;
+
+                            foundLocation = new Location(world, x + 0.5, y + 1, z + 0.5);
+                            break;
+                        }
+
+                        if (foundLocation == null) {
+                            player.sendMessage("§cNo safe place to teleport could be found.");
+                            return;
+                        }
+
+                        Location finalLocation = foundLocation;
+
                         player.sendMessage("§aTeleport in 5 seconds...");
+
                         new BukkitRunnable() {
                             @Override
                             public void run() {
@@ -135,7 +146,6 @@ public class RandomTeleportCommand implements CommandExecutor, TabCompleter {
         }
         return -1;
     }
-
 
     @Override
     public List<String> onTabComplete(@NonNull CommandSender sender, @NonNull Command command, @NonNull String alias, String[] args) {
