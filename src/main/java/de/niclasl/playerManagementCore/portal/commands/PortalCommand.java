@@ -104,9 +104,7 @@ public record PortalCommand(PlayerManagementCore plugin) implements CommandExecu
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, @NonNull Command command, @NonNull String alias, String[] args) {
-        if (!sender.hasPermission("playerManagementCore.portal.manage")) return List.of();
-
+    public List<String> onTabComplete(@NonNull CommandSender sender, @NonNull Command command, @NonNull String alias, String[] args) {
         if (args.length == 1) {
             return Stream.of("reload", "toggle", "whitelist", "gui")
                     .filter(s -> s.startsWith(args[0].toLowerCase())).collect(Collectors.toList());

@@ -71,12 +71,8 @@ public class UnbanCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, @NonNull Command command, @NonNull String alias, String @NonNull [] args) {
+    public List<String> onTabComplete(@NonNull CommandSender sender, @NonNull Command command, @NonNull String alias, String @NonNull [] args) {
         List<String> completions = new ArrayList<>();
-
-        if (!sender.hasPermission("playerManagementCore.unban")) {
-            return completions;
-        }
 
         if (args.length == 1) {
             BanList<?> banList = Bukkit.getBanList(BanList.Type.NAME);

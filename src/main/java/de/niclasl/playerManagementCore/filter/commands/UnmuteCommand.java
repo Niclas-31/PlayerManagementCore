@@ -52,10 +52,8 @@ public class UnmuteCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, @NonNull Command command, @NonNull String alias, String @NonNull [] args) {
+    public List<String> onTabComplete(@NonNull CommandSender sender, @NonNull Command command, @NonNull String alias, String @NonNull [] args) {
         List<String> completions = new ArrayList<>();
-
-        if (!sender.hasPermission("playerManagementCore.unmute")) return completions;
 
         if (args.length == 1) {
             for (UUID mutedUUID : muteManager.getMutedPlayers()) {
