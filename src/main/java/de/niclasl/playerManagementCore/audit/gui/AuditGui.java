@@ -42,7 +42,7 @@ public class AuditGui {
         int perPage = allowedSlots.length;
         int totalPages = (int) Math.ceil(entries.size() / (double) perPage);
         if (totalPages == 0) totalPages = 1;
-        page = Math.min(Math.max(page, 1), totalPages);
+        page = Math.clamp(page, 1, totalPages);
 
         Inventory inv = Bukkit.createInventory(
                 null,

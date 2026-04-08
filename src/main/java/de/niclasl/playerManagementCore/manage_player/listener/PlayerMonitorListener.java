@@ -100,7 +100,7 @@ public class PlayerMonitorListener implements Listener {
                 player.closeInventory();
             }
             case GREEN_STAINED_GLASS_PANE -> {
-                if (Bukkit.getBanList(BanList.Type.NAME).isBanned(target.getName())) {
+                if (Bukkit.getBanList(BanList.Type.NAME).isBanned(Objects.requireNonNull(target.getName()))) {
                     Bukkit.getBanList(BanList.Type.NAME).pardon(target.getName());
                     player.sendMessage("§aPlayer §e" + target.getName() + " §a has been unbanned.");
                 } else {

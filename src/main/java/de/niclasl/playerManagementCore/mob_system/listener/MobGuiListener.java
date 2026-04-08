@@ -1,14 +1,13 @@
 package de.niclasl.playerManagementCore.mob_system.listener;
 
-import de.niclasl.playerManagementCore.PlayerManagementCore;
 import de.niclasl.playerManagementCore.GuiConstants;
-import de.niclasl.playerManagementCore.mob_system.MobCategories;
+import de.niclasl.playerManagementCore.PlayerManagementCore;
 import de.niclasl.playerManagementCore.mob_system.gui.MobGui;
 import de.niclasl.playerManagementCore.mob_system.manager.MobManager;
 import de.niclasl.playerManagementCore.mob_system.model.MobSpawnRequest;
+import de.niclasl.playerManagementCore.mob_system.rule.MobSpawnRules;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Difficulty;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -52,7 +51,7 @@ public class MobGuiListener implements Listener {
         if (slot == 26) {
             OfflinePlayer target = getTarget(player);
             if (target != null) {
-                plugin.getWatchGuiManager().open1(player, (Player) target);
+                plugin.getWatchGuiManager().open1(player, target);
             } else {
                 player.sendMessage("§cError: Target player not found.");
                 player.closeInventory();
@@ -128,8 +127,7 @@ public class MobGuiListener implements Listener {
 
         EntityType entityType = request.getEntityType();
 
-        if (player.getWorld().getDifficulty() == Difficulty.PEACEFUL
-                && (MobCategories.HOSTILE_MOBS.contains(entityType))) {
+        if (!MobSpawnRules.canSpawn(entityType, player.getWorld().getDifficulty())) {
             player.sendMessage(ChatColor.RED + "The server is set to Peaceful. This mob cannot be spawned.");
             return;
         }

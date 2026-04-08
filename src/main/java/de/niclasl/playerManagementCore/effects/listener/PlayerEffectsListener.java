@@ -46,7 +46,7 @@ public class PlayerEffectsListener implements Listener {
             if (clicked.getType() == Material.BARRIER) {
                 OfflinePlayer target = getTarget(viewer);
                 if (target != null) {
-                    plugin.getWatchGuiManager().open2(viewer, (Player) target);
+                    plugin.getWatchGuiManager().open2(viewer, target);
                 } else {
                     viewer.sendMessage("§cError: Target player not found.");
                     viewer.closeInventory();

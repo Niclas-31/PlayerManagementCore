@@ -14,7 +14,8 @@ public class MobCategories {
             EntityType.CREAKING, // 4
             EntityType.CREEPER, // 5
             EntityType.ELDER_GUARDIAN, // 6
-            EntityType.ENDERMITE, // 7
+            EntityType.ENDER_DRAGON, // 7
+            EntityType.ENDERMITE, // 8
             EntityType.EVOKER, // 9
             EntityType.GHAST, // 10
             EntityType.GUARDIAN, // 11
@@ -37,15 +38,11 @@ public class MobCategories {
             EntityType.VINDICATOR, // 26
             EntityType.WARDEN, // 27
             EntityType.WITCH, // 28
-            EntityType.WITHER_SKELETON, // 29
-            EntityType.ZOGLIN, // 30
-            EntityType.ZOMBIE, // 31
-            EntityType.ZOMBIE_VILLAGER // 32
-    );
-
-    public static final Set<EntityType> BOSS_MOBS = EnumSet.of(
-            EntityType.ENDER_DRAGON, // 33
-            EntityType.WITHER // 34
+            EntityType.WITHER, // 29
+            EntityType.WITHER_SKELETON, // 30
+            EntityType.ZOGLIN, // 31
+            EntityType.ZOMBIE, // 32
+            EntityType.ZOMBIE_VILLAGER // 33
     );
 
     public static final Set<EntityType> NEUTRAL_MOBS = EnumSet.of(

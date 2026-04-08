@@ -42,7 +42,7 @@ public class BanHistoryGui {
         int totalPages = (int) Math.ceil(bans.size() / (double) bansPerPage);
         if (totalPages == 0) totalPages = 1;
 
-        page = Math.max(1, Math.min(page, totalPages));
+        page = Math.clamp(page, 1, totalPages);
 
         Inventory inv = Bukkit.createInventory(null, 54, "§8Bans from " + target.getName() + " §7(" + page + "/" + totalPages + ")");
 

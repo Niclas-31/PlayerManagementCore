@@ -37,7 +37,6 @@ public class MobManager {
 
         Set<EntityType> allRelevantMobs = EnumSet.noneOf(EntityType.class);
         allRelevantMobs.addAll(MobCategories.HOSTILE_MOBS);
-        allRelevantMobs.addAll(MobCategories.BOSS_MOBS);
         allRelevantMobs.addAll(MobCategories.NEUTRAL_MOBS);
         allRelevantMobs.addAll(MobCategories.PASSIVE_MOBS);
 
@@ -130,7 +129,6 @@ public class MobManager {
     public static List<MobSpawnRequest> createDefaultMobList() {
         Set<EntityType> allRelevantMobs = EnumSet.noneOf(EntityType.class);
         allRelevantMobs.addAll(MobCategories.HOSTILE_MOBS);
-        allRelevantMobs.addAll(MobCategories.BOSS_MOBS);
         allRelevantMobs.addAll(MobCategories.NEUTRAL_MOBS);
         allRelevantMobs.addAll(MobCategories.PASSIVE_MOBS);
 

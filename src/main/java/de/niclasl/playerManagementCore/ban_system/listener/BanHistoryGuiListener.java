@@ -49,7 +49,7 @@ public class BanHistoryGuiListener implements Listener {
         if (slot == 26) {
             OfflinePlayer target = getTarget(player);
             if (target != null) {
-                plugin.getWatchGuiManager().open1(player, (Player) target);
+                plugin.getWatchGuiManager().open1(player, target);
             } else {
                 player.sendMessage("§cError: Target player not found.");
                 player.closeInventory();
